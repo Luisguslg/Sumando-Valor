@@ -89,7 +89,24 @@ public class LoginModel : PageModel
             if (result.IsLockedOut)
             {
                 _logger.LogWarning("Cuenta bloqueada para {Email}", Input.Email);
-                ModelState.AddModelError(string.Empty, "Tu cuenta ha sido bloqueada temporalmente debido a múltiples intentos fallidos. Por favor intenta más tarde.");
+                if (user != null && user.LockoutEnd.HasValue)
+                {
+                    var lockoutEnd = user.LockoutEnd.Value;
+                    if (lockoutEnd > DateTimeOffset.UtcNow)
+                    {
+                        var remainingTime = lockoutEnd - DateTimeOffset.UtcNow;
+                        var minutes = (int)remainingTime.TotalMinutes;
+                        ModelState.AddModelError(string.Empty, $"Tu cuenta ha sido bloqueada temporalmente debido a múltiples intentos fallidos. Intenta nuevamente en aproximadamente {minutes} minuto(s).");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, "Tu cuenta ha sido bloqueada temporalmente. Por favor intenta nuevamente.");
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Tu cuenta ha sido bloqueada temporalmente debido a múltiples intentos fallidos. Por favor intenta más tarde.");
+                }
                 return Page();
             }
             else

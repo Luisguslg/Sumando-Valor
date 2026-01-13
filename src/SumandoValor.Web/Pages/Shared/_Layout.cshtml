@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<SumandoValor.Infrastructure.Data.ApplicationUser> UserManager
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
@@ -34,6 +36,62 @@
                     <ul class="navbar-nav">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
+                            var currentUser = await UserManager.GetUserAsync(User);
+                            string displayName = "Usuario";
+                            
+                            if (currentUser != null)
+                            {
+                                var nombres = (currentUser.Nombres?.Trim() ?? string.Empty);
+                                var apellidos = (currentUser.Apellidos?.Trim() ?? string.Empty);
+                                
+                                if (!string.IsNullOrWhiteSpace(nombres) && !string.IsNullOrWhiteSpace(apellidos))
+                                {
+                                    if (nombres.Equals(apellidos, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        displayName = nombres;
+                                    }
+                                    else
+                                    {
+                                        displayName = $"{nombres} {apellidos}";
+                                    }
+                                }
+                                else if (!string.IsNullOrWhiteSpace(nombres))
+                                {
+                                    var nombreParts = nombres.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                                    if (nombreParts.Length > 1 && nombreParts[0].Equals(nombreParts[1], StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        displayName = nombreParts[0];
+                                    }
+                                    else
+                                    {
+                                        displayName = nombres;
+                                    }
+                                }
+                                else if (!string.IsNullOrWhiteSpace(apellidos))
+                                {
+                                    var apellidoParts = apellidos.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                                    if (apellidoParts.Length > 1 && apellidoParts[0].Equals(apellidoParts[1], StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        displayName = apellidoParts[0];
+                                    }
+                                    else
+                                    {
+                                        displayName = apellidos;
+                                    }
+                                }
+                                else if (!string.IsNullOrWhiteSpace(currentUser.Email))
+                                {
+                                    displayName = currentUser.Email;
+                                }
+                            }
+                            else if (!string.IsNullOrWhiteSpace(User.Identity?.Name))
+                            {
+                                displayName = User.Identity.Name;
+                            }
+                            
+                            <li class="nav-item">
+                                <span class="nav-link text-muted me-2">@displayName</span>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-page="/Profile">Perfil</a>
                             </li>
@@ -45,7 +103,7 @@
                             }
                             <li class="nav-item">
                                 <form asp-page="/Account/Logout" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-link nav-link border-0 p-0">Cerrar Sesión</button>
+                                    <button type="submit" class="btn btn-link nav-link border-0 p-0 ms-3" style="background: none; box-shadow: none; text-decoration: none;">Cerrar Sesión</button>
                                 </form>
                             </li>
                         }
