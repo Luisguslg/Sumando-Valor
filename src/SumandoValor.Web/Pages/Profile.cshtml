@@ -1,16 +1,149 @@
 @page
 @model ProfileModel
+@using SumandoValor.Domain.Helpers
 @{
-    ViewData["Title"] = "Perfil";
+    ViewData["Title"] = "Mi Perfil";
 }
 
-<div class="mb-4">
-    <h1>Mi Perfil</h1>
-    <p class="text-muted">Información de tu cuenta</p>
-</div>
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title mb-4">Mi Perfil</h2>
 
-<div class="card">
-    <div class="card-body">
-        <p class="text-muted">Contenido del perfil (placeholder)</p>
+                @if (TempData["Message"] != null)
+                {
+                    <div class="alert alert-success">@TempData["Message"]</div>
+                }
+
+                <form method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <h5 class="mt-4 mb-3">Datos de Acceso</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" value="@Model.CurrentUser?.Email" disabled />
+                            <small class="text-muted">El email no puede ser modificado desde aquí.</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Cédula</label>
+                            <input type="text" class="form-control" value="@Model.CurrentUser?.Cedula" disabled />
+                        </div>
+                    </div>
+
+                    <h5 class="mt-4 mb-3">Datos Personales</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nombres</label>
+                            <input type="text" class="form-control" value="@Model.CurrentUser?.Nombres" disabled />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Apellidos</label>
+                            <input type="text" class="form-control" value="@Model.CurrentUser?.Apellidos" disabled />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Sexo</label>
+                            <input type="text" class="form-control" value="@(Model.CurrentUser?.Sexo != null ? Catalogos.Sexos.GetValueOrDefault(Model.CurrentUser.Sexo, Model.CurrentUser.Sexo) : "")" disabled />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Fecha de Nacimiento</label>
+                            <input type="date" class="form-control" value="@Model.CurrentUser?.FechaNacimiento.ToString("yyyy-MM-dd")" disabled />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Input.Telefono" class="form-label">Teléfono</label>
+                            <input asp-for="Input.Telefono" class="form-control" />
+                            <span asp-validation-for="Input.Telefono" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <h5 class="mt-4 mb-3">Información Adicional</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Input.NivelEducativo" class="form-label">Nivel Educativo</label>
+                            <select asp-for="Input.NivelEducativo" class="form-select">
+                                <option value="">Seleccione...</option>
+                                @foreach (var nivel in Catalogos.NivelesEducativos)
+                                {
+                                    <option value="@nivel.Key" selected="@(Model.CurrentUser?.NivelEducativo == nivel.Key)">@nivel.Value</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Input.NivelEducativo" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Input.SituacionLaboral" class="form-label">Situación Laboral</label>
+                            <select asp-for="Input.SituacionLaboral" class="form-select">
+                                <option value="">Seleccione...</option>
+                                @foreach (var situacion in Catalogos.SituacionesLaborales)
+                                {
+                                    <option value="@situacion.Key" selected="@(Model.CurrentUser?.SituacionLaboral == situacion.Key)">@situacion.Value</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Input.SituacionLaboral" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Input.Estado" class="form-label">Estado</label>
+                            <select asp-for="Input.Estado" class="form-select">
+                                <option value="">Seleccione...</option>
+                                @foreach (var estado in Catalogos.EstadosVenezuela)
+                                {
+                                    <option value="@estado.Key" selected="@(Model.CurrentUser?.Estado == estado.Key)">@estado.Value</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Input.Estado" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Input.Ciudad" class="form-label">Ciudad</label>
+                            <select asp-for="Input.Ciudad" class="form-select">
+                                <option value="">Seleccione...</option>
+                                @foreach (var ciudad in Catalogos.CiudadesVenezuela)
+                                {
+                                    <option value="@ciudad.Key" selected="@(Model.CurrentUser?.Ciudad == ciudad.Key)">@ciudad.Value</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Input.Ciudad" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <h5 class="mt-4 mb-3">Discapacidad</h5>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input asp-for="Input.TieneDiscapacidad" class="form-check-input" type="checkbox" id="tieneDiscapacidad" />
+                            <label class="form-check-label" for="tieneDiscapacidad">
+                                Tengo una discapacidad
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3" id="discapacidadDescripcionGroup" style="display: @(Model.CurrentUser?.TieneDiscapacidad == true ? "block" : "none");">
+                        <label asp-for="Input.DiscapacidadDescripcion" class="form-label">Descripción de la discapacidad</label>
+                        <textarea asp-for="Input.DiscapacidadDescripcion" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Input.DiscapacidadDescripcion" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('tieneDiscapacidad').addEventListener('change', function() {
+            const descGroup = document.getElementById('discapacidadDescripcionGroup');
+            if (this.checked) {
+                descGroup.style.display = 'block';
+            } else {
+                descGroup.style.display = 'none';
+                document.getElementById('Input_DiscapacidadDescripcion').value = '';
+            }
+        });
+    </script>
+}

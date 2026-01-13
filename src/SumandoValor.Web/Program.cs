@@ -20,6 +20,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     options.Password.RequiredLength = 8;
     options.SignIn.RequireConfirmedEmail = true;
     options.User.RequireUniqueEmail = true;
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
+    options.Lockout.AllowedForNewUsers = true;
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
@@ -36,14 +39,24 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddHttpClient();
 
-if (builder.Environment.IsDevelopment())
+builder.Services.AddSingleton<IDevEmailStore, InMemoryDevEmailStore>();
+
+var captchaProvider = builder.Configuration["Captcha:Provider"] ?? "None";
+if (builder.Environment.IsDevelopment() || captchaProvider == "None")
 {
     builder.Services.AddScoped<ICaptchaValidator, MockCaptchaValidator>();
+}
+else if (captchaProvider == "Turnstile")
+{
+    builder.Services.AddScoped<ICaptchaValidator, CloudflareTurnstileCaptchaValidator>();
+}
+
+if (builder.Environment.IsDevelopment())
+{
     builder.Services.AddScoped<IEmailService, DevelopmentEmailService>();
 }
 else
 {
-    builder.Services.AddScoped<ICaptchaValidator, CloudflareTurnstileCaptchaValidator>();
     builder.Services.AddScoped<IEmailService, DevelopmentEmailService>();
 }
 

@@ -15,7 +15,7 @@ public class CloudflareTurnstileCaptchaValidator : ICaptchaValidator
         _siteKey = configuration["Captcha:CloudflareTurnstile:SiteKey"] ?? string.Empty;
     }
 
-    public async Task<bool> ValidateAsync(string token)
+    public async Task<bool> ValidateAsync(string token, string? remoteIp = null, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(_secretKey) || string.IsNullOrWhiteSpace(token))
         {
@@ -24,14 +24,21 @@ public class CloudflareTurnstileCaptchaValidator : ICaptchaValidator
 
         try
         {
-            var content = new FormUrlEncodedContent(new[]
+            var formData = new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>("secret", _secretKey),
-                new KeyValuePair<string, string>("response", token)
-            });
+                new("secret", _secretKey),
+                new("response", token)
+            };
 
-            var response = await _httpClient.PostAsync("https://challenges.cloudflare.com/turnstile/v0/siteverify", content);
-            var responseBody = await response.Content.ReadAsStringAsync();
+            if (!string.IsNullOrWhiteSpace(remoteIp))
+            {
+                formData.Add(new KeyValuePair<string, string>("remoteip", remoteIp));
+            }
+
+            var content = new FormUrlEncodedContent(formData);
+
+            var response = await _httpClient.PostAsync("https://challenges.cloudflare.com/turnstile/v0/siteverify", content, cancellationToken);
+            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
 
             return response.IsSuccessStatusCode && responseBody.Contains("\"success\":true");
         }

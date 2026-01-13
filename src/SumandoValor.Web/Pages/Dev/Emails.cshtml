@@ -1,0 +1,75 @@
+@page
+@model EmailsModel
+@{
+    ViewData["Title"] = "Bandeja de Emails (Development)";
+}
+
+<div class="container mt-4">
+    <div class="alert alert-warning">
+        <strong>⚠️ Solo disponible en modo Development</strong>
+        <p class="mb-0">Esta página muestra los emails simulados enviados durante el desarrollo.</p>
+    </div>
+
+    <h2 class="mb-4">Bandeja de Emails Simulados</h2>
+
+    @if (Model.Emails.Any())
+    {
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Último Email Enviado</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Para:</strong> @Model.Emails.First().To</p>
+                <p><strong>Asunto:</strong> @Model.Emails.First().Subject</p>
+                <p><strong>Enviado:</strong> @Model.Emails.First().CreatedAt.ToString("g")</p>
+                <div class="mt-3">
+                    <strong>Cuerpo del mensaje:</strong>
+                    <pre class="bg-light p-3 mt-2" style="white-space: pre-wrap; word-wrap: break-word;">@Model.Emails.First().Body</pre>
+                </div>
+                @if (Model.Emails.First().Body.Contains("http"))
+                {
+                    <div class="mt-3">
+                        <strong>Enlaces encontrados:</strong>
+                        <div class="mt-2">
+                            @{
+                                var body = Model.Emails.First().Body;
+                                var lines = body.Split('\n');
+                                foreach (var line in lines)
+                                {
+                                    if (line.Contains("http"))
+                                    {
+                                        var url = line.Trim();
+                                        <div class="mb-2">
+                                            <a href="@url" target="_blank" class="btn btn-sm btn-outline-primary">@url</a>
+                                        </div>
+                                    }
+                                }
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <h4 class="mt-4 mb-3">Historial de Emails (@Model.Emails.Count total)</h4>
+        <div class="list-group">
+            @foreach (var email in Model.Emails)
+            {
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">@email.Subject</h6>
+                        <small>@email.CreatedAt.ToString("g")</small>
+                    </div>
+                    <p class="mb-1"><strong>Para:</strong> @email.To</p>
+                    <small class="text-muted">@email.Body.Substring(0, Math.Min(100, email.Body.Length))...</small>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <p class="mb-0">No hay emails en la bandeja. Los emails aparecerán aquí cuando se envíen durante el desarrollo.</p>
+        </div>
+    }
+</div>

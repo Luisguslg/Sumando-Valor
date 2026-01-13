@@ -5,10 +5,12 @@ namespace SumandoValor.Infrastructure.Services;
 public class DevelopmentEmailService : IEmailService
 {
     private readonly ILogger<DevelopmentEmailService> _logger;
+    private readonly IDevEmailStore _emailStore;
 
-    public DevelopmentEmailService(ILogger<DevelopmentEmailService> logger)
+    public DevelopmentEmailService(ILogger<DevelopmentEmailService> logger, IDevEmailStore emailStore)
     {
         _logger = logger;
+        _emailStore = emailStore;
     }
 
     public Task SendEmailAsync(string to, string subject, string body)
@@ -18,12 +20,21 @@ public class DevelopmentEmailService : IEmailService
         _logger.LogInformation("Asunto: {Subject}", subject);
         _logger.LogInformation("Cuerpo: {Body}", body);
         _logger.LogInformation("===================================");
+
+        _emailStore.AddEmail(to, subject, body);
+
         return Task.CompletedTask;
     }
 
     public Task SendEmailConfirmationAsync(string to, string confirmationLink)
     {
-        var body = $"Por favor confirma tu email haciendo clic en el siguiente enlace:\n\n{confirmationLink}";
+        var body = $"Por favor confirma tu email haciendo clic en el siguiente enlace:\n\n{confirmationLink}\n\nEste enlace expirará en 24 horas.";
         return SendEmailAsync(to, "Confirma tu email - Sumando Valor", body);
+    }
+
+    public Task SendPasswordResetAsync(string to, string resetLink)
+    {
+        var body = $"Has solicitado restablecer tu contraseña. Haz clic en el siguiente enlace:\n\n{resetLink}\n\nSi no solicitaste este cambio, ignora este mensaje.\n\nEste enlace expirará en 1 hora.";
+        return SendEmailAsync(to, "Restablecer contraseña - Sumando Valor", body);
     }
 }

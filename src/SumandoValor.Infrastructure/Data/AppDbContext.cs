@@ -26,6 +26,18 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         {
             entity.HasIndex(e => e.Cedula).IsUnique();
             entity.HasIndex(e => e.Email).IsUnique();
+            entity.Property(e => e.Nombres).IsRequired().HasMaxLength(80);
+            entity.Property(e => e.Apellidos).IsRequired().HasMaxLength(80);
+            entity.Property(e => e.Cedula).IsRequired().HasMaxLength(20);
+            entity.Property(e => e.Sexo).IsRequired();
+            entity.Property(e => e.FechaNacimiento).IsRequired();
+            entity.Property(e => e.DiscapacidadDescripcion).HasMaxLength(120);
+            entity.Property(e => e.NivelEducativo).IsRequired();
+            entity.Property(e => e.SituacionLaboral).IsRequired();
+            entity.Property(e => e.CanalConocio).IsRequired();
+            entity.Property(e => e.Estado).IsRequired();
+            entity.Property(e => e.Ciudad).IsRequired();
+            entity.Property(e => e.Telefono).HasMaxLength(25);
         });
 
         builder.Entity<Taller>(entity =>
