@@ -1,0 +1,51 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Inicio";
+}
+
+<div class="text-center mb-5">
+    <h1 class="display-4 mb-4">Bienvenido a Sumando Valor</h1>
+    <p class="lead text-muted">Plataforma de talleres y capacitación de la Fundación KPMG Venezuela</p>
+</div>
+
+<div class="row mb-5">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Carrusel de Noticias</h5>
+                <p class="card-text text-muted">Contenido del carrusel de noticias (placeholder)</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Talleres Disponibles</h5>
+                <p class="card-text">Explora nuestra oferta de talleres y capacitaciones.</p>
+                <a asp-page="/Workshops" class="btn btn-primary">Ver Talleres</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Conócenos</h5>
+                <p class="card-text">Descubre más sobre nuestra misión y valores.</p>
+                <a asp-page="/About" class="btn btn-primary">Saber Más</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Contáctanos</h5>
+                <p class="card-text">¿Tienes preguntas? Estamos aquí para ayudarte.</p>
+                <a asp-page="/Contact" class="btn btn-primary">Contactar</a>
+            </div>
+        </div>
+    </div>
+</div>
