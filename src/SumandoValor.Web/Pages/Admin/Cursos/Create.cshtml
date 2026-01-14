@@ -1,0 +1,59 @@
+@page
+@model CreateModel
+@{
+    ViewData["Title"] = "Crear Curso";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="mb-4">
+    <h1>Crear Nuevo Curso</h1>
+    <a asp-page="/Admin/Cursos" class="btn btn-link">← Volver a Cursos</a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            
+            <div class="mb-3">
+                <label asp-for="Input.Titulo" class="form-label">Título *</label>
+                <input asp-for="Input.Titulo" class="form-control" />
+                <span asp-validation-for="Input.Titulo" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.Descripcion" class="form-label">Descripción *</label>
+                <textarea asp-for="Input.Descripcion" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="Input.Descripcion" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.PublicoObjetivo" class="form-label">Público Objetivo</label>
+                <input asp-for="Input.PublicoObjetivo" class="form-control" />
+                <span asp-validation-for="Input.PublicoObjetivo" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <div class="form-check">
+                    <input asp-for="Input.EsPublico" class="form-check-input" />
+                    <label asp-for="Input.EsPublico" class="form-check-label">Es Público</label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.Orden" class="form-label">Orden (opcional)</label>
+                <input asp-for="Input.Orden" class="form-control" type="number" />
+                <span asp-validation-for="Input.Orden" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Crear Curso</button>
+                <a asp-page="/Admin/Cursos" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

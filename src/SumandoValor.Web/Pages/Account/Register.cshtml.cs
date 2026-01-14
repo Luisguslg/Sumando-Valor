@@ -113,7 +113,7 @@ public class RegisterModel : PageModel
 
             _logger.LogInformation("Usuario {Email} se registró. Email de confirmación enviado.", user.Email);
 
-            TempData["Message"] = "Registro exitoso. Por favor revisa tu email para confirmar tu cuenta antes de iniciar sesión. En modo Development, puedes ver el enlace en /Dev/Emails";
+            TempData["FlashInfo"] = "Registro exitoso. Por favor revisa tu email para confirmar tu cuenta antes de iniciar sesión. En modo Development, puedes ver el enlace en /Dev/Emails";
             return RedirectToPage("./Login");
         }
 

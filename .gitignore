@@ -47,6 +47,10 @@ artifacts/
 .idea/
 *.sln.iml
 
+# Maqueta frontend (no subir al repositorio)
+Maqueta-SumandoValor/
+**/maqueta-*/
+
 # User-specific files
 *.rsuser
 *.suo
@@ -92,3 +96,7 @@ artifacts/
 # Rider
 .idea/
 *.sln.iml
+
+# Maqueta frontend (no subir al repositorio)
+Maqueta-SumandoValor/
+**/maqueta-*/

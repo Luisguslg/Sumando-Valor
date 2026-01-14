@@ -6,6 +6,7 @@ public class Inscripcion
     public int TallerId { get; set; }
     public string UserId { get; set; } = string.Empty;
     public EstadoInscripcion Estado { get; set; }
+    public bool Asistencia { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public Taller Taller { get; set; } = null!;

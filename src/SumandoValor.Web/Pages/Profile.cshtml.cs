@@ -72,7 +72,7 @@ public class ProfileModel : PageModel
         if (result.Succeeded)
         {
             _logger.LogInformation("Usuario {Email} actualizó su perfil", user.Email);
-            TempData["Message"] = "Perfil actualizado exitosamente.";
+            TempData["FlashSuccess"] = "Perfil actualizado exitosamente.";
             return RedirectToPage();
         }
 

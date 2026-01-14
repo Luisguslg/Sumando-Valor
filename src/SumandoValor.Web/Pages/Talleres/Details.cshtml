@@ -1,0 +1,127 @@
+@page "/Talleres/{id:int}"
+@model SumandoValor.Web.Pages.Talleres.DetailsModel
+@using SumandoValor.Domain.Entities
+@{
+    ViewData["Title"] = Model.Taller?.Titulo ?? "Taller";
+}
+
+@if (Model.Taller == null)
+{
+    <div class="alert alert-warning">
+        <p class="mb-0">Taller no encontrado.</p>
+    </div>
+    <a asp-page="/Cursos" class="btn btn-secondary">Volver a Cursos</a>
+}
+else
+{
+    <div class="mb-4">
+        <a asp-page="/Cursos" class="btn btn-link px-0">← Volver a Talleres</a>
+        <h1 class="mt-2 mb-1">@Model.Taller.Titulo</h1>
+        <div class="text-muted">
+            @Model.Taller.Curso.Titulo
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Detalles</h5>
+                    <p class="text-muted mb-4">@Model.Taller.Descripcion</p>
+
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="p-3 border rounded">
+                                <div class="text-muted small"><i class="bi bi-calendar-event me-1"></i>Fecha</div>
+                                <div class="fw-semibold">@Model.Taller.FechaInicio.ToString("dd/MM/yyyy")</div>
+                                @if (Model.Taller.FechaFin.HasValue)
+                                {
+                                    <div class="text-muted small">Hasta @Model.Taller.FechaFin.Value.ToString("dd/MM/yyyy")</div>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 border rounded">
+                                <div class="text-muted small"><i class="bi bi-clock me-1"></i>Hora</div>
+                                <div class="fw-semibold">@Model.Taller.HoraInicio.ToString(@"hh\:mm")</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 border rounded">
+                                <div class="text-muted small"><i class="bi bi-laptop me-1"></i>Modalidad</div>
+                                <div class="fw-semibold">@Model.Taller.Modalidad</div>
+                                @if (!string.IsNullOrWhiteSpace(Model.Taller.PlataformaDigital))
+                                {
+                                    <div class="text-muted small">Plataforma: @Model.Taller.PlataformaDigital</div>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 border rounded d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="text-muted small"><i class="bi bi-people me-1"></i>Cupos</div>
+                                    <div class="fw-semibold">@Model.Taller.CuposDisponibles de @Model.Taller.CuposMaximos</div>
+                                </div>
+                                <span class="badge @(Model.Taller.CuposDisponibles > 0 ? "bg-success" : "bg-danger")">
+                                    @(Model.Taller.CuposDisponibles > 0 ? "Disponible" : "Lleno")
+                                </span>
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(Model.Taller.FacilitadorTexto))
+                        {
+                            <div class="col-12">
+                                <div class="p-3 border rounded">
+                                    <div class="text-muted small"><i class="bi bi-person-badge me-1"></i>Facilitador</div>
+                                    <div class="fw-semibold">@Model.Taller.FacilitadorTexto</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title mb-3">Inscripción</h5>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.UiBannerText))
+                    {
+                        <div class="alert @Model.UiBannerClass mb-3" role="alert">
+                            @Model.UiBannerText
+                        </div>
+                    }
+
+                    <div class="mt-auto">
+                        @switch (Model.UiState)
+                        {
+                            case SumandoValor.Web.Pages.Talleres.DetailsModel.InscripcionUiState.AlreadyEnrolled:
+                                <a asp-page="/Profile/Talleres" class="btn btn-outline-primary w-100">
+                                    <i class="bi bi-list-check me-1"></i>Ver en Mis Talleres
+                                </a>
+                                break;
+                            case SumandoValor.Web.Pages.Talleres.DetailsModel.InscripcionUiState.MustLogin:
+                                <a asp-page="/Account/Login" class="btn btn-primary w-100">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar sesión
+                                </a>
+                                break;
+                            case SumandoValor.Web.Pages.Talleres.DetailsModel.InscripcionUiState.CanEnroll:
+                                <form method="post" asp-page-handler="Inscribirse" asp-route-id="@Model.Taller.Id">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="bi bi-check2-circle me-1"></i>Inscribirme
+                                    </button>
+                                </form>
+                                break;
+                            default:
+                                <button type="button" class="btn btn-secondary w-100" disabled>
+                                    No disponible
+                                </button>
+                                break;
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

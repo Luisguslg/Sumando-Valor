@@ -1,0 +1,1137 @@
+/* 
+  KPMG Sumando Valor - Custom Theme
+  Enterprise-grade styling with KPMG brand colors
+*/
+
+/* Global font-size scaling for smaller laptops */
+html {
+  font-size: 16px;
+}
+
+@media (max-width: 1440px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 1366px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+:root {
+  /* KPMG Official Brand Colors - Mejorados para mejor contraste y legibilidad */
+  --brand-900: #002266;  /* Más oscuro para mejor contraste */
+  --brand-800: #00338d;  /* Original brand-900 */
+  --brand-700: #0044aa;  /* Ligeramente más oscuro */
+  --brand-600: #0055b8;  /* Original brand-700 */
+  --brand-500: #0066cc;
+  --brand-400: #3385d6;  /* Intermedio */
+  --brand-300: #4d94e0;
+  --brand-200: #99c2f0;  /* Intermedio claro */
+  --brand-100: #e6f2ff;
+
+  /* Accent colors - ajustados para mejor armonía */
+  --accent: #6b2d9e;  /* Ligeramente más oscuro */
+  --accent-dark: #4a1f6b;  /* Más oscuro para contraste */
+  --accent-light: #8b4db8;  /* Más claro */
+  --accent-100: #e8d5f5;  /* Muy claro para fondos */
+
+  /* Surface Colors */
+  --surface: #ffffff;
+  --surface-2: #f8f9fa;
+  --surface-3: #e9ecef;
+  --surface-overlay: rgba(0, 51, 141, 0.95);
+
+  /* Text Colors */
+  --text: #212529;
+  --text-secondary: #6c757d;
+  --muted: #adb5bd;
+  --text-on-brand: #ffffff;
+
+  /* Semantic Colors */
+  --success: #28a745;
+  --warning: #ffc107;
+  --danger: #dc3545;
+  --info: #17a2b8;
+
+  /* Borders */
+  --border: #dee2e6;
+  --border-radius: 0.5rem;
+  --border-radius-lg: 1rem;
+  --border-radius-sm: 0.25rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.2);
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Transitions */
+  --transition: all 0.2s ease-in-out;
+
+  /* KPMG gradient - mejorado para mejor contraste y legibilidad */
+  --brand-gradient: linear-gradient(135deg, var(--brand-900) 0%, var(--brand-700) 50%, var(--accent-dark) 100%);
+  --kpmg-gradient: linear-gradient(135deg, var(--brand-900) 0%, var(--brand-700) 50%, var(--accent-dark) 100%);
+  
+  /* CTA Section background - fondo oscuro sólido con gradiente sutil */
+  --cta-bg: linear-gradient(135deg, #001a4d 0%, #002266 30%, #00338d 70%, #4a1f6b 100%);
+  --cta-bg-solid: #002266;  /* Color sólido de respaldo */
+  
+  /* Text colors for CTA sections */
+  --cta-text: #ffffff;
+  --cta-text-secondary: rgba(255, 255, 255, 0.9);
+}
+
+/* Global Styles */
+body {
+  font-family: var(--font-sans);
+  color: var(--text);
+  background-color: var(--surface-2);
+  line-height: 1.6;
+}
+
+/* Container width optimization for laptops */
+.container-narrow {
+  max-width: 1140px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 1200px) and (max-width: 1440px) {
+  .container {
+    max-width: 1140px;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+  .container {
+    max-width: 960px;
+  }
+}
+
+/* Override Bootstrap primary colors with KPMG brand - mejorados */
+.btn-primary {
+  background-color: var(--brand-600) !important;
+  border-color: var(--brand-600) !important;
+  color: var(--text-on-brand) !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--brand-800) !important;
+  border-color: var(--brand-800) !important;
+}
+
+.text-primary {
+  color: var(--brand-600) !important;
+}
+
+.bg-primary {
+  background-color: var(--brand-600) !important;
+}
+
+/* KPMG Brand Utilities - mejorados */
+.btn-brand {
+  background: var(--brand-600);
+  border-color: var(--brand-600);
+  color: var(--text-on-brand);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+  border: none;
+}
+
+.btn-brand:hover {
+  background: var(--brand-800);
+  border-color: var(--brand-800);
+  color: var(--text-on-brand);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.bg-brand {
+  background: var(--brand-gradient) !important;
+}
+
+.text-brand {
+  color: var(--brand-600) !important;
+}
+
+.badge-brand {
+  background: var(--brand-500);
+  color: var(--text-on-brand);
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-weight: 600;
+}
+
+/* Botones KPMG específicos */
+.btn-kpmg-primary {
+  background: var(--brand-600);
+  border-color: var(--brand-600);
+  color: var(--text-on-brand);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+}
+
+.btn-kpmg-primary:hover {
+  background: var(--brand-800);
+  border-color: var(--brand-800);
+  color: var(--text-on-brand);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-kpmg-secondary {
+  background: transparent;
+  border-color: var(--brand-600);
+  color: var(--brand-600);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+  border-width: 2px;
+}
+
+.btn-kpmg-secondary:hover {
+  background: var(--brand-600);
+  border-color: var(--brand-600);
+  color: var(--text-on-brand);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Cards */
+.card-kpmg {
+  background: var(--surface);
+  border: none;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+  overflow: hidden;
+}
+
+.card-kpmg:hover {
+  box-shadow: var(--shadow-xl);
+  transform: translateY(-4px);
+}
+
+/* Card header with brand background */
+.card-kpmg-header {
+  background: var(--brand-gradient);
+  background-color: var(--brand-600);
+  padding: 1rem 1.5rem;
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+  color: var(--text-on-brand);
+}
+
+.card-kpmg-header h3,
+.card-kpmg-header h4,
+.card-kpmg-header h5,
+.card-kpmg-header h6 {
+  color: var(--text-on-brand) !important;
+  margin: 0;
+}
+
+.card-kpmg-header i {
+  color: var(--text-on-brand) !important;
+}
+
+/* Hero carousel with controlled heights for laptops */
+.hero-carousel .carousel-inner {
+  max-height: 500px;
+}
+
+.hero-carousel .carousel-item img {
+  max-height: 500px;
+  width: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 1440px) {
+  .hero-carousel .carousel-inner {
+    max-height: 400px;
+  }
+
+  .hero-carousel .carousel-item img {
+    max-height: 400px;
+  }
+}
+
+@media (max-width: 1199px) {
+  .hero-carousel .carousel-inner {
+    max-height: 320px;
+  }
+
+  .hero-carousel .carousel-item img {
+    max-height: 320px;
+  }
+}
+
+/* Hero Section */
+.hero-section {
+  position: relative;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-on-brand);
+  overflow: hidden;
+}
+
+@media (max-width: 1440px) {
+  .hero-section {
+    min-height: 320px;
+  }
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(0, 26, 77, 0.88) 0%, rgba(0, 34, 102, 0.85) 50%, rgba(74, 31, 107, 0.82) 100%);
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 3rem 2rem;
+}
+
+.hero-content h1,
+.hero-content h2,
+.hero-content h3,
+.hero-content .display-1,
+.hero-content .display-2,
+.hero-content .display-3,
+.hero-content .display-4,
+.hero-content .display-5 {
+  color: var(--text-on-brand) !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-content .lead {
+  color: rgba(255, 255, 255, 0.95) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 1440px) {
+  .hero-content {
+    padding: 2rem 1.5rem;
+  }
+}
+
+/* Navigation */
+.navbar-kpmg {
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 1rem 0;
+}
+
+.navbar-kpmg .nav-link {
+  color: var(--text);
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  transition: var(--transition);
+  border-bottom: 3px solid transparent;
+  margin: 0 0.25rem;
+}
+
+.navbar-kpmg .nav-link:hover {
+  color: var(--brand-600);
+  border-bottom-color: var(--brand-300);
+}
+
+.navbar-kpmg .nav-link.active {
+  color: var(--brand-600);
+  border-bottom-color: var(--brand-600);
+  font-weight: 600;
+}
+
+/* Footer */
+.footer-kpmg {
+  background: var(--brand-900);
+  color: var(--text-on-brand);
+  padding: 3rem 0 1.5rem;
+}
+
+/* Admin Sidebar - Contraste garantizado */
+.bg-brand {
+  background: var(--brand-gradient) !important;
+  background-color: var(--brand-900) !important;
+}
+
+.bg-brand,
+.bg-brand *,
+.bg-brand h1,
+.bg-brand h2,
+.bg-brand h3,
+.bg-brand h4,
+.bg-brand h5,
+.bg-brand h6 {
+  color: var(--text-on-brand) !important;
+}
+
+.bg-brand .nav-link,
+.bg-brand .nav-link *,
+.bg-brand .nav-link i,
+.bg-brand .nav-link span {
+  color: var(--text-on-brand) !important;
+}
+
+.bg-brand .nav-link:hover,
+.bg-brand .nav-link:hover *,
+.bg-brand .nav-link:hover i {
+  color: var(--text-on-brand) !important;
+  opacity: 0.9;
+}
+
+.bg-brand .nav-link.active {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  color: var(--text-on-brand) !important;
+}
+
+.bg-brand .nav-link.active *,
+.bg-brand .nav-link.active i {
+  color: var(--text-on-brand) !important;
+}
+
+.bg-brand small,
+.bg-brand .text-white-50 {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.bg-brand hr.bg-white {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* CTA Section - Mejorado contraste y legibilidad */
+.cta-section {
+  background: var(--cta-bg);
+  background-color: var(--cta-bg-solid); /* Fallback sólido */
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--cta-bg);
+  z-index: 0;
+}
+
+.cta-section .container {
+  position: relative;
+  z-index: 1;
+}
+
+.cta-text {
+  color: var(--cta-text) !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Sombra para mejor legibilidad */
+}
+
+.cta-section .lead {
+  color: var(--cta-text-secondary) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.cta-section .btn-light {
+  background-color: #ffffff !important;
+  color: var(--brand-900) !important;
+  border-color: #ffffff !important;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.cta-section .btn-light:hover {
+  background-color: var(--brand-100) !important;
+  color: var(--brand-900) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.cta-section .btn-outline-light {
+  background-color: transparent !important;
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+  border-width: 2px !important;
+  font-weight: 600;
+}
+
+.cta-section .btn-outline-light:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+  transform: translateY(-2px);
+}
+
+.footer-kpmg a {
+  color: rgba(255, 255, 255, 0.8);
+  transition: var(--transition);
+}
+
+.footer-kpmg a:hover {
+  color: white;
+  text-decoration: underline;
+}
+
+/* Stats Cards */
+.stat-card {
+  background: var(--surface);
+  padding: 1.5rem;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow);
+  text-align: center;
+  border-left: 4px solid var(--brand-600);
+  transition: var(--transition);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+.stat-card-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--brand-600);
+  margin-bottom: 0.5rem;
+}
+
+.stat-card-label {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Stat card compact - para estadísticas pequeñas */
+.stat-card-compact {
+  background: var(--surface);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+  border-top: 3px solid var(--brand-600);
+  transition: var(--transition);
+}
+
+.stat-card-compact:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+
+/* Professional image placeholders with KPMG branding */
+.image-placeholder {
+  background: linear-gradient(135deg, var(--brand-100) 0%, var(--brand-300) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-700);
+  font-weight: 600;
+  min-height: 200px;
+  border-radius: var(--border-radius);
+  position: relative;
+}
+
+.image-placeholder::before {
+  content: "KPMG";
+  position: absolute;
+  font-size: 4rem;
+  opacity: 0.1;
+  font-weight: 900;
+}
+
+/* Badges */
+.badge-status-active {
+  background: var(--success);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+}
+
+.badge-status-completed {
+  background: var(--info);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+}
+
+/* Forms */
+.form-kpmg .form-label {
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.form-kpmg .form-control {
+  border: 2px solid var(--border);
+  border-radius: var(--border-radius);
+  padding: 0.75rem;
+  transition: var(--transition);
+}
+
+.form-kpmg .form-control:focus {
+  border-color: var(--brand-600);
+  box-shadow: 0 0 0 0.2rem rgba(0, 68, 170, 0.25);
+  outline: none;
+}
+
+/* Tables */
+.table-kpmg {
+  background: var(--surface);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.table-kpmg thead {
+  background: var(--brand-gradient);
+  color: var(--text-on-brand);
+  font-weight: 600;
+}
+
+.table-kpmg tbody tr:hover {
+  background: var(--brand-100);
+  cursor: pointer;
+}
+
+/* HTMX loading indicator */
+.htmx-indicator {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.htmx-request .htmx-indicator {
+  opacity: 1;
+}
+
+.spinner-kpmg {
+  border: 3px solid var(--border);
+  border-top: 3px solid var(--brand-700);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Reduced vertical spacing for small laptops */
+@media (max-width: 1440px) {
+  .py-5 {
+    padding-top: 2.5rem !important;
+    padding-bottom: 2.5rem !important;
+  }
+
+  .py-4 {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .py-5 {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+  }
+}
+
+/* Accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--brand-600);
+  outline-offset: 2px;
+}
+
+/* Utility classes */
+.text-muted {
+  color: var(--muted) !important;
+}
+
+.border-brand {
+  border-color: var(--brand-600) !important;
+}
+
+.img-fluid {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Complete Bootstrap color overrides with KPMG palette */
+.btn-outline-primary {
+  color: var(--brand-600);
+  border-color: var(--brand-600);
+  background-color: transparent;
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--brand-600);
+  border-color: var(--brand-600);
+  color: var(--text-on-brand);
+}
+
+.btn-outline-primary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0, 68, 170, 0.25);
+}
+
+.link-primary {
+  color: var(--brand-600);
+  text-decoration: none;
+}
+
+.link-primary:hover {
+  color: var(--brand-800);
+  text-decoration: underline;
+}
+
+/* Badge system with KPMG colors */
+.badge-success {
+  background-color: var(--success) !important;
+  color: white;
+}
+
+.badge-warning {
+  background-color: var(--warning) !important;
+  color: #212529;
+}
+
+.badge-danger {
+  background-color: var(--danger) !important;
+  color: white;
+}
+
+.badge-info {
+  background-color: var(--info) !important;
+  color: white;
+}
+
+.badge-secondary {
+  background-color: var(--muted) !important;
+  color: white;
+}
+
+.badge-kpmg {
+  background-color: var(--brand-500);
+  color: var(--text-on-brand);
+  padding: 0.4rem 0.8rem;
+  border-radius: 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Alert system */
+.alert-primary {
+  background-color: var(--brand-100);
+  border-color: var(--brand-300);
+  color: var(--brand-900);
+}
+
+.alert-success {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+.alert-warning {
+  background-color: #fff3cd;
+  border-color: #ffeaa7;
+  color: #856404;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+.alert-info {
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+  color: #0c5460;
+}
+
+/* Responsive scale system for 1366x768 and 1440x900 */
+@media (max-width: 1366px) {
+  /* Reduce hero heights */
+  .hero-section {
+    min-height: clamp(220px, 28vh, 280px) !important;
+  }
+
+  .hero-carousel .carousel-inner,
+  .hero-carousel .carousel-item img {
+    max-height: clamp(220px, 28vh, 280px) !important;
+  }
+
+  .hero-content {
+    padding: clamp(1.25rem, 2.5vw, 1.75rem) clamp(0.875rem, 1.75vw, 1.25rem) !important;
+  }
+
+  .hero-content h1,
+  .hero-content .display-4 {
+    font-size: clamp(1.75rem, 3.5vw, 2rem) !important;
+    margin-bottom: clamp(0.75rem, 1.5vw, 1rem) !important;
+  }
+
+  .hero-content .lead {
+    font-size: clamp(0.9375rem, 1.75vw, 1.0625rem) !important;
+  }
+
+  /* Reduce section padding */
+  section {
+    padding-top: clamp(2rem, 4vw, 2.5rem) !important;
+    padding-bottom: clamp(2rem, 4vw, 2.5rem) !important;
+  }
+
+  .py-5 {
+    padding-top: clamp(2rem, 4vw, 2.5rem) !important;
+    padding-bottom: clamp(2rem, 4vw, 2.5rem) !important;
+  }
+
+  .my-5 {
+    margin-top: clamp(2rem, 4vw, 2.5rem) !important;
+    margin-bottom: clamp(2rem, 4vw, 2.5rem) !important;
+  }
+
+  /* Optimize container max-width */
+  .container {
+    max-width: 1140px;
+    padding-left: clamp(0.875rem, 1.75vw, 1.25rem);
+    padding-right: clamp(0.875rem, 1.75vw, 1.25rem);
+  }
+
+  /* Reduce card padding */
+  .card-kpmg .card-body,
+  .card-kpmg.p-4 {
+    padding: clamp(1rem, 2vw, 1.25rem) !important;
+  }
+
+  /* Smaller stat numbers */
+  .stat-card-number {
+    font-size: clamp(1.75rem, 3.5vw, 2rem) !important;
+  }
+}
+
+@media (min-width: 1367px) and (max-width: 1440px) {
+  .hero-section {
+    min-height: clamp(300px, 35vh, 380px);
+  }
+
+  .hero-carousel .carousel-inner,
+  .hero-carousel .carousel-item img {
+    max-height: clamp(300px, 35vh, 380px);
+  }
+
+  .container {
+    max-width: 1200px;
+  }
+}
+
+/* Improved spacing system with clamp */
+.section-padding {
+  padding-top: clamp(2.5rem, 5vw, 4rem);
+  padding-bottom: clamp(2.5rem, 5vw, 4rem);
+}
+
+@media (max-width: 1366px) {
+  .section-padding {
+    padding-top: clamp(2rem, 4vw, 3rem);
+    padding-bottom: clamp(2rem, 4vw, 3rem);
+  }
+}
+
+/* Card improvements */
+.card-kpmg .card-title {
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+  font-weight: 600;
+  color: var(--brand-900);
+  margin-bottom: 0.75rem;
+}
+
+.card-kpmg .card-text {
+  font-size: clamp(0.875rem, 1.75vw, 1rem);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Table responsive improvements */
+@media (max-width: 1366px) {
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+
+  .table-kpmg th,
+  .table-kpmg td {
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* Form improvements */
+.form-control,
+.form-select {
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
+}
+
+@media (max-width: 1366px) {
+  .form-control,
+  .form-select {
+    padding: 0.625rem 0.875rem;
+  }
+}
+
+/* Button size adjustments */
+@media (max-width: 1366px) {
+  .btn {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+  }
+
+  .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* Navbar improvements for smaller screens */
+@media (max-width: 1366px) {
+  .navbar-kpmg {
+    padding: 0.75rem 0;
+  }
+
+  .navbar-brand {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+  }
+
+  .navbar-kpmg .nav-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Footer improvements */
+@media (max-width: 1366px) {
+  .footer-kpmg {
+    padding: 2rem 0 1rem;
+    font-size: 0.875rem;
+  }
+
+  .footer-kpmg h5,
+  .footer-kpmg h6 {
+    font-size: clamp(1rem, 2vw, 1.125rem);
+  }
+}
+
+/* Loading states */
+.loading-skeleton {
+  background: linear-gradient(90deg, var(--surface-3) 25%, var(--surface-2) 50%, var(--surface-3) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s ease-in-out infinite;
+  border-radius: var(--border-radius);
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Image placeholder improvements */
+.image-placeholder {
+  min-height: clamp(150px, 20vh, 250px);
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
+}
+
+.image-placeholder::before {
+  font-size: clamp(2rem, 5vw, 4rem);
+}
+
+/* Print styles */
+@media print {
+  .navbar-kpmg,
+  .footer-kpmg,
+  .btn,
+  .htmx-indicator {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --border: #000000;
+    --text: #000000;
+    --text-secondary: #333333;
+  }
+
+  .btn-primary,
+  .btn-brand {
+    border: 2px solid #000000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Mejoras adicionales de contraste y legibilidad */
+
+/* Asegurar que texto sobre fondos claros sea oscuro */
+.bg-white .text-white,
+.bg-light .text-white,
+[style*="background: var(--surface"] .text-white,
+[style*="background: var(--surface-2"] .text-white {
+  color: var(--text) !important;
+  text-shadow: none !important;
+}
+
+/* Mejorar contraste en secciones con gradientes */
+section[style*="gradient"] {
+  position: relative;
+}
+
+section[style*="gradient"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 0;
+}
+
+section[style*="gradient"] > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Mejorar legibilidad de texto en cards sobre fondos claros */
+.card-kpmg .text-white {
+  color: var(--text) !important;
+}
+
+.card-kpmg.bg-primary .text-white,
+.card-kpmg[style*="background"] .text-white {
+  color: var(--text-on-brand) !important;
+}
+
+/* Asegurar buen contraste en badges */
+.badge {
+  font-weight: 600;
+  padding: 0.5em 0.75em;
+}
+
+/* Mejorar contraste en alertas */
+.alert {
+  border-width: 2px;
+  font-weight: 500;
+}
+
+/* Mejorar legibilidad en formularios */
+.form-control::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+/* Asegurar contraste mínimo en todos los textos */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+/* Mejorar contraste en enlaces */
+a {
+  color: var(--brand-600);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+a:hover {
+  color: var(--brand-800);
+  text-decoration: underline;
+}
+
+/* Asegurar que botones tengan buen contraste */
+.btn {
+  font-weight: 500;
+  border-width: 2px;
+}
+
+.btn-light {
+  background-color: #ffffff !important;
+  color: var(--brand-900) !important;
+  border-color: #e0e0e0 !important;
+}
+
+.btn-light:hover {
+  background-color: #f5f5f5 !important;
+  color: var(--brand-900) !important;
+}
+
+.btn-outline-light {
+  background-color: transparent !important;
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+.btn-outline-light:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}

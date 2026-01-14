@@ -20,7 +20,7 @@ public class ContactModel : PageModel
             return Page();
         }
 
-        TempData["Message"] = "Mensaje enviado correctamente. Nos pondremos en contacto contigo pronto.";
+        TempData["FlashSuccess"] = "Mensaje enviado correctamente. Nos pondremos en contacto contigo pronto.";
         return RedirectToPage();
     }
 

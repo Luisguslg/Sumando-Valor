@@ -1,0 +1,72 @@
+@page
+@model SumandoValor.Web.Pages.Profile.TalleresModel
+@using SumandoValor.Domain.Entities
+@{
+    ViewData["Title"] = "Mis Talleres";
+}
+
+<div class="mb-4">
+    <h1>Mis Talleres</h1>
+    <p class="text-muted">Talleres en los que estás inscrito</p>
+</div>
+
+@if (Model.Inscripciones == null || !Model.Inscripciones.Any())
+{
+    <div class="alert alert-info">
+        <p class="mb-0">No estás inscrito en ningún taller. <a asp-page="/Cursos">Explora nuestros cursos</a> para inscribirte.</p>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Taller</th>
+                    <th>Curso</th>
+                    <th>Fecha de Inicio</th>
+                    <th>Hora</th>
+                    <th>Modalidad</th>
+                    <th>Estado</th>
+                    <th>Certificado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var inscripcion in Model.Inscripciones)
+                {
+                    <tr>
+                        <td>@inscripcion.Taller.Titulo</td>
+                        <td>@inscripcion.Taller.Curso.Titulo</td>
+                        <td>@inscripcion.Taller.FechaInicio.ToString("dd/MM/yyyy")</td>
+                        <td>@inscripcion.Taller.HoraInicio.ToString(@"hh\:mm")</td>
+                        <td>@inscripcion.Taller.Modalidad</td>
+                        <td>
+                            @if (inscripcion.Estado == EstadoInscripcion.Activa)
+                            {
+                                <span class="badge bg-success">Activa</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Cancelada</span>
+                            }
+                        </td>
+                        <td>
+                            @if (inscripcion.Taller.PermiteCertificado)
+                            {
+                                <span class="badge bg-info">Disponible</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">No disponible</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-page="/Talleres/Details" asp-route-id="@inscripcion.TallerId" class="btn btn-sm btn-outline-primary">Ver Detalles</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

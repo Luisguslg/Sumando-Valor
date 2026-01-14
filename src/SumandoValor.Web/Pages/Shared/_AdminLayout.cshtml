@@ -1,0 +1,200 @@
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<SumandoValor.Infrastructure.Data.ApplicationUser> UserManager
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Administración | Sumando Valor</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+    
+    <!-- Custom KPMG Theme -->
+    <link href="~/theme/theme.css" rel="stylesheet" />
+    
+    <style>
+        .admin-sidebar {
+            min-height: 100vh;
+            background: linear-gradient(180deg, #00338D 0%, #001F5C 100%);
+            color: white;
+            padding: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            z-index: 1000;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+        }
+        
+        .admin-sidebar .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .admin-sidebar .sidebar-header h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.95);
+        }
+
+        .admin-sidebar .sidebar-section {
+            color: rgba(255,255,255,0.85);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 0.75rem 1.5rem 0.25rem 1.5rem;
+        }
+        
+        .admin-sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 0.75rem 1.5rem;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .admin-sidebar .nav-link:hover,
+        .admin-sidebar .nav-link.active {
+            color: white;
+            background: rgba(255,255,255,0.1);
+            border-left-color: #FFCD00;
+        }
+        
+        .admin-sidebar .nav-link i {
+            width: 20px;
+            margin-right: 0.5rem;
+        }
+        
+        .admin-main {
+            margin-left: 250px;
+            padding: 2rem;
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+        
+        .admin-topbar {
+            background: white;
+            padding: 1rem 2rem;
+            margin: -2rem -2rem 2rem -2rem;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-topbar .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .admin-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+        
+        .admin-stats-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        
+        .admin-stats-card .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00338D;
+        }
+        
+        .admin-stats-card .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        @@media (max-width: 768px) {
+            .admin-sidebar {
+                width: 100%;
+                position: relative;
+            }
+            
+            .admin-main {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-sidebar">
+        <div class="sidebar-header">
+            <h4 class="mb-0 d-flex align-items-center gap-2">
+                <i class="bi bi-shield-check"></i>
+                <span>Administración</span>
+            </h4>
+        </div>
+        <div class="sidebar-section">Navegación</div>
+        <nav class="nav flex-column">
+            <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin") && Context.Request.Path == "/Admin" ? "active" : "")" 
+               asp-page="/Admin">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Cursos") ? "active" : "")" 
+               asp-page="/Admin/Cursos">
+                <i class="bi bi-book"></i> Cursos
+            </a>
+            <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Talleres") ? "active" : "")" 
+               asp-page="/Admin/Talleres">
+                <i class="bi bi-calendar-event"></i> Talleres
+            </a>
+            <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Inscripciones") ? "active" : "")" 
+               asp-page="/Admin/Inscripciones">
+                <i class="bi bi-people"></i> Inscripciones
+            </a>
+            <div class="mt-auto p-3 border-top border-white border-opacity-10">
+                <a href="/" class="nav-link">
+                    <i class="bi bi-arrow-left"></i> Volver al sitio
+                </a>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    var currentUser = await UserManager.GetUserAsync(User);
+                    <div class="text-white-50 small px-3 py-2">
+                        <i class="bi bi-person-circle"></i> 
+                        @(currentUser?.Nombres ?? currentUser?.Email ?? "Usuario")
+                    </div>
+                    <form method="post" asp-page="/Account/Logout" class="px-3">
+                        <button type="submit" class="btn btn-outline-light btn-sm w-100">
+                            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                        </button>
+                    </form>
+                }
+            </div>
+        </nav>
+    </div>
+    
+    <div class="admin-main">
+        <div class="admin-topbar">
+            <h5 class="mb-0">@ViewData["Title"]</h5>
+        </div>
+
+        <partial name="_Flash" />
+        
+        <main>
+            @RenderBody()
+        </main>
+    </div>
+    
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,16 +1,72 @@
 @page
 @model AdminModel
 @{
-    ViewData["Title"] = "Administración";
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
 }
 
-<div class="mb-4">
-    <h1>Panel de Administración</h1>
-    <p class="text-muted">Gestión del sistema</p>
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="admin-stats-card">
+            <div class="stat-number">@Model.TotalCursosActivos</div>
+            <div class="stat-label">Cursos Activos</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="admin-stats-card">
+            <div class="stat-number">@Model.TotalTalleresAbiertos</div>
+            <div class="stat-label">Talleres Abiertos</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="admin-stats-card">
+            <div class="stat-number">@Model.InscripcionesMes</div>
+            <div class="stat-label">Inscripciones del Mes</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="admin-stats-card">
+            <div class="stat-number">@Model.CuposOcupados%</div>
+            <div class="stat-label">Cupos Ocupados</div>
+        </div>
+    </div>
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <p class="text-muted">Panel de administración (placeholder)</p>
+<div class="admin-card">
+    <h5 class="mb-4">Accesos Rápidos</h5>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <a asp-page="/Admin/Cursos" class="text-decoration-none">
+                <div class="card h-100 border-primary">
+                    <div class="card-body text-center">
+                        <i class="bi bi-book fs-1 text-primary mb-3"></i>
+                        <h5 class="card-title">Cursos</h5>
+                        <p class="card-text text-muted">Gestiona los cursos disponibles</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a asp-page="/Admin/Talleres" class="text-decoration-none">
+                <div class="card h-100 border-primary">
+                    <div class="card-body text-center">
+                        <i class="bi bi-calendar-event fs-1 text-primary mb-3"></i>
+                        <h5 class="card-title">Talleres</h5>
+                        <p class="card-text text-muted">Gestiona los talleres de cada curso</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a asp-page="/Admin/Inscripciones" class="text-decoration-none">
+                <div class="card h-100 border-primary">
+                    <div class="card-body text-center">
+                        <i class="bi bi-people fs-1 text-primary mb-3"></i>
+                        <h5 class="card-title">Inscripciones</h5>
+                        <p class="card-text text-muted">Visualiza y gestiona las inscripciones</p>
+                    </div>
+                </div>
+            </a>
+        </div>
     </div>
 </div>

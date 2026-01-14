@@ -1,0 +1,59 @@
+@page
+@model CursosModel
+@using SumandoValor.Domain.Entities
+@{
+    ViewData["Title"] = "Gestión de Cursos";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="mb-4">
+    <h1>Gestión de Cursos</h1>
+    <a asp-page="/Admin/Cursos/Create" class="btn btn-primary">Crear Nuevo Curso</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Orden</th>
+                <th>Título</th>
+                <th>Estado</th>
+                <th>Público</th>
+                <th>Talleres</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var curso in Model.Cursos)
+            {
+                <tr>
+                    <td>@(curso.Orden ?? 0)</td>
+                    <td>@curso.Titulo</td>
+                    <td>
+                        @if (curso.Estado == EstatusCurso.Activo)
+                        {
+                            <span class="badge bg-success">Activo</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Inactivo</span>
+                        }
+                    </td>
+                    <td>@(curso.EsPublico ? "Sí" : "No")</td>
+                    <td>@curso.Talleres.Count</td>
+                    <td>
+                        <a asp-page="/Admin/Cursos/Edit" asp-route-id="@curso.Id" class="btn btn-sm btn-outline-primary">Editar</a>
+                        @if (curso.Talleres.Count == 0)
+                        {
+                            <form method="post" asp-page-handler="ToggleEstado" asp-route-id="@curso.Id" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-warning">
+                                    @(curso.Estado == EstatusCurso.Activo ? "Desactivar" : "Activar")
+                                </button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

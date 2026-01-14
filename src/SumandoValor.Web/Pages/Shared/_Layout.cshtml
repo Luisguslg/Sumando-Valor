@@ -5,137 +5,271 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Sumando Valor</title>
+    <title>@ViewData["Title"] - Sumando Valor | Fundación KPMG Venezuela</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Plataforma de formación y voluntariado de la Fundación KPMG Venezuela. Sumando Valor a través de talleres y programas de desarrollo." />
+    <meta name="keywords" content="KPMG, Fundación, Venezuela, Voluntariado, Talleres, Capacitación, Sumando Valor" />
+    
+    <!-- Bootstrap 5 CSS -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+    
+    <!-- Custom KPMG Theme -->
+    <link href="~/theme/theme.css" rel="stylesheet" />
+    
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SumandoValor.Web.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-            <div class="container">
-                <a class="navbar-brand fw-bold" asp-area="" asp-page="/Index">Sumando Valor</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Index">Inicio</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Workshops">Oferta de Talleres</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/About">Conócenos</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Contact">Contáctanos</a>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav">
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            var currentUser = await UserManager.GetUserAsync(User);
-                            string displayName = "Usuario";
-                            
-                            if (currentUser != null)
-                            {
-                                var nombres = (currentUser.Nombres?.Trim() ?? string.Empty);
-                                var apellidos = (currentUser.Apellidos?.Trim() ?? string.Empty);
-                                
-                                if (!string.IsNullOrWhiteSpace(nombres) && !string.IsNullOrWhiteSpace(apellidos))
-                                {
-                                    if (nombres.Equals(apellidos, StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        displayName = nombres;
-                                    }
-                                    else
-                                    {
-                                        displayName = $"{nombres} {apellidos}";
-                                    }
-                                }
-                                else if (!string.IsNullOrWhiteSpace(nombres))
-                                {
-                                    var nombreParts = nombres.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                                    if (nombreParts.Length > 1 && nombreParts[0].Equals(nombreParts[1], StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        displayName = nombreParts[0];
-                                    }
-                                    else
-                                    {
-                                        displayName = nombres;
-                                    }
-                                }
-                                else if (!string.IsNullOrWhiteSpace(apellidos))
-                                {
-                                    var apellidoParts = apellidos.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                                    if (apellidoParts.Length > 1 && apellidoParts[0].Equals(apellidoParts[1], StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        displayName = apellidoParts[0];
-                                    }
-                                    else
-                                    {
-                                        displayName = apellidos;
-                                    }
-                                }
-                                else if (!string.IsNullOrWhiteSpace(currentUser.Email))
-                                {
-                                    displayName = currentUser.Email;
-                                }
-                            }
-                            else if (!string.IsNullOrWhiteSpace(User.Identity?.Name))
-                            {
-                                displayName = User.Identity.Name;
-                            }
-                            
-                            <li class="nav-item">
-                                <span class="nav-link text-muted me-2">@displayName</span>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-page="/Profile">Perfil</a>
-                            </li>
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-area="" asp-page="/Admin">Admin</a>
-                                </li>
-                            }
-                            <li class="nav-item">
-                                <form asp-page="/Account/Logout" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-link nav-link border-0 p-0 ms-3" style="background: none; box-shadow: none; text-decoration: none;">Cerrar Sesión</button>
-                                </form>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-page="/Account/Login">Iniciar Sesión</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-page="/Account/Register">Registrarse</a>
-                            </li>
-                        }
-                    </ul>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-kpmg sticky-top" role="navigation" aria-label="Navegación principal">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" asp-area="" asp-page="/Index" aria-label="Sumando Valor - Inicio">
+                <i class="bi bi-award-fill text-primary me-2" style="font-size: 2rem;"></i>
+                <div>
+                    <div style="font-weight: 700; font-size: 1.25rem; line-height: 1;">Sumando Valor</div>
+                    <small style="font-size: 0.75rem; color: var(--text-secondary);">Fundación KPMG</small>
                 </div>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["page"]?.ToString() == "/Index" || Context.Request.Path == "/" ? "active" : "")" 
+                           asp-area="" asp-page="/Index" 
+                           aria-label="Inicio"
+                           aria-current="@(ViewContext.RouteData.Values["page"]?.ToString() == "/Index" || Context.Request.Path == "/" ? "page" : "false")">
+                            <i class="bi bi-house-fill me-1"></i>Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Cursos") ? "active" : "")" 
+                           asp-area="" asp-page="/Cursos" 
+                           aria-label="Talleres disponibles"
+                           aria-current="@(Context.Request.Path.StartsWithSegments("/Cursos") ? "page" : "false")">
+                            <i class="bi bi-calendar-check me-1"></i>Talleres
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(Context.Request.Path.StartsWithSegments("/About") ? "active" : "")" 
+                           asp-area="" asp-page="/About" 
+                           aria-label="Conócenos"
+                           aria-current="@(Context.Request.Path.StartsWithSegments("/About") ? "page" : "false")">
+                            <i class="bi bi-people-fill me-1"></i>Conócenos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Contact") ? "active" : "")" 
+                           asp-area="" asp-page="/Contact" 
+                           aria-label="Contacto"
+                           aria-current="@(Context.Request.Path.StartsWithSegments("/Contact") ? "page" : "false")">
+                            <i class="bi bi-envelope-fill me-1"></i>Contacto
+                        </a>
+                    </li>
+                    
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        var currentUser = await UserManager.GetUserAsync(User);
+                        string displayName = "Usuario";
+                        
+                        if (currentUser != null)
+                        {
+                            var nombres = (currentUser.Nombres?.Trim() ?? string.Empty);
+                            var apellidos = (currentUser.Apellidos?.Trim() ?? string.Empty);
+                            
+                            if (!string.IsNullOrWhiteSpace(nombres) && !string.IsNullOrWhiteSpace(apellidos))
+                            {
+                                if (nombres.Equals(apellidos, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    displayName = nombres;
+                                }
+                                else
+                                {
+                                    displayName = $"{nombres} {apellidos}";
+                                }
+                            }
+                            else if (!string.IsNullOrWhiteSpace(nombres))
+                            {
+                                var nombreParts = nombres.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                                if (nombreParts.Length > 1 && nombreParts[0].Equals(nombreParts[1], StringComparison.OrdinalIgnoreCase))
+                                {
+                                    displayName = nombreParts[0];
+                                }
+                                else
+                                {
+                                    displayName = nombres;
+                                }
+                            }
+                            else if (!string.IsNullOrWhiteSpace(apellidos))
+                            {
+                                var apellidoParts = apellidos.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                                if (apellidoParts.Length > 1 && apellidoParts[0].Equals(apellidoParts[1], StringComparison.OrdinalIgnoreCase))
+                                {
+                                    displayName = apellidoParts[0];
+                                }
+                                else
+                                {
+                                    displayName = apellidos;
+                                }
+                            }
+                            else if (!string.IsNullOrWhiteSpace(currentUser.Email))
+                            {
+                                displayName = currentUser.Email;
+                            }
+                        }
+                        else if (!string.IsNullOrWhiteSpace(User.Identity?.Name))
+                        {
+                            displayName = User.Identity.Name;
+                        }
+                        
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin") ? "active" : "")" 
+                                   asp-area="" asp-page="/Admin" 
+                                   aria-label="Panel de administración">
+                                    <i class="bi bi-gear-fill me-1"></i>Admin
+                                </a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Beneficiario"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Profile/Talleres") ? "active" : "")"
+                                   asp-area="" asp-page="/Profile/Talleres"
+                                   aria-label="Mis talleres">
+                                    <i class="bi bi-calendar2-check me-1"></i>Mis Talleres
+                                </a>
+                            </li>
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Profile") ? "active" : "")" 
+                               asp-area="" asp-page="/Profile" 
+                               aria-label="Mi perfil">
+                                <i class="bi bi-person-circle me-1"></i>Mi Perfil
+                            </a>
+                        </li>
+                        <li class="nav-item ms-lg-2">
+                            <form method="post" asp-page="/Account/Logout" class="d-inline">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-box-arrow-right me-1"></i>Salir
+                                </button>
+                            </form>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item ms-lg-2">
+                            <a asp-area="" asp-page="/Account/Login" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar Sesión
+                            </a>
+                        </li>
+                        <li class="nav-item ms-2">
+                            <a asp-area="" asp-page="/Account/Register" class="btn btn-primary btn-sm">
+                                <i class="bi bi-person-plus-fill me-1"></i>Registrarse
+                            </a>
+                        </li>
+                    }
+                </ul>
             </div>
-        </nav>
-    </header>
-    <div class="container mt-4 mb-5">
-        <main role="main">
-            @RenderBody()
-        </main>
+        </div>
+    </nav>
+    
+    <div class="container mt-3">
+        <partial name="_Flash" />
     </div>
 
-    <footer class="bg-light border-top mt-5 py-4">
+    <!-- Main Content -->
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-kpmg mt-5">
         <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <p class="mb-0 text-muted">&copy; @DateTime.Now.Year - Sumando Valor - Fundación KPMG Venezuela</p>
+            <div class="row g-4">
+                <div class="col-md-4 mb-3">
+                    <h5 class="fw-bold mb-3 text-white">
+                        <i class="bi bi-award-fill me-2"></i>Sumando Valor
+                    </h5>
+                    <p class="text-white-50">
+                        Plataforma de formación y desarrollo de la Fundación KPMG Venezuela. 
+                        Trabajamos para sumar valor a nuestra comunidad a través de la educación y el voluntariado.
+                    </p>
                 </div>
-                <div class="col-md-6 text-md-end">
-                    <a asp-area="" asp-page="/About" class="text-muted text-decoration-none me-3">Conócenos</a>
-                    <a asp-area="" asp-page="/Contact" class="text-muted text-decoration-none">Contacto</a>
+                
+                <div class="col-md-2 mb-3">
+                    <h6 class="fw-bold mb-3 text-white">Enlaces</h6>
+                    <ul class="list-unstyled">
+                        <li><a asp-area="" asp-page="/Index" class="text-white-50 text-decoration-none d-block mb-2 hover-white">Inicio</a></li>
+                        <li><a asp-area="" asp-page="/Cursos" class="text-white-50 text-decoration-none d-block mb-2 hover-white">Talleres</a></li>
+                        <li><a asp-area="" asp-page="/About" class="text-white-50 text-decoration-none d-block mb-2 hover-white">Conócenos</a></li>
+                        <li><a asp-area="" asp-page="/Contact" class="text-white-50 text-decoration-none d-block hover-white">Contacto</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-md-3 mb-3">
+                    <h6 class="fw-bold mb-3 text-white">Programas</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <span class="text-white-50">Sumando Valor</span>
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <span class="text-white-50">Deja Tu Huella</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="col-md-3 mb-3">
+                    <h6 class="fw-bold mb-3 text-white">Contacto</h6>
+                    <p class="text-white-50 mb-2">
+                        <i class="bi bi-envelope-fill me-2"></i>
+                        contacto@kpmgfundacion.org.ve
+                    </p>
+                    <p class="text-white-50 mb-3">
+                        <i class="bi bi-geo-alt-fill me-2"></i>
+                        Caracas, Venezuela
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-white fs-4" aria-label="Facebook" title="Facebook">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="#" class="text-white fs-4" aria-label="Instagram" title="Instagram">
+                            <i class="bi bi-instagram"></i>
+                        </a>
+                        <a href="#" class="text-white fs-4" aria-label="LinkedIn" title="LinkedIn">
+                            <i class="bi bi-linkedin"></i>
+                        </a>
+                        <a href="#" class="text-white fs-4" aria-label="Twitter" title="Twitter">
+                            <i class="bi bi-twitter"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <hr class="border-white-50 my-4" />
+            
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    <small class="text-white-50">
+                        &copy; @DateTime.Now.Year Fundación KPMG Venezuela. Todos los derechos reservados.
+                    </small>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <small class="text-white-50">
+                        <a href="#" class="text-white-50 text-decoration-none me-3 hover-white">Términos de Uso</a>
+                        <a href="#" class="text-white-50 text-decoration-none hover-white">Política de Privacidad</a>
+                    </small>
                 </div>
             </div>
         </div>

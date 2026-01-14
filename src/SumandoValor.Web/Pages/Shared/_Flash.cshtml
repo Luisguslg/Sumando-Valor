@@ -1,0 +1,32 @@
+@{
+    // Flash messages centralizados para evitar duplicados.
+    // Preferimos Flash*; soportamos claves legacy mientras se migra el código.
+    var flashSuccess = TempData["FlashSuccess"] as string ?? TempData["SuccessMessage"] as string;
+    var flashError = TempData["FlashError"] as string ?? TempData["ErrorMessage"] as string;
+    var flashInfo = TempData["FlashInfo"] as string ?? TempData["Message"] as string;
+}
+
+@if (!string.IsNullOrWhiteSpace(flashSuccess))
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @flashSuccess
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(flashError))
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @flashError
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(flashInfo))
+{
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        @flashInfo
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+}
+

@@ -1,0 +1,60 @@
+@page
+@model SumandoValor.Web.Pages.Admin.TalleresModel
+@using SumandoValor.Domain.Entities
+@{
+    ViewData["Title"] = "Gestión de Talleres";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="mb-4">
+    <h1>Gestión de Talleres</h1>
+    <a asp-page="/Admin/Talleres/Create" class="btn btn-primary">Crear Nuevo Taller</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Curso</th>
+                <th>Título</th>
+                <th>Fecha Inicio</th>
+                <th>Modalidad</th>
+                <th>Cupos</th>
+                <th>Estatus</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var taller in Model.Talleres)
+            {
+                <tr>
+                    <td>@taller.Curso.Titulo</td>
+                    <td>@taller.Titulo</td>
+                    <td>@taller.FechaInicio.ToString("dd/MM/yyyy")</td>
+                    <td>@taller.Modalidad</td>
+                    <td>@taller.CuposDisponibles / @taller.CuposMaximos</td>
+                    <td>
+                        @switch (taller.Estatus)
+                        {
+                            case EstatusTaller.Abierto:
+                                <span class="badge bg-success">Abierto</span>
+                                break;
+                            case EstatusTaller.Cerrado:
+                                <span class="badge bg-secondary">Cerrado</span>
+                                break;
+                            case EstatusTaller.Cancelado:
+                                <span class="badge bg-danger">Cancelado</span>
+                                break;
+                            case EstatusTaller.Finalizado:
+                                <span class="badge bg-info">Finalizado</span>
+                                break;
+                        }
+                    </td>
+                    <td>
+                        <a asp-page="/Admin/Talleres/Edit" asp-route-id="@taller.Id" class="btn btn-sm btn-outline-primary">Editar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

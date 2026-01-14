@@ -163,9 +163,6 @@ namespace SumandoValor.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -187,13 +184,53 @@ namespace SumandoValor.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
-
                     b.HasIndex("TallerId");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("Certificados");
+                });
+
+            modelBuilder.Entity("SumandoValor.Domain.Entities.Curso", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("EsPublico")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("Orden")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PublicoObjetivo")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Estado");
+
+                    b.HasIndex("Orden");
+
+                    b.ToTable("Cursos");
                 });
 
             modelBuilder.Entity("SumandoValor.Domain.Entities.EncuestaSatisfaccion", b =>
@@ -204,9 +241,6 @@ namespace SumandoValor.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -215,7 +249,8 @@ namespace SumandoValor.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("ScorePromedio")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<int>("TallerId")
                         .HasColumnType("int");
@@ -225,8 +260,6 @@ namespace SumandoValor.Infrastructure.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("TallerId");
 
@@ -243,8 +276,8 @@ namespace SumandoValor.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<bool>("Asistencia")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -260,8 +293,6 @@ namespace SumandoValor.Infrastructure.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("TallerId");
 
@@ -325,7 +356,13 @@ namespace SumandoValor.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Cupos")
+                    b.Property<int>("CuposDisponibles")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CuposMaximos")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CursoId")
                         .HasColumnType("int");
 
                     b.Property<string>("Descripcion")
@@ -333,29 +370,34 @@ namespace SumandoValor.Infrastructure.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
-                    b.Property<int>("DuracionMin")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("EsPublico")
-                        .HasColumnType("bit");
-
                     b.Property<int>("Estatus")
                         .HasColumnType("int");
 
                     b.Property<string>("FacilitadorTexto")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
-                    b.Property<DateTime>("FechaHoraInicio")
+                    b.Property<DateTime?>("FechaFin")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaInicio")
+                        .HasColumnType("datetime2");
+
+                    b.Property<TimeSpan>("HoraInicio")
+                        .HasColumnType("time");
 
                     b.Property<int>("Modalidad")
                         .HasColumnType("int");
 
-                    b.Property<string>("PlataformaDigital")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("PermiteCertificado")
+                        .HasColumnType("bit");
 
-                    b.Property<string>("PublicoObjetivo")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("PlataformaDigital")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("RequiereEncuesta")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Titulo")
                         .IsRequired()
@@ -367,7 +409,11 @@ namespace SumandoValor.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FechaHoraInicio");
+                    b.HasIndex("CursoId");
+
+                    b.HasIndex("Estatus");
+
+                    b.HasIndex("FechaInicio");
 
                     b.ToTable("Talleres");
                 });
@@ -556,13 +602,15 @@ namespace SumandoValor.Infrastructure.Migrations
 
             modelBuilder.Entity("SumandoValor.Domain.Entities.Certificado", b =>
                 {
-                    b.HasOne("SumandoValor.Infrastructure.Data.ApplicationUser", null)
-                        .WithMany("Certificados")
-                        .HasForeignKey("ApplicationUserId");
-
                     b.HasOne("SumandoValor.Domain.Entities.Taller", "Taller")
                         .WithMany("Certificados")
                         .HasForeignKey("TallerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SumandoValor.Infrastructure.Data.ApplicationUser", null)
+                        .WithMany("Certificados")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -571,13 +619,15 @@ namespace SumandoValor.Infrastructure.Migrations
 
             modelBuilder.Entity("SumandoValor.Domain.Entities.EncuestaSatisfaccion", b =>
                 {
-                    b.HasOne("SumandoValor.Infrastructure.Data.ApplicationUser", null)
-                        .WithMany("Encuestas")
-                        .HasForeignKey("ApplicationUserId");
-
                     b.HasOne("SumandoValor.Domain.Entities.Taller", "Taller")
                         .WithMany("Encuestas")
                         .HasForeignKey("TallerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SumandoValor.Infrastructure.Data.ApplicationUser", null)
+                        .WithMany("Encuestas")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -586,17 +636,35 @@ namespace SumandoValor.Infrastructure.Migrations
 
             modelBuilder.Entity("SumandoValor.Domain.Entities.Inscripcion", b =>
                 {
-                    b.HasOne("SumandoValor.Infrastructure.Data.ApplicationUser", null)
-                        .WithMany("Inscripciones")
-                        .HasForeignKey("ApplicationUserId");
-
                     b.HasOne("SumandoValor.Domain.Entities.Taller", "Taller")
                         .WithMany("Inscripciones")
                         .HasForeignKey("TallerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("SumandoValor.Infrastructure.Data.ApplicationUser", null)
+                        .WithMany("Inscripciones")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Taller");
+                });
+
+            modelBuilder.Entity("SumandoValor.Domain.Entities.Taller", b =>
+                {
+                    b.HasOne("SumandoValor.Domain.Entities.Curso", "Curso")
+                        .WithMany("Talleres")
+                        .HasForeignKey("CursoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Curso");
+                });
+
+            modelBuilder.Entity("SumandoValor.Domain.Entities.Curso", b =>
+                {
+                    b.Navigation("Talleres");
                 });
 
             modelBuilder.Entity("SumandoValor.Domain.Entities.Taller", b =>

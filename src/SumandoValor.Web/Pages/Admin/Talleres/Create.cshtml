@@ -1,0 +1,148 @@
+@page
+@model CreateModel
+@using SumandoValor.Domain.Entities
+@{
+    ViewData["Title"] = "Crear Taller";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="mb-4">
+    <h1>Crear Nuevo Taller</h1>
+    <a asp-page="/Admin/Talleres" class="btn btn-link">← Volver a Talleres</a>
+</div>
+
+<div class="row">
+    <div class="col-md-10">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            
+            <div class="mb-3">
+                <label asp-for="Input.CursoId" class="form-label">Curso *</label>
+                <select asp-for="Input.CursoId" class="form-select" asp-items="Model.CursosSelectList">
+                    <option value="">-- Seleccione un curso --</option>
+                </select>
+                <span asp-validation-for="Input.CursoId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.Titulo" class="form-label">Título *</label>
+                <input asp-for="Input.Titulo" class="form-control" />
+                <span asp-validation-for="Input.Titulo" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.Descripcion" class="form-label">Descripción *</label>
+                <textarea asp-for="Input.Descripcion" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="Input.Descripcion" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Input.FechaInicio" class="form-label">Fecha de Inicio *</label>
+                    <input asp-for="Input.FechaInicio" class="form-control" type="date"
+                           min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    <small class="form-text text-muted">No puede ser anterior a hoy (excepto talleres finalizados)</small>
+                    <span asp-validation-for="Input.FechaInicio" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Input.FechaFin" class="form-label">Fecha de Fin (opcional)</label>
+                    <input asp-for="Input.FechaFin" class="form-control" type="date" />
+                    <span asp-validation-for="Input.FechaFin" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Input.HoraInicio" class="form-label">Hora de Inicio *</label>
+                    <input asp-for="Input.HoraInicio" class="form-control" type="time" />
+                    <span asp-validation-for="Input.HoraInicio" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.Modalidad" class="form-label">Modalidad *</label>
+                <select asp-for="Input.Modalidad" class="form-select" id="modalidadSelect"
+                        asp-items="Html.GetEnumSelectList<ModalidadTaller>()">
+                </select>
+                <span asp-validation-for="Input.Modalidad" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3" id="plataformaWrapper" style="display:none;">
+                <label asp-for="Input.PlataformaDigital" class="form-label">Plataforma Digital *</label>
+                <input asp-for="Input.PlataformaDigital" class="form-control" id="plataformaInput" />
+                <span asp-validation-for="Input.PlataformaDigital" class="text-danger"></span>
+                <small class="text-muted">Requerida si la modalidad es Virtual o Híbrida</small>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Input.CuposMaximos" class="form-label">Cupos Máximos *</label>
+                    <input asp-for="Input.CuposMaximos" class="form-control" type="number" min="1" />
+                    <span asp-validation-for="Input.CuposMaximos" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.Estatus" class="form-label">Estatus *</label>
+                <select asp-for="Input.Estatus" class="form-select">
+                    <option value="@EstatusTaller.Abierto">Abierto</option>
+                    <option value="@EstatusTaller.Cerrado">Cerrado</option>
+                    <option value="@EstatusTaller.Cancelado">Cancelado</option>
+                    <option value="@EstatusTaller.Finalizado">Finalizado</option>
+                </select>
+                <span asp-validation-for="Input.Estatus" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.FacilitadorTexto" class="form-label">Facilitador</label>
+                <input asp-for="Input.FacilitadorTexto" class="form-control" />
+                <span asp-validation-for="Input.FacilitadorTexto" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <div class="form-check">
+                    <input asp-for="Input.PermiteCertificado" class="form-check-input" />
+                    <label asp-for="Input.PermiteCertificado" class="form-check-label">Permite Certificado</label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="form-check">
+                    <input asp-for="Input.RequiereEncuesta" class="form-check-input" />
+                    <label asp-for="Input.RequiereEncuesta" class="form-check-label">Requiere Encuesta</label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Crear Taller</button>
+                <a asp-page="/Admin/Talleres" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        (function () {
+            const modalidadSelect = document.getElementById('modalidadSelect');
+            const wrapper = document.getElementById('plataformaWrapper');
+            const input = document.getElementById('plataformaInput');
+
+            function syncPlataforma() {
+                const modalidad = parseInt(modalidadSelect.value, 10);
+                const requiere = modalidad === @((int)ModalidadTaller.Virtual) || modalidad === @((int)ModalidadTaller.Hibrido);
+
+                wrapper.style.display = requiere ? 'block' : 'none';
+                input.required = requiere;
+
+                if (!requiere) {
+                    input.value = '';
+                }
+            }
+
+            modalidadSelect.addEventListener('change', syncPlataforma);
+            syncPlataforma(); // inicial
+        })();
+    </script>
+}

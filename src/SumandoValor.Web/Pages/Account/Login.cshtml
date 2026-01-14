@@ -10,10 +10,7 @@
             <div class="card-body">
                 <h2 class="card-title mb-4">Iniciar Sesión</h2>
                 
-                @if (TempData["Message"] != null)
-                {
-                    <div class="alert alert-info">@TempData["Message"]</div>
-                }
+                <!-- Mensajes flash se renderizan en el layout -->
 
                 <form method="post">
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>

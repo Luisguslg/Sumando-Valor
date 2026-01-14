@@ -1,0 +1,102 @@
+@page
+@model SumandoValor.Web.Pages.Admin.InscripcionesModel
+@using SumandoValor.Domain.Entities
+@{
+    ViewData["Title"] = "Gestión de Inscripciones";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="mb-4">
+    <h1>Gestión de Inscripciones</h1>
+    <div class="d-flex gap-2">
+        <form method="post" asp-page-handler="ExportCsv" class="d-inline">
+            <button type="submit" class="btn btn-outline-primary">Exportar CSV</button>
+        </form>
+        <select id="tallerFilter" class="form-select d-inline" style="width: auto;">
+            <option value="">Todos los talleres</option>
+            @foreach (var taller in Model.TalleresDisponibles)
+            {
+                <option value="@taller.Id" selected="@(Model.TallerIdFiltro == taller.Id)">@taller.Titulo</option>
+            }
+        </select>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Taller</th>
+                <th>Curso</th>
+                <th>Usuario</th>
+                <th>Email</th>
+                <th>Fecha Inscripción</th>
+                <th>Estado</th>
+                <th>Asistencia</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Inscripciones)
+            {
+                var inscripcion = item.Inscripcion;
+                var user = item.User;
+                <tr>
+                    <td>@inscripcion.Taller.Titulo</td>
+                    <td>@inscripcion.Taller.Curso.Titulo</td>
+                    <td>@user.Nombres @user.Apellidos</td>
+                    <td>@user.Email</td>
+                    <td>@inscripcion.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>
+                        @if (inscripcion.Estado == EstadoInscripcion.Activa)
+                        {
+                            <span class="badge bg-success">Activa</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Cancelada</span>
+                        }
+                    </td>
+                    <td>
+                        @if (inscripcion.Asistencia)
+                        {
+                            <span class="badge bg-info">Sí</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">No</span>
+                        }
+                    </td>
+                    <td>
+                        <form method="post" asp-page-handler="ToggleAsistencia" asp-route-id="@inscripcion.Id" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-info">
+                                @(inscripcion.Asistencia ? "Quitar Asistencia" : "Marcar Asistencia")
+                            </button>
+                        </form>
+                        @if (inscripcion.Estado == EstadoInscripcion.Activa)
+                        {
+                            <form method="post" asp-page-handler="Cancelar" asp-route-id="@inscripcion.Id" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Está seguro de cancelar esta inscripción?');">Cancelar</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('tallerFilter').addEventListener('change', function() {
+            const tallerId = this.value;
+            const url = new URL(window.location);
+            if (tallerId) {
+                url.searchParams.set('tallerId', tallerId);
+            } else {
+                url.searchParams.delete('tallerId');
+            }
+            window.location.href = url.toString();
+        });
+    </script>
+}
