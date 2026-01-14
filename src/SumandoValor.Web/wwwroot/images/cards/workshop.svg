@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-label="Taller">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e6f2ff"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00338d"/>
+      <stop offset="1" stop-color="#0066cc"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" rx="24" fill="url(#bg)"/>
+  <path d="M0 540 C 280 420, 520 720, 860 580 C 1030 510, 1120 480, 1200 460 L1200 675 L0 675 Z" fill="rgba(0,51,141,0.06)"/>
+  <g transform="translate(120,140)">
+    <rect x="0" y="0" width="520" height="360" rx="18" fill="#ffffff" stroke="rgba(0,51,141,0.18)"/>
+    <rect x="34" y="36" width="320" height="24" rx="12" fill="rgba(0,51,141,0.12)"/>
+    <rect x="34" y="84" width="420" height="16" rx="8" fill="rgba(0,51,141,0.10)"/>
+    <rect x="34" y="116" width="380" height="16" rx="8" fill="rgba(0,51,141,0.08)"/>
+    <g transform="translate(34,170)">
+      <rect x="0" y="0" width="452" height="56" rx="14" fill="rgba(0,51,141,0.06)"/>
+      <circle cx="28" cy="28" r="12" fill="url(#accent)"/>
+      <rect x="56" y="18" width="180" height="20" rx="10" fill="rgba(0,51,141,0.10)"/>
+    </g>
+    <g transform="translate(34,242)">
+      <rect x="0" y="0" width="452" height="56" rx="14" fill="rgba(0,51,141,0.06)"/>
+      <circle cx="28" cy="28" r="12" fill="rgba(255,205,0,0.85)"/>
+      <rect x="56" y="18" width="220" height="20" rx="10" fill="rgba(0,51,141,0.10)"/>
+    </g>
+  </g>
+  <g transform="translate(780,190)">
+    <circle cx="140" cy="140" r="140" fill="url(#accent)" opacity="0.14"/>
+    <path d="M110 88 h60 a18 18 0 0 1 18 18 v120 a18 18 0 0 1-18 18 h-60 a18 18 0 0 1-18-18 v-120 a18 18 0 0 1 18-18z" fill="rgba(0,51,141,0.75)"/>
+    <rect x="128" y="118" width="24" height="24" rx="6" fill="rgba(255,255,255,0.9)"/>
+    <rect x="128" y="156" width="24" height="24" rx="6" fill="rgba(255,255,255,0.9)"/>
+    <rect x="128" y="194" width="24" height="24" rx="6" fill="rgba(255,255,255,0.9)"/>
+  </g>
+</svg>
+

@@ -5,55 +5,74 @@
     ViewData["Title"] = "Registrarse";
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-10">
-        <div class="card">
-            <div class="card-body">
-                <h2 class="card-title mb-4">Crear Cuenta de Beneficiario</h2>
-                <form method="post" id="registerForm">
+@await Html.PartialAsync("_PageHeader", new SumandoValor.Web.Pages.Shared.PageHeaderModel
+{
+    Title = "Crear cuenta",
+    Subtitle = "Regístrate para inscribirte en talleres y acceder a tu perfil.",
+    UseBrandBackground = false
+})
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card card-kpmg form-card">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="d-flex flex-wrap justify-content-between gap-2 align-items-end mb-4">
+                        <div>
+                            <h2 class="h4 fw-bold mb-1">Cuenta de beneficiario</h2>
+                            <div class="text-muted">Completa tus datos para registrarte.</div>
+                        </div>
+                        <a asp-page="./Login" class="btn btn-outline-secondary btn-sm">Ya tengo cuenta</a>
+                    </div>
+
+                    <form method="post" id="registerForm">
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                     
-                    <h5 class="mt-4 mb-3">Datos de Acceso</h5>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                    <div class="border-bottom pb-2 mb-3">
+                        <h3 class="h6 fw-bold mb-0">Datos de acceso</h3>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
                             <label asp-for="Input.Email" class="form-label">Email <span class="text-danger">*</span></label>
                             <input asp-for="Input.Email" class="form-control" autocomplete="username" />
                             <span asp-validation-for="Input.Email" class="text-danger"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6">
                             <label asp-for="Input.Cedula" class="form-label">Cédula <span class="text-danger">*</span></label>
                             <input asp-for="Input.Cedula" class="form-control" />
                             <span asp-validation-for="Input.Cedula" class="text-danger"></span>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                    <div class="row g-3 mt-0">
+                        <div class="col-md-6">
                             <label asp-for="Input.Password" class="form-label">Contraseña <span class="text-danger">*</span></label>
                             <input asp-for="Input.Password" class="form-control" autocomplete="new-password" />
                             <span asp-validation-for="Input.Password" class="text-danger"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6">
                             <label asp-for="Input.ConfirmPassword" class="form-label">Confirmar Contraseña <span class="text-danger">*</span></label>
                             <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" />
                             <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
                         </div>
                     </div>
 
-                    <h5 class="mt-4 mb-3">Datos Personales</h5>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                    <div class="border-bottom pb-2 mt-4 mb-3">
+                        <h3 class="h6 fw-bold mb-0">Datos personales</h3>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
                             <label asp-for="Input.Nombres" class="form-label">Nombres <span class="text-danger">*</span></label>
                             <input asp-for="Input.Nombres" class="form-control" />
                             <span asp-validation-for="Input.Nombres" class="text-danger"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6">
                             <label asp-for="Input.Apellidos" class="form-label">Apellidos <span class="text-danger">*</span></label>
                             <input asp-for="Input.Apellidos" class="form-control" />
                             <span asp-validation-for="Input.Apellidos" class="text-danger"></span>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
+                    <div class="row g-3 mt-0">
+                        <div class="col-md-4">
                             <label asp-for="Input.Sexo" class="form-label">Sexo <span class="text-danger">*</span></label>
                             <select asp-for="Input.Sexo" class="form-select">
                                 <option value="">Seleccione...</option>
@@ -64,21 +83,23 @@
                             </select>
                             <span asp-validation-for="Input.Sexo" class="text-danger"></span>
                         </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-4">
                             <label asp-for="Input.FechaNacimiento" class="form-label">Fecha de Nacimiento <span class="text-danger">*</span></label>
                             <input asp-for="Input.FechaNacimiento" type="date" class="form-control" />
                             <span asp-validation-for="Input.FechaNacimiento" class="text-danger"></span>
                         </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-4">
                             <label asp-for="Input.Telefono" class="form-label">Teléfono</label>
                             <input asp-for="Input.Telefono" class="form-control" />
                             <span asp-validation-for="Input.Telefono" class="text-danger"></span>
                         </div>
                     </div>
 
-                    <h5 class="mt-4 mb-3">Información Adicional</h5>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                    <div class="border-bottom pb-2 mt-4 mb-3">
+                        <h3 class="h6 fw-bold mb-0">Información adicional</h3>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
                             <label asp-for="Input.NivelEducativo" class="form-label">Nivel Educativo <span class="text-danger">*</span></label>
                             <select asp-for="Input.NivelEducativo" class="form-select">
                                 <option value="">Seleccione...</option>
@@ -89,7 +110,7 @@
                             </select>
                             <span asp-validation-for="Input.NivelEducativo" class="text-danger"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6">
                             <label asp-for="Input.SituacionLaboral" class="form-label">Situación Laboral <span class="text-danger">*</span></label>
                             <select asp-for="Input.SituacionLaboral" class="form-select">
                                 <option value="">Seleccione...</option>
@@ -101,8 +122,8 @@
                             <span asp-validation-for="Input.SituacionLaboral" class="text-danger"></span>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                    <div class="row g-3 mt-0">
+                        <div class="col-md-6">
                             <label asp-for="Input.Estado" class="form-label">Estado <span class="text-danger">*</span></label>
                             <select asp-for="Input.Estado" class="form-select" id="estadoSelect">
                                 <option value="">Seleccione...</option>
@@ -113,7 +134,7 @@
                             </select>
                             <span asp-validation-for="Input.Estado" class="text-danger"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6">
                             <label asp-for="Input.Ciudad" class="form-label">Ciudad <span class="text-danger">*</span></label>
                             <select asp-for="Input.Ciudad" class="form-select">
                                 <option value="">Seleccione...</option>
@@ -125,7 +146,7 @@
                             <span asp-validation-for="Input.Ciudad" class="text-danger"></span>
                         </div>
                     </div>
-                    <div class="mb-3">
+                    <div class="mt-3">
                         <label asp-for="Input.CanalConocio" class="form-label">¿Cómo conoció la plataforma? <span class="text-danger">*</span></label>
                         <select asp-for="Input.CanalConocio" class="form-select">
                             <option value="">Seleccione...</option>
@@ -137,8 +158,10 @@
                         <span asp-validation-for="Input.CanalConocio" class="text-danger"></span>
                     </div>
 
-                    <h5 class="mt-4 mb-3">Discapacidad</h5>
-                    <div class="mb-3">
+                    <div class="border-bottom pb-2 mt-4 mb-3">
+                        <h3 class="h6 fw-bold mb-0">Discapacidad</h3>
+                    </div>
+                    <div class="mb-2">
                         <div class="form-check">
                             <input asp-for="Input.TieneDiscapacidad" class="form-check-input" type="checkbox" id="tieneDiscapacidad" />
                             <label class="form-check-label" for="tieneDiscapacidad">
@@ -161,13 +184,16 @@
                         </div>
                     }
 
-                    <div class="mb-3">
-                        <button type="submit" class="btn btn-primary w-100">Registrarse</button>
-                    </div>
-                    <div class="text-center">
-                        <a asp-page="./Login">¿Ya tienes cuenta? Inicia sesión</a>
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-person-plus me-1"></i>Registrarse
+                        </button>
+                        <a asp-page="./Login" class="btn btn-outline-primary">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Ya tengo cuenta
+                        </a>
                     </div>
                 </form>
+                </div>
             </div>
         </div>
     </div>

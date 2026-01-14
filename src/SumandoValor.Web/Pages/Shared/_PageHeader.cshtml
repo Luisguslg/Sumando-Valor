@@ -1,0 +1,26 @@
+@model SumandoValor.Web.Pages.Shared.PageHeaderModel
+
+@{
+    var hasBackground = !string.IsNullOrWhiteSpace(Model.BackgroundImageUrl) || Model.UseBrandBackground;
+    var headerClass = hasBackground ? "hero-section" : "bg-white border-bottom py-4";
+    var contentClass = hasBackground ? "hero-content" : "container";
+    var textClass = hasBackground ? "cta-text" : "text-brand";
+}
+
+<section class="@headerClass @(Model.UseBrandBackground ? "cta-section" : "")"
+         style="@(hasBackground && !string.IsNullOrWhiteSpace(Model.BackgroundImageUrl) ? $"background-image: url('{Model.BackgroundImageUrl}'); background-size: cover; background-position: center; min-height: clamp(220px, 28vh, 320px);" : "")">
+    @if (hasBackground)
+    {
+        <div class="hero-overlay"></div>
+    }
+    <div class="@contentClass">
+        <div class="container">
+            <h1 class="@(hasBackground ? "display-4" : "display-5") fw-bold mb-2 @textClass">@Model.Title</h1>
+            @if (!string.IsNullOrWhiteSpace(Model.Subtitle))
+            {
+                <p class="lead @(hasBackground ? "cta-text" : "text-muted") mb-0">@Model.Subtitle</p>
+            }
+        </div>
+    </div>
+</section>
+

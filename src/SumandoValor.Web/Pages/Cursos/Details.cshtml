@@ -14,18 +14,22 @@
 }
 else
 {
-    <div class="mb-4">
-        <a asp-page="/Cursos" class="btn btn-link mb-3">← Volver a Cursos</a>
-        <h1>@Model.Curso.Titulo</h1>
-        <p class="text-muted">@Model.Curso.Descripcion</p>
-        @if (!string.IsNullOrWhiteSpace(Model.Curso.PublicoObjetivo))
-        {
-            <p><strong>Público Objetivo:</strong> @Model.Curso.PublicoObjetivo</p>
-        }
-    </div>
+    @await Html.PartialAsync("_PageHeader", new SumandoValor.Web.Pages.Shared.PageHeaderModel
+    {
+        Title = Model.Curso.Titulo,
+        Subtitle = string.IsNullOrWhiteSpace(Model.Curso.PublicoObjetivo) ? "Curso formativo" : $"Público objetivo: {Model.Curso.PublicoObjetivo}",
+        UseBrandBackground = false
+    })
 
-    <div class="mb-4">
-        <h2 class="mb-4">Talleres Disponibles</h2>
+    <div class="container my-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="h4 fw-bold mb-1">Talleres (eventos)</h2>
+                <div class="text-muted">Selecciona un taller para ver detalles e inscribirte.</div>
+            </div>
+            <a asp-page="/Cursos" class="btn btn-outline-secondary btn-sm">Volver</a>
+        </div>
+
         @if (Model.Talleres == null || !Model.Talleres.Any())
         {
             <div class="alert alert-info">
@@ -39,61 +43,21 @@ else
                 @foreach (var taller in Model.Talleres)
                 {
                     <div class="col-md-6">
-                        <div class="card h-100 shadow-sm border-0">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <h5 class="card-title fw-bold mb-0">@taller.Titulo</h5>
-                                    @if (taller.Estatus == EstatusTaller.Abierto)
-                                    {
-                                        <span class="badge bg-success">Abierto</span>
-                                    }
-                                    else if (taller.Estatus == EstatusTaller.Cerrado)
-                                    {
-                                        <span class="badge bg-secondary">Cerrado</span>
-                                    }
-                                    else if (taller.Estatus == EstatusTaller.Cancelado)
-                                    {
-                                        <span class="badge bg-danger">Cancelado</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-info">Finalizado</span>
-                                    }
-                                </div>
-                                <p class="card-text text-muted small mb-3">
-                                    @(taller.Descripcion?.Length > 100 ? taller.Descripcion.Substring(0, 100) + "..." : taller.Descripcion ?? "")
-                                </p>
-                                <div class="mb-3">
-                                    <div class="row g-2 small">
-                                        <div class="col-6">
-                                            <i class="bi bi-calendar3 me-1 text-primary"></i>
-                                            <strong>Fecha:</strong><br>
-                                            @taller.FechaInicio.ToString("dd/MM/yyyy")
-                                        </div>
-                                        <div class="col-6">
-                                            <i class="bi bi-clock me-1 text-primary"></i>
-                                            <strong>Hora:</strong><br>
-                                            @taller.HoraInicio.ToString(@"hh\:mm")
-                                        </div>
-                                        <div class="col-6">
-                                            <i class="bi bi-geo-alt me-1 text-primary"></i>
-                                            <strong>Modalidad:</strong><br>
-                                            @taller.Modalidad
-                                        </div>
-                                        <div class="col-6">
-                                            <i class="bi bi-people me-1 text-primary"></i>
-                                            <strong>Cupos:</strong><br>
-                                            <span class="badge @(taller.CuposDisponibles > 0 ? "bg-success" : "bg-danger")">
-                                                @taller.CuposDisponibles de @taller.CuposMaximos
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <a asp-page="/Talleres/Details" asp-route-id="@taller.Id" class="btn btn-primary w-100">
-                                    <i class="bi bi-eye me-1"></i>Ver Detalles
-                                </a>
-                            </div>
-                        </div>
+                        @await Html.PartialAsync("_WorkshopCard", new SumandoValor.Web.Pages.Shared.WorkshopCardModel
+                        {
+                            TallerId = taller.Id,
+                            Title = taller.Titulo,
+                            Description = taller.Descripcion,
+                            FechaInicio = taller.FechaInicio,
+                            HoraInicio = taller.HoraInicio,
+                            Modalidad = taller.Modalidad,
+                            CuposDisponibles = taller.CuposDisponibles,
+                            CuposMaximos = taller.CuposMaximos,
+                            Estatus = taller.Estatus,
+                            CursoTitle = Model.Curso?.Titulo,
+                            PrimaryCtaText = "Ver evento",
+                            PrimaryCtaPage = "/Talleres/Details"
+                        })
                     </div>
                 }
             </div>

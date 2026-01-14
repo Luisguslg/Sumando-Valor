@@ -4,14 +4,64 @@
     ViewData["Title"] = "Conócenos";
 }
 
-<div class="mb-4">
-    <h1>Conócenos</h1>
-    <p class="text-muted">Sobre Sumando Valor</p>
-</div>
+@await Html.PartialAsync("_PageHeader", new SumandoValor.Web.Pages.Shared.PageHeaderModel
+{
+    Title = "Conócenos",
+    Subtitle = "Sobre la Fundación KPMG Venezuela y el programa Sumando Valor.",
+    UseBrandBackground = false
+})
 
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title">Fundación KPMG Venezuela</h5>
-        <p class="card-text">Contenido sobre la fundación (placeholder)</p>
+<div class="container my-5">
+    <div class="row g-4 align-items-stretch">
+        <div class="col-lg-7">
+            <div class="card card-kpmg h-100">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="text-muted small mb-2">Fundación KPMG Venezuela</div>
+                    <h2 class="h3 fw-bold mb-3">Formación que suma valor</h2>
+                    <p class="text-muted mb-3">
+                        Sumando Valor es una plataforma de formación que reúne cursos y talleres orientados a habilidades prácticas,
+                        desarrollo personal y fortalecimiento de oportunidades para distintos perfiles.
+                    </p>
+                    <p class="text-muted mb-4">
+                        Nuestro objetivo es ofrecer una experiencia clara y accesible: explorar actividades, inscribirse con facilidad
+                        y dar seguimiento a tu participación.
+                    </p>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded h-100">
+                                <div class="fw-semibold mb-1">Claridad</div>
+                                <div class="text-muted small">Información simple, jerarquía visual y pasos claros.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded h-100">
+                                <div class="fw-semibold mb-1">Accesibilidad</div>
+                                <div class="text-muted small">Diseño responsivo y lenguaje directo.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded h-100">
+                                <div class="fw-semibold mb-1">Impacto</div>
+                                <div class="text-muted small">Actividades con propósito y foco en resultados.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card card-kpmg h-100">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="card-media mb-3">
+                        <img src="~/images/sections/about-kpmg.jpg" alt="Fundación KPMG Venezuela" loading="lazy" decoding="async" />
+                    </div>
+                    <h3 class="h5 fw-bold mb-2">Una plataforma para aprender</h3>
+                    <p class="text-muted mb-0">
+                        Cursos como contenedores y talleres como eventos formativos, con cupos y estados claros para una experiencia profesional.
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

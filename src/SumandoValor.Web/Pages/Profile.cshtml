@@ -5,55 +5,69 @@
     ViewData["Title"] = "Mi Perfil";
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-10">
-        <div class="card">
-            <div class="card-body">
-                <h2 class="card-title mb-4">Mi Perfil</h2>
+@await Html.PartialAsync("_PageHeader", new SumandoValor.Web.Pages.Shared.PageHeaderModel
+{
+    Title = "Mi perfil",
+    Subtitle = "Actualiza tu información de contacto y datos adicionales.",
+    UseBrandBackground = false
+})
 
-                <div class="d-flex flex-wrap gap-2 mb-3">
-                    <a asp-page="/Profile/Talleres" class="btn btn-outline-primary">
-                        <i class="bi bi-calendar2-check me-1"></i>Mis Talleres
-                    </a>
-                </div>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card card-kpmg form-card">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="d-flex flex-wrap justify-content-between gap-2 align-items-end mb-4">
+                        <div>
+                            <h2 class="h4 fw-bold mb-1">Mi perfil</h2>
+                            <div class="text-muted">Gestiona tu información.</div>
+                        </div>
+                        <a asp-page="/Profile/Talleres" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-calendar2-check me-1"></i>Mis Talleres
+                        </a>
+                    </div>
 
                 <form method="post">
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                    <h5 class="mt-4 mb-3">Datos de Acceso</h5>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                    <div class="border-bottom pb-2 mb-3">
+                        <h3 class="h6 fw-bold mb-0">Datos de acceso</h3>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
                             <label class="form-label">Email</label>
                             <input type="email" class="form-control" value="@Model.CurrentUser?.Email" disabled />
                             <small class="text-muted">El email no puede ser modificado desde aquí.</small>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6">
                             <label class="form-label">Cédula</label>
                             <input type="text" class="form-control" value="@Model.CurrentUser?.Cedula" disabled />
                         </div>
                     </div>
 
-                    <h5 class="mt-4 mb-3">Datos Personales</h5>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                    <div class="border-bottom pb-2 mt-4 mb-3">
+                        <h3 class="h6 fw-bold mb-0">Datos personales</h3>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
                             <label class="form-label">Nombres</label>
                             <input type="text" class="form-control" value="@Model.CurrentUser?.Nombres" disabled />
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6">
                             <label class="form-label">Apellidos</label>
                             <input type="text" class="form-control" value="@Model.CurrentUser?.Apellidos" disabled />
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
+                    <div class="row g-3 mt-0">
+                        <div class="col-md-4">
                             <label class="form-label">Sexo</label>
                             <input type="text" class="form-control" value="@(Model.CurrentUser?.Sexo != null ? Catalogos.Sexos.GetValueOrDefault(Model.CurrentUser.Sexo, Model.CurrentUser.Sexo) : "")" disabled />
                         </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-4">
                             <label class="form-label">Fecha de Nacimiento</label>
                             <input type="date" class="form-control" value="@Model.CurrentUser?.FechaNacimiento.ToString("yyyy-MM-dd")" disabled />
                         </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-4">
                             <label asp-for="Input.Telefono" class="form-label">Teléfono</label>
                             <input asp-for="Input.Telefono" class="form-control" />
                             <span asp-validation-for="Input.Telefono" class="text-danger"></span>
@@ -125,8 +139,11 @@
                         <span asp-validation-for="Input.DiscapacidadDescripcion" class="text-danger"></span>
                     </div>
 
-                    <div class="mb-3">
-                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check2 me-1"></i>Guardar cambios
+                        </button>
+                        <a asp-page="/Profile/Talleres" class="btn btn-outline-secondary">Mis talleres</a>
                     </div>
                 </form>
             </div>

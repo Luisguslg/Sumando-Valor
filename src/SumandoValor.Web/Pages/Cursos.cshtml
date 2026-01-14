@@ -5,11 +5,14 @@
     ViewData["Title"] = "Cursos";
 }
 
+@await Html.PartialAsync("_PageHeader", new SumandoValor.Web.Pages.Shared.PageHeaderModel
+{
+    Title = "Cursos",
+    Subtitle = "Explora nuestros cursos y talleres formativos.",
+    UseBrandBackground = false
+})
+
 <div class="container my-5">
-    <div class="mb-4">
-        <h1 class="display-5 fw-bold">Cursos Disponibles</h1>
-        <p class="text-muted">Explora nuestros cursos y talleres formativos</p>
-    </div>
 
     @if (Model.Cursos == null || !Model.Cursos.Any())
     {
@@ -24,27 +27,47 @@
             @foreach (var curso in Model.Cursos)
             {
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm border-0">
-                        <div class="card-body d-flex flex-column">
-                            <div class="mb-3">
-                                <span class="badge bg-primary mb-2">Curso</span>
-                                <h5 class="card-title fw-bold">@curso.Titulo</h5>
-                                <p class="card-text text-muted small">
-                                    @(curso.Descripcion.Length > 120 ? curso.Descripcion.Substring(0, 120) + "..." : curso.Descripcion)
-                                </p>
+                    <div class="card card-kpmg h-100 hover-lift">
+                        <div class="card-body p-4 d-flex flex-column">
+                            <div class="course-media mb-3">
+                                <div class="d-flex align-items-center justify-content-between gap-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="course-media-icon">
+                                            <i class="bi bi-journal-bookmark-fill"></i>
+                                        </span>
+                                        <div>
+                                            <div class="course-media-kicker">Curso</div>
+                                            <div class="fw-semibold">Programa formativo</div>
+                                        </div>
+                                    </div>
+                                    @if (!curso.EsPublico)
+                                    {
+                                        <span class="badge bg-secondary">Interno</span>
+                                    }
+                                </div>
                             </div>
+
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <span class="badge badge-kpmg">Curso</span>
+                            </div>
+
+                            <h2 class="h5 card-title fw-bold mb-2">@curso.Titulo</h2>
+
+                            <p class="card-text text-muted mb-3">
+                                @(curso.Descripcion.Length > 140 ? curso.Descripcion.Substring(0, 140) + "..." : curso.Descripcion)
+                            </p>
+
                             @if (!string.IsNullOrWhiteSpace(curso.PublicoObjetivo))
                             {
-                                <div class="mb-3">
-                                    <small class="text-muted">
-                                        <i class="bi bi-people me-1"></i>
-                                        <strong>Público:</strong> @curso.PublicoObjetivo
-                                    </small>
+                                <div class="text-muted small mb-3">
+                                    <i class="bi bi-people me-1"></i>
+                                    <strong>Público:</strong> @curso.PublicoObjetivo
                                 </div>
                             }
+
                             <div class="mt-auto">
                                 <a asp-page="/Cursos/Details" asp-route-id="@curso.Id" class="btn btn-primary w-100">
-                                    <i class="bi bi-arrow-right-circle me-1"></i>Ver Detalles
+                                    <i class="bi bi-arrow-right-circle me-1"></i>Ver talleres
                                 </a>
                             </div>
                         </div>

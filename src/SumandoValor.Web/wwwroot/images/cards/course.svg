@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-label="Curso">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e6f2ff"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00338d"/>
+      <stop offset="1" stop-color="#4a1f6b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" rx="24" fill="url(#bg)"/>
+  <path d="M0 520 C 280 440, 520 700, 820 580 C 980 515, 1080 450, 1200 430 L1200 675 L0 675 Z" fill="rgba(0,51,141,0.06)"/>
+  <g transform="translate(110,130)">
+    <rect x="0" y="0" width="460" height="340" rx="18" fill="#ffffff" stroke="rgba(0,51,141,0.18)"/>
+    <rect x="28" y="34" width="280" height="22" rx="10" fill="rgba(0,51,141,0.12)"/>
+    <rect x="28" y="74" width="360" height="16" rx="8" fill="rgba(0,51,141,0.10)"/>
+    <rect x="28" y="106" width="320" height="16" rx="8" fill="rgba(0,51,141,0.08)"/>
+    <rect x="28" y="150" width="404" height="140" rx="14" fill="rgba(0,51,141,0.06)"/>
+    <circle cx="392" cy="64" r="22" fill="url(#accent)" opacity="0.9"/>
+  </g>
+  <g transform="translate(720,170)">
+    <circle cx="170" cy="170" r="170" fill="url(#accent)" opacity="0.14"/>
+    <path d="M120 152 L170 120 L220 152 L170 184 Z" fill="rgba(0,51,141,0.85)"/>
+    <path d="M120 152 L170 184 L170 244 L120 212 Z" fill="rgba(74,31,107,0.75)"/>
+    <path d="M220 152 L170 184 L170 244 L220 212 Z" fill="rgba(0,51,141,0.65)"/>
+  </g>
+</svg>
+

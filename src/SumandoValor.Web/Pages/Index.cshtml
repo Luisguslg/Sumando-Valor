@@ -4,47 +4,202 @@
     ViewData["Title"] = "Inicio";
 }
 
-<div class="text-center mb-5">
-    <h1 class="display-4 mb-4">Bienvenido a Sumando Valor</h1>
-    <p class="lead text-muted">Plataforma de talleres y capacitación de la Fundación KPMG Venezuela</p>
-</div>
+@await Html.PartialAsync("_PageHeader", new SumandoValor.Web.Pages.Shared.PageHeaderModel
+{
+    Title = "Sumando Valor",
+    Subtitle = "Plataforma de formación y desarrollo de la Fundación KPMG Venezuela.",
+    BackgroundImageUrl = Url.Content("~/images/hero/hero-home.jpg"),
+    UseBrandBackground = true
+})
 
-<div class="row mb-5">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Carrusel de Noticias</h5>
-                <p class="card-text text-muted">Contenido del carrusel de noticias (placeholder)</p>
-            </div>
-        </div>
+<div class="container my-5">
+    <div class="d-flex flex-wrap gap-2 mb-5">
+        <a asp-page="/Cursos" class="btn btn-light">
+            <i class="bi bi-journal-bookmark me-1"></i>Ver cursos
+        </a>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <a asp-page="/Profile/Talleres" class="btn btn-outline-light">
+                <i class="bi bi-calendar2-check me-1"></i>Mis talleres
+            </a>
+        }
+        else
+        {
+            <a asp-page="/Account/Register" class="btn btn-outline-light">
+                <i class="bi bi-person-plus me-1"></i>Crear cuenta
+            </a>
+        }
     </div>
-</div>
 
-<div class="row">
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Talleres Disponibles</h5>
-                <p class="card-text">Explora nuestra oferta de talleres y capacitaciones.</p>
-                <a asp-page="/Cursos" class="btn btn-primary">Ver Cursos</a>
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card card-kpmg h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-mortarboard text-primary"></i>
+                        <h5 class="mb-0 fw-bold">Programas formativos</h5>
+                    </div>
+                    <p class="text-muted mb-0">Cursos y talleres orientados a habilidades prácticas, empleabilidad y crecimiento.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-kpmg h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-people text-primary"></i>
+                        <h5 class="mb-0 fw-bold">Público diverso</h5>
+                    </div>
+                    <p class="text-muted mb-0">Acceso claro y accesible para distintos perfiles y niveles educativos.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-kpmg h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-shield-check text-primary"></i>
+                        <h5 class="mb-0 fw-bold">Inscripción segura</h5>
+                    </div>
+                    <p class="text-muted mb-0">Cupos controlados, confirmación por correo y experiencia de inscripción simple.</p>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Conócenos</h5>
-                <p class="card-text">Descubre más sobre nuestra misión y valores.</p>
-                <a asp-page="/About" class="btn btn-primary">Saber Más</a>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="d-flex justify-content-between align-items-end mb-3">
+                <div>
+                    <h2 class="h4 fw-bold mb-1">Cursos destacados</h2>
+                    <div class="text-muted">Explora la oferta disponible</div>
+                </div>
+                <a asp-page="/Cursos" class="btn btn-sm btn-outline-primary">Ver todos</a>
             </div>
+
+            @if (Model.CursosDestacados.Count == 0)
+            {
+                <div class="alert alert-info mb-0">No hay cursos publicados por el momento.</div>
+            }
+            else
+            {
+                <div class="row g-3">
+                    @foreach (var curso in Model.CursosDestacados)
+                    {
+                        <div class="col-12">
+                            <div class="card card-kpmg hover-lift">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between gap-3">
+                                        <div class="flex-grow-1">
+                                            <div class="course-media mb-3">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <span class="course-media-icon">
+                                                        <i class="bi bi-journal-bookmark-fill"></i>
+                                                    </span>
+                                                    <div>
+                                                        <div class="course-media-kicker">Curso</div>
+                                                        <div class="fw-semibold">Programa destacado</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="text-muted small mb-1">Curso</div>
+                                            <h3 class="h5 fw-bold mb-2">@curso.Titulo</h3>
+                                            <p class="text-muted mb-0">
+                                                @(curso.Descripcion.Length > 140 ? curso.Descripcion.Substring(0, 140) + "..." : curso.Descripcion)
+                                            </p>
+                                        </div>
+                                        <div class="d-flex align-items-end">
+                                            <a asp-page="/Cursos/Details" asp-route-id="@curso.Id" class="btn btn-primary btn-sm">
+                                                Ver
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-6">
+            <div class="d-flex justify-content-between align-items-end mb-3">
+                <div>
+                    <h2 class="h4 fw-bold mb-1">Próximos talleres</h2>
+                    <div class="text-muted">Eventos abiertos para inscripción</div>
+                </div>
+            </div>
+
+            @if (Model.TalleresProximos.Count == 0)
+            {
+                <div class="alert alert-info mb-0">No hay talleres próximos por el momento.</div>
+            }
+            else
+            {
+                <div class="agenda-list">
+                    @foreach (var taller in Model.TalleresProximos)
+                    {
+                        <div class="card card-kpmg agenda-item hover-lift">
+                            <div class="card-body p-4">
+                            <div class="d-flex flex-column flex-sm-row justify-content-between gap-3">
+                                <div class="flex-grow-1">
+                                    <div class="text-muted small mb-1">@taller.Curso.Titulo</div>
+                                    <div class="fw-bold">@taller.Titulo</div>
+                                    <div class="d-flex flex-wrap gap-2 small text-muted mt-1">
+                                        <span><i class="bi bi-calendar-event me-1"></i>@DateFormat.FechaConDia(taller.FechaInicio)</span>
+                                        <span><i class="bi bi-clock me-1"></i>@DateFormat.Hora(taller.HoraInicio)</span>
+                                        <span><i class="bi bi-geo-alt me-1"></i>@taller.Modalidad</span>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex flex-column align-items-stretch align-items-sm-end justify-content-between gap-2">
+                                    <span class="badge @(taller.CuposDisponibles > 0 ? "bg-success" : "bg-danger")">
+                                        <i class="bi bi-people me-1"></i>@taller.CuposDisponibles/@taller.CuposMaximos
+                                    </span>
+                                    <a asp-page="/Talleres/Details" asp-route-id="@taller.Id" class="btn btn-outline-primary btn-sm w-100 w-sm-auto">
+                                        Ver
+                                    </a>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
         </div>
     </div>
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">Contáctanos</h5>
-                <p class="card-text">¿Tienes preguntas? Estamos aquí para ayudarte.</p>
-                <a asp-page="/Contact" class="btn btn-primary">Contactar</a>
+
+    <div class="row g-4 mt-5">
+        <div class="col-lg-7">
+            <h2 class="h4 fw-bold mb-2">Sobre Sumando Valor</h2>
+            <p class="text-muted mb-3">
+                Sumando Valor es una iniciativa de la Fundación KPMG Venezuela que impulsa oportunidades de aprendizaje y desarrollo.
+                A través de cursos y talleres, buscamos fortalecer habilidades prácticas con enfoque en empleabilidad, ciudadanía y crecimiento.
+            </p>
+            <p class="text-muted mb-3">
+                Nuestro enfoque es claro y accesible: una experiencia simple para explorar, inscribirse y participar en actividades formativas,
+                con una comunidad comprometida y alianzas que amplían el alcance.
+            </p>
+            <ul class="text-muted">
+                <li>Educación y empleabilidad</li>
+                <li>Comunidad y voluntariado</li>
+                <li>Alianzas para ampliar el alcance</li>
+            </ul>
+            <a asp-page="/About" class="btn btn-outline-primary">
+                Conócenos
+            </a>
+        </div>
+        <div class="col-lg-5">
+            <div class="card card-kpmg h-100">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="card-media mb-3">
+                        <img src="~/images/sections/pilares.jpg" alt="Pilares de formación" loading="lazy" decoding="async" />
+                    </div>
+                    <div class="fw-bold mb-1">Formación con propósito</div>
+                    <div class="text-muted">
+                        Contenido diseñado para sumar valor a personas y comunidades, con foco en claridad, acceso y resultados.
+                    </div>
+                </div>
             </div>
         </div>
     </div>

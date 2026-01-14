@@ -14,18 +14,26 @@
 }
 else
 {
-    <div class="mb-4">
-        <a asp-page="/Cursos" class="btn btn-link px-0">← Volver a Talleres</a>
-        <h1 class="mt-2 mb-1">@Model.Taller.Titulo</h1>
-        <div class="text-muted">
-            @Model.Taller.Curso.Titulo
-        </div>
-    </div>
+    @await Html.PartialAsync("_PageHeader", new SumandoValor.Web.Pages.Shared.PageHeaderModel
+    {
+        Title = Model.Taller.Titulo,
+        Subtitle = Model.Taller.Curso.Titulo,
+        BackgroundImageUrl = Url.Content("~/images/hero/hero-event.jpg"),
+        UseBrandBackground = true
+    })
 
-    <div class="row g-4">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-body">
+    <div class="container my-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a asp-page="/Cursos" class="btn btn-outline-secondary btn-sm">← Volver</a>
+            <span class="badge @(Model.Taller.CuposDisponibles > 0 ? "bg-success" : "bg-danger")">
+                <i class="bi bi-people me-1"></i>@Model.Taller.CuposDisponibles/@Model.Taller.CuposMaximos
+            </span>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card card-kpmg">
+                    <div class="card-body p-4 p-lg-5">
                     <h5 class="card-title mb-3">Detalles</h5>
                     <p class="text-muted mb-4">@Model.Taller.Descripcion</p>
 
@@ -77,48 +85,49 @@ else
                             </div>
                         }
                     </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-lg-4">
-            <div class="card h-100">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title mb-3">Inscripción</h5>
+            <div class="col-lg-4">
+                <div class="card card-kpmg h-100">
+                    <div class="card-body p-4 p-lg-5 d-flex flex-column">
+                        <h5 class="card-title mb-3">Inscripción</h5>
 
-                    @if (!string.IsNullOrWhiteSpace(Model.UiBannerText))
-                    {
-                        <div class="alert @Model.UiBannerClass mb-3" role="alert">
-                            @Model.UiBannerText
-                        </div>
-                    }
-
-                    <div class="mt-auto">
-                        @switch (Model.UiState)
+                        @if (!string.IsNullOrWhiteSpace(Model.UiBannerText))
                         {
-                            case SumandoValor.Web.Pages.Talleres.DetailsModel.InscripcionUiState.AlreadyEnrolled:
-                                <a asp-page="/Profile/Talleres" class="btn btn-outline-primary w-100">
-                                    <i class="bi bi-list-check me-1"></i>Ver en Mis Talleres
-                                </a>
-                                break;
-                            case SumandoValor.Web.Pages.Talleres.DetailsModel.InscripcionUiState.MustLogin:
-                                <a asp-page="/Account/Login" class="btn btn-primary w-100">
-                                    <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar sesión
-                                </a>
-                                break;
-                            case SumandoValor.Web.Pages.Talleres.DetailsModel.InscripcionUiState.CanEnroll:
-                                <form method="post" asp-page-handler="Inscribirse" asp-route-id="@Model.Taller.Id">
-                                    <button type="submit" class="btn btn-primary w-100">
-                                        <i class="bi bi-check2-circle me-1"></i>Inscribirme
-                                    </button>
-                                </form>
-                                break;
-                            default:
-                                <button type="button" class="btn btn-secondary w-100" disabled>
-                                    No disponible
-                                </button>
-                                break;
+                            <div class="alert @Model.UiBannerClass mb-3" role="alert">
+                                @Model.UiBannerText
+                            </div>
                         }
+
+                        <div class="mt-auto">
+                            @switch (Model.UiState)
+                            {
+                                case SumandoValor.Web.Pages.Talleres.DetailsModel.InscripcionUiState.AlreadyEnrolled:
+                                    <a asp-page="/Profile/Talleres" class="btn btn-outline-primary w-100">
+                                        <i class="bi bi-list-check me-1"></i>Ver en Mis Talleres
+                                    </a>
+                                    break;
+                                case SumandoValor.Web.Pages.Talleres.DetailsModel.InscripcionUiState.MustLogin:
+                                    <a asp-page="/Account/Login" class="btn btn-primary w-100">
+                                        <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar sesión
+                                    </a>
+                                    break;
+                                case SumandoValor.Web.Pages.Talleres.DetailsModel.InscripcionUiState.CanEnroll:
+                                    <form method="post" asp-page-handler="Inscribirse" asp-route-id="@Model.Taller.Id">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="bi bi-check2-circle me-1"></i>Inscribirme
+                                        </button>
+                                    </form>
+                                    break;
+                                default:
+                                    <button type="button" class="btn btn-secondary w-100" disabled>
+                                        No disponible
+                                    </button>
+                                    break;
+                            }
+                        </div>
                     </div>
                 </div>
             </div>

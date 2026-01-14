@@ -4,38 +4,70 @@
     ViewData["Title"] = "Contáctanos";
 }
 
-<div class="mb-4">
-    <h1>Contáctanos</h1>
-    <p class="text-muted">Envíanos un mensaje</p>
-</div>
+@await Html.PartialAsync("_PageHeader", new SumandoValor.Web.Pages.Shared.PageHeaderModel
+{
+    Title = "Contáctanos",
+    Subtitle = "Envíanos un mensaje y te responderemos a la brevedad.",
+    UseBrandBackground = false
+})
 
-<div class="row">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-body">
-                <form method="post">
-                    <div class="mb-3">
-                        <label asp-for="Input.Nombre" class="form-label">Nombre</label>
-                        <input asp-for="Input.Nombre" class="form-control" />
-                        <span asp-validation-for="Input.Nombre" class="text-danger"></span>
+<div class="container my-5">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card card-kpmg form-card">
+                <div class="card-body p-4 p-lg-5">
+                    <h2 class="h4 fw-bold mb-4">Formulario de contacto</h2>
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="Input.Nombre" class="form-label">Nombre</label>
+                                <input asp-for="Input.Nombre" class="form-control" />
+                                <span asp-validation-for="Input.Nombre" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Input.Email" class="form-label">Email</label>
+                                <input asp-for="Input.Email" class="form-control" />
+                                <span asp-validation-for="Input.Email" class="text-danger"></span>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="Input.Titulo" class="form-label">Título</label>
+                                <input asp-for="Input.Titulo" class="form-control" />
+                                <span asp-validation-for="Input.Titulo" class="text-danger"></span>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="Input.Mensaje" class="form-label">Mensaje</label>
+                                <textarea asp-for="Input.Mensaje" class="form-control" rows="6"></textarea>
+                                <span asp-validation-for="Input.Mensaje" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send me-1"></i>Enviar
+                            </button>
+                            <a asp-page="/Index" class="btn btn-outline-secondary">Volver</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card card-kpmg h-100">
+                <div class="card-body p-4 p-lg-5">
+                    <h3 class="h5 fw-bold mb-3">Información</h3>
+                    <p class="text-muted mb-4">También puedes escribirnos directamente:</p>
+                    <div class="d-grid gap-2">
+                        <a class="btn btn-outline-primary" href="mailto:contacto@kpmgfundacion.org.ve">
+                            <i class="bi bi-envelope me-1"></i>contacto@kpmgfundacion.org.ve
+                        </a>
+                        <div class="text-muted small">
+                            <i class="bi bi-geo-alt me-1"></i>Caracas, Venezuela
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label asp-for="Input.Email" class="form-label">Email</label>
-                        <input asp-for="Input.Email" class="form-control" />
-                        <span asp-validation-for="Input.Email" class="text-danger"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label asp-for="Input.Titulo" class="form-label">Título</label>
-                        <input asp-for="Input.Titulo" class="form-control" />
-                        <span asp-validation-for="Input.Titulo" class="text-danger"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label asp-for="Input.Mensaje" class="form-label">Mensaje</label>
-                        <textarea asp-for="Input.Mensaje" class="form-control" rows="5"></textarea>
-                        <span asp-validation-for="Input.Mensaje" class="text-danger"></span>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Enviar Mensaje</button>
-                </form>
+                </div>
             </div>
         </div>
     </div>

@@ -4,30 +4,41 @@
     ViewData["Title"] = "Iniciar Sesión";
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-body">
-                <h2 class="card-title mb-4">Iniciar Sesión</h2>
-                
-                <!-- Mensajes flash se renderizan en el layout -->
+@await Html.PartialAsync("_PageHeader", new SumandoValor.Web.Pages.Shared.PageHeaderModel
+{
+    Title = "Iniciar sesión",
+    Subtitle = "Accede para inscribirte y gestionar tus talleres.",
+    UseBrandBackground = false
+})
 
-                <form method="post">
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                    <div class="mb-3">
-                        <label asp-for="Input.Email" class="form-label">Email</label>
-                        <input asp-for="Input.Email" class="form-control" autocomplete="username" />
-                        <span asp-validation-for="Input.Email" class="text-danger"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label asp-for="Input.Password" class="form-label">Contraseña</label>
-                        <input asp-for="Input.Password" class="form-control" autocomplete="current-password" />
-                        <span asp-validation-for="Input.Password" class="text-danger"></span>
-                    </div>
-                    <div class="mb-3 form-check">
-                        <input asp-for="Input.RememberMe" class="form-check-input" />
-                        <label asp-for="Input.RememberMe" class="form-check-label">Recordarme</label>
-                    </div>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card card-kpmg form-card">
+                <div class="card-body p-4 p-lg-5">
+                    <h2 class="h4 fw-bold mb-4">Iniciar sesión</h2>
+
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label asp-for="Input.Email" class="form-label">Email</label>
+                                <input asp-for="Input.Email" class="form-control" autocomplete="username" />
+                                <span asp-validation-for="Input.Email" class="text-danger"></span>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="Input.Password" class="form-label">Contraseña</label>
+                                <input asp-for="Input.Password" class="form-control" autocomplete="current-password" />
+                                <span asp-validation-for="Input.Password" class="text-danger"></span>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input asp-for="Input.RememberMe" class="form-check-input" />
+                                    <label asp-for="Input.RememberMe" class="form-check-label">Recordarme</label>
+                                </div>
+                            </div>
+                        </div>
 
                     @if (Model.ShowCaptcha)
                     {
@@ -38,16 +49,20 @@
                         </div>
                     }
 
-                    <div class="mb-3">
-                        <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
-                    </div>
-                    <div class="text-center">
-                        <a asp-page="./ForgotPassword">¿Olvidaste tu contraseña?</a>
-                    </div>
-                    <div class="text-center mt-2">
-                        <a asp-page="./Register">¿No tienes cuenta? Regístrate</a>
-                    </div>
-                </form>
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar sesión
+                            </button>
+                            <a asp-page="./Register" class="btn btn-outline-primary">
+                                <i class="bi bi-person-plus me-1"></i>Crear cuenta
+                            </a>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <a asp-page="./ForgotPassword">¿Olvidaste tu contraseña?</a>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
