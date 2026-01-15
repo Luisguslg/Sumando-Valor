@@ -1,0 +1,133 @@
+@page
+@model SumandoValor.Web.Pages.Admin.UsuariosModel
+@{
+    ViewData["Title"] = "Usuarios";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-card">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h1 class="h4 mb-1">Usuarios</h1>
+            <div class="text-muted">Búsqueda, activación y roles.</div>
+        </div>
+    </div>
+
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-5">
+            <label class="form-label small">Buscar</label>
+            <input class="form-control" name="Search" value="@Model.Search" placeholder="Nombre, apellido, email o cédula" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small">Estado</label>
+            <select class="form-select" name="Status">
+                <option value="">Todos</option>
+                <option value="active" selected="@(Model.Status == "active")">Activos</option>
+                <option value="inactive" selected="@(Model.Status == "inactive")">Inactivos</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small">Rol</label>
+            <select class="form-select" name="Role">
+                <option value="">Todos</option>
+                <option value="Admin" selected="@(Model.Role == "Admin")">Admin</option>
+                <option value="Beneficiario" selected="@(Model.Role == "Beneficiario")">Beneficiario</option>
+            </select>
+        </div>
+        <div class="col-md-1">
+            <button class="btn btn-primary w-100" type="submit">Filtrar</button>
+        </div>
+    </form>
+</div>
+
+<div class="admin-card">
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Email</th>
+                <th>Cédula</th>
+                <th>Estado</th>
+                <th>Roles</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var u in Model.Rows)
+            {
+                <tr>
+                    <td>
+                        <div class="fw-semibold">@u.FullName</div>
+                        <div class="text-muted small">@u.UserId</div>
+                    </td>
+                    <td class="text-muted">@u.Email</td>
+                    <td>@u.Cedula</td>
+                    <td>
+                        <span class="badge @(u.IsActive ? "bg-success" : "bg-secondary")">
+                            @(u.IsActive ? "Activo" : "Inactivo")
+                        </span>
+                    </td>
+                    <td>
+                        @foreach (var r in u.Roles)
+                        {
+                            <span class="badge bg-light text-dark me-1">@r</span>
+                        }
+                    </td>
+                    <td class="text-center">
+                        <div class="admin-actions">
+                            <form method="post" asp-page-handler="ToggleActive" asp-route-id="@u.UserId" class="m-0">
+                                <button type="submit"
+                                        class="btn btn-sm @(u.IsActive ? "btn-outline-secondary" : "btn-outline-success") w-100 w-md-auto"
+                                        onclick="return confirm('¿Confirmas @(u.IsActive ? "desactivar" : "activar") este usuario?');">
+                                    @(u.IsActive ? "Desactivar" : "Activar")
+                                </button>
+                            </form>
+
+                            @if (!u.IsAdmin)
+                            {
+                                <form method="post" asp-page-handler="MakeAdmin" asp-route-id="@u.UserId" class="m-0">
+                                    <button type="submit" class="btn btn-sm btn-outline-primary w-100 w-md-auto"
+                                            onclick="return confirm('¿Convertir a Admin a este usuario?');">
+                                        Hacer Admin
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form method="post" asp-page-handler="RemoveAdmin" asp-route-id="@u.UserId" class="m-0">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100 w-md-auto"
+                                            onclick="return confirm('¿Quitar rol Admin a este usuario?');">
+                                        Quitar Admin
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Paginación" class="mt-3">
+            <ul class="pagination justify-content-center mb-0">
+                <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                    <a class="page-link" href="@Model.PageUrl(Model.PageNumber - 1)">Anterior</a>
+                </li>
+                @for (var i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.TotalPages, Model.PageNumber + 2); i++)
+                {
+                    <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                        <a class="page-link" href="@Model.PageUrl(i)">@i</a>
+                    </li>
+                }
+                <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" href="@Model.PageUrl(Model.PageNumber + 1)">Siguiente</a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>
+

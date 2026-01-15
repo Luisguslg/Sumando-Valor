@@ -19,6 +19,7 @@
     <style>
         .admin-sidebar {
             min-height: 100vh;
+            height: 100vh;
             background: linear-gradient(180deg, #00338D 0%, #001F5C 100%);
             color: white;
             padding: 0;
@@ -28,6 +29,8 @@
             width: 250px;
             z-index: 1000;
             box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            overscroll-behavior: contain;
         }
         
         .admin-sidebar .sidebar-header {
@@ -120,6 +123,32 @@
             font-size: 0.9rem;
             margin-top: 0.5rem;
         }
+
+        /* Admin actions: stack full-width on mobile, compact inline on md+ */
+        .admin-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.5rem;
+            max-width: 320px;
+            margin-inline: auto;
+        }
+
+        .admin-actions .btn {
+            width: 100%;
+            height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 1.1;
+        }
+
+        @@media (max-width: 420px) {
+            .admin-actions {
+                grid-template-columns: 1fr;
+                max-width: 220px;
+            }
+        }
         
         @@media (max-width: 768px) {
             .admin-sidebar {
@@ -158,6 +187,22 @@
             <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Inscripciones") ? "active" : "")" 
                asp-page="/Admin/Inscripciones">
                 <i class="bi bi-people"></i> Inscripciones
+            </a>
+            <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Encuestas") ? "active" : "")"
+               asp-page="/Admin/Encuestas">
+                <i class="bi bi-clipboard-check"></i> Encuestas
+            </a>
+            <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Certificados") ? "active" : "")"
+               asp-page="/Admin/Certificados">
+                <i class="bi bi-award"></i> Certificados
+            </a>
+            <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Usuarios") ? "active" : "")"
+               asp-page="/Admin/Usuarios">
+                <i class="bi bi-person-gear"></i> Usuarios
+            </a>
+            <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/EmailDiagnostics") ? "active" : "")"
+               asp-page="/Admin/EmailDiagnostics">
+                <i class="bi bi-envelope-check"></i> Email Diagnostics
             </a>
             <div class="mt-auto p-3 border-top border-white border-opacity-10">
                 <a href="/" class="nav-link">

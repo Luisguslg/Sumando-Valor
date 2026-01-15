@@ -1,0 +1,149 @@
+@page
+@model SumandoValor.Web.Pages.Admin.EncuestasModel
+@{
+    ViewData["Title"] = "Encuestas";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-card">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h1 class="h4 mb-1">Encuestas</h1>
+            <div class="text-muted">Resultados y exportación.</div>
+        </div>
+
+        <form method="post" asp-page-handler="ExportCsv" class="m-0">
+            <input type="hidden" name="Filter.CursoId" value="@Model.Filter.CursoId" />
+            <input type="hidden" name="Filter.TallerId" value="@Model.Filter.TallerId" />
+            <input type="hidden" name="Filter.Search" value="@Model.Filter.Search" />
+            <input type="hidden" name="Filter.MinRating" value="@Model.Filter.MinRating" />
+            <input type="hidden" name="Filter.MaxRating" value="@Model.Filter.MaxRating" />
+            <input type="hidden" name="Filter.From" value="@(Model.Filter.From?.ToString("yyyy-MM-dd"))" />
+            <input type="hidden" name="Filter.To" value="@(Model.Filter.To?.ToString("yyyy-MM-dd"))" />
+            <button type="submit" class="btn btn-outline-primary">
+                <i class="bi bi-download me-1"></i>Exportar CSV
+            </button>
+        </form>
+    </div>
+
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small">Curso</label>
+            <select class="form-select" name="CursoId">
+                <option value="">Todos</option>
+                @foreach (var c in Model.Cursos)
+                {
+                    <option value="@c.Id" selected="@(Model.Filter.CursoId == c.Id)">@c.Titulo</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small">Taller</label>
+            <select class="form-select" name="TallerId">
+                <option value="">Todos</option>
+                @foreach (var t in Model.Talleres)
+                {
+                    <option value="@t.Id" selected="@(Model.Filter.TallerId == t.Id)">@t.Titulo</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small">Buscar usuario</label>
+            <input class="form-control" name="Search" value="@Model.Filter.Search" placeholder="Nombre, email o cédula" />
+        </div>
+        <div class="col-md-1">
+            <label class="form-label small">Min</label>
+            <input type="number" min="1" max="5" class="form-control" name="MinRating" value="@(Model.Filter.MinRating?.ToString() ?? "")" />
+        </div>
+        <div class="col-md-1">
+            <label class="form-label small">Max</label>
+            <input type="number" min="1" max="5" class="form-control" name="MaxRating" value="@(Model.Filter.MaxRating?.ToString() ?? "")" />
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+        </div>
+    </form>
+</div>
+
+@if (Model.ResumenPorTaller.Any())
+{
+    <div class="admin-card">
+        <h2 class="h6 mb-3">Resumen por taller</h2>
+        <div class="table-responsive">
+            <table class="table table-sm table-striped align-middle">
+                <thead>
+                <tr>
+                    <th>Taller</th>
+                    <th>Curso</th>
+                    <th class="text-end">Respuestas</th>
+                    <th class="text-end">Promedio</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var r in Model.ResumenPorTaller)
+                {
+                    <tr>
+                        <td>@r.TallerTitulo</td>
+                        <td class="text-muted">@r.CursoTitulo</td>
+                        <td class="text-end">@r.Cantidad</td>
+                        <td class="text-end">@r.Promedio.ToString("0.00")</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<div class="admin-card">
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Usuario</th>
+                <th>Email</th>
+                <th>Taller</th>
+                <th>Curso</th>
+                <th class="text-end">Rating</th>
+                <th>Comentario</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var row in Model.Rows)
+            {
+                <tr>
+                    <td>@row.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@row.UserFullName</td>
+                    <td class="text-muted">@row.UserEmail</td>
+                    <td>@row.TallerTitulo</td>
+                    <td class="text-muted">@row.CursoTitulo</td>
+                    <td class="text-end"><span class="badge bg-primary">@row.Rating1_5</span></td>
+                    <td class="text-muted">@row.Comentario</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Paginación" class="mt-3">
+            <ul class="pagination justify-content-center mb-0">
+                <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                    <a class="page-link" href="@Model.PageUrl(Model.PageNumber - 1)">Anterior</a>
+                </li>
+                @for (var i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.TotalPages, Model.PageNumber + 2); i++)
+                {
+                    <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                        <a class="page-link" href="@Model.PageUrl(i)">@i</a>
+                    </li>
+                }
+                <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" href="@Model.PageUrl(Model.PageNumber + 1)">Siguiente</a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>
+

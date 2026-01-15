@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SumandoValor.Infrastructure.Data;
 using SumandoValor.Infrastructure.Services;
+using SumandoValor.Web.Services.Certificates;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,7 +40,11 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddHttpClient();
 
-builder.Services.AddSingleton<IDevEmailStore, InMemoryDevEmailStore>();
+// Dev email storage: persist to disk so emails survive restarts (used by /Dev/Emails).
+var devEmailPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "DevEmails");
+builder.Services.AddSingleton<IDevEmailStore>(_ => new FileDevEmailStore(devEmailPath));
+
+builder.Services.Configure<SmtpEmailOptions>(builder.Configuration.GetSection("Email:Smtp"));
 
 var captchaProvider = builder.Configuration["Captcha:Provider"] ?? "None";
 if (builder.Environment.IsDevelopment() || captchaProvider == "None")
@@ -57,10 +62,11 @@ if (builder.Environment.IsDevelopment())
 }
 else
 {
-    builder.Services.AddScoped<IEmailService, DevelopmentEmailService>();
+    builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 }
 
 builder.Services.AddRazorPages();
+builder.Services.AddSingleton<CertificatePdfGenerator>();
 
 builder.Services.AddAntiforgery(options =>
 {

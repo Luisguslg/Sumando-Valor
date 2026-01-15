@@ -25,6 +25,22 @@
             @foreach (var inscripcion in Model.Inscripciones)
             {
                 var taller = inscripcion.Taller;
+                Model.EncuestasByTallerId.TryGetValue(taller.Id, out var encuesta);
+                Model.CertificadosByTallerId.TryGetValue(taller.Id, out var certificado);
+
+                var encuestaDisponible = inscripcion.Estado == EstadoInscripcion.Activa
+                                         && taller.Estatus == EstatusTaller.Finalizado
+                                         && taller.RequiereEncuesta
+                                         && encuesta == null;
+
+                var encuestaCompletada = taller.RequiereEncuesta && encuesta != null;
+
+                var certificadoAplica = taller.PermiteCertificado;
+                var certificadoBloqueadoPorEncuesta = certificadoAplica && taller.RequiereEncuesta && !encuestaCompletada;
+                var certificadoBloqueadoPorAsistencia = certificadoAplica && !inscripcion.Asistencia;
+                var certificadoAprobado = certificadoAplica && certificado?.Estado == EstadoCertificado.Aprobado;
+                var certificadoEnRevision = certificadoAplica && !certificadoAprobado && !certificadoBloqueadoPorAsistencia && !certificadoBloqueadoPorEncuesta;
+
                 <div class="col-md-6 col-lg-4">
                     <div class="card card-kpmg h-100 hover-lift">
                         <div class="card-body p-4 d-flex flex-column">
@@ -50,8 +66,46 @@
                                 <div class="border rounded p-3 mb-3">
                                     <div class="fw-semibold mb-1">Próximos pasos</div>
                                     <div class="text-muted small">
-                                        Encuesta: <span class="badge bg-light text-dark">Pendiente</span><br />
-                                        Certificado: <span class="badge bg-light text-dark">Pendiente</span>
+                                        Encuesta:
+                                        @if (!taller.RequiereEncuesta)
+                                        {
+                                            <span class="badge bg-light text-dark">No aplica</span>
+                                        }
+                                        else if (encuestaCompletada)
+                                        {
+                                            <span class="badge bg-success">Completada</span>
+                                        }
+                                        else if (taller.Estatus != EstatusTaller.Finalizado)
+                                        {
+                                            <span class="badge bg-light text-dark">Disponible al finalizar</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">Pendiente</span>
+                                        }
+                                        <br />
+
+                                        Certificado:
+                                        @if (!certificadoAplica)
+                                        {
+                                            <span class="badge bg-light text-dark">No aplica</span>
+                                        }
+                                        else if (certificadoAprobado)
+                                        {
+                                            <span class="badge bg-success">Aprobado</span>
+                                        }
+                                        else if (certificadoBloqueadoPorAsistencia)
+                                        {
+                                            <span class="badge bg-light text-dark">Pendiente de asistencia</span>
+                                        }
+                                        else if (certificadoBloqueadoPorEncuesta)
+                                        {
+                                            <span class="badge bg-light text-dark">Pendiente de encuesta</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-info">En revisión</span>
+                                        }
                                     </div>
                                 </div>
 
@@ -59,12 +113,57 @@
                                     <a asp-page="/Talleres/Details" asp-route-id="@inscripcion.TallerId" class="btn btn-outline-primary">
                                         Ver evento
                                     </a>
-                                    <button type="button" class="btn btn-secondary" disabled>
-                                        Encuesta (próximamente)
-                                    </button>
-                                    <button type="button" class="btn btn-secondary" disabled>
-                                        Descargar certificado (próximamente)
-                                    </button>
+
+                                    @if (encuestaDisponible)
+                                    {
+                                        <div class="border rounded p-3">
+                                            <div class="fw-semibold mb-2">Encuesta de satisfacción</div>
+                                            <form method="post" asp-page-handler="SubmitEncuesta" class="d-grid gap-2">
+                                                <input type="hidden" name="EncuestaInput.TallerId" value="@taller.Id" />
+
+                                                <div>
+                                                    <div class="small text-muted mb-2">Calificación (1–5)</div>
+                                                    <div class="d-flex flex-wrap gap-2">
+                                                        @for (int r = 1; r <= 5; r++)
+                                                        {
+                                                            <div class="form-check form-check-inline m-0">
+                                                                <input class="form-check-input" type="radio" name="EncuestaInput.Rating1_5" id="rating_@(taller.Id)_@(r)" value="@r" required />
+                                                                <label class="form-check-label" for="rating_@(taller.Id)_@(r)">@r</label>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label class="form-label small mb-1" for="comentario_@taller.Id">Comentario (opcional)</label>
+                                                    <textarea class="form-control" id="comentario_@taller.Id" name="EncuestaInput.Comentario" rows="3" maxlength="2000"></textarea>
+                                                </div>
+
+                                                <button type="submit" class="btn btn-primary">
+                                                    Enviar encuesta
+                                                </button>
+                                            </form>
+                                        </div>
+                                    }
+                                    else if (encuestaCompletada)
+                                    {
+                                        <button type="button" class="btn btn-outline-success" disabled>
+                                            <i class="bi bi-check-circle me-1"></i>Encuesta completada
+                                        </button>
+                                    }
+
+                                    @if (certificadoAprobado)
+                                    {
+                                        <a asp-page="/Certificates/Download" asp-route-id="@certificado!.Id" class="btn btn-primary">
+                                            Descargar certificado (PDF)
+                                        </a>
+                                    }
+                                    else if (certificadoAplica)
+                                    {
+                                        <button type="button" class="btn btn-outline-secondary" disabled>
+                                            Certificado (@(certificadoEnRevision ? "en revisión" : "pendiente"))
+                                        </button>
+                                    }
                                 </div>
                             </div>
                         </div>

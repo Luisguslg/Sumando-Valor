@@ -188,6 +188,9 @@ namespace SumandoValor.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("TallerId", "UserId")
+                        .IsUnique();
+
                     b.ToTable("Certificados");
                 });
 
@@ -241,12 +244,19 @@ namespace SumandoValor.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Comentario")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("PayloadJson")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Rating1_5")
+                        .HasColumnType("int");
 
                     b.Property<decimal?>("ScorePromedio")
                         .HasPrecision(5, 2)
@@ -264,6 +274,9 @@ namespace SumandoValor.Infrastructure.Migrations
                     b.HasIndex("TallerId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("TallerId", "UserId")
+                        .IsUnique();
 
                     b.ToTable("EncuestasSatisfaccion");
                 });

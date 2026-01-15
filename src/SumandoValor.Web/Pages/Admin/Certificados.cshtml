@@ -1,0 +1,153 @@
+@page
+@model SumandoValor.Web.Pages.Admin.CertificadosModel
+@using SumandoValor.Domain.Entities
+@{
+    ViewData["Title"] = "Certificados";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-card">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+            <h1 class="h4 mb-1">Certificados</h1>
+            <div class="text-muted">Aprobación y revocación.</div>
+        </div>
+    </div>
+
+    <form method="get" class="row g-2 align-items-end mt-3">
+        <div class="col-md-4">
+            <label class="form-label small">Taller</label>
+            <select class="form-select" name="TallerId">
+                <option value="">Todos</option>
+                @foreach (var t in Model.Talleres)
+                {
+                    <option value="@t.Id" selected="@(Model.TallerId == t.Id)">@t.Titulo</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small">Estado</label>
+            <select class="form-select" name="Estado">
+                <option value="">Todos</option>
+                @foreach (EstadoCertificado e in Enum.GetValues(typeof(EstadoCertificado)))
+                {
+                    <option value="@((int)e)" selected="@(Model.Estado == (int)e)">@e</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label small">Buscar usuario</label>
+            <input class="form-control" name="Search" value="@Model.Search" placeholder="Nombre, email o cédula" />
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+        </div>
+    </form>
+</div>
+
+<div class="admin-card">
+    <form method="post">
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <button type="submit" asp-page-handler="ApproveSelected" class="btn btn-primary">
+                <i class="bi bi-patch-check me-1"></i>Aprobar seleccionados
+            </button>
+            <button type="submit" asp-page-handler="RevokeSelected" class="btn btn-outline-danger"
+                    onclick="return confirm('¿Confirmas revocar los certificados seleccionados?');">
+                <i class="bi bi-x-octagon me-1"></i>Revocar seleccionados
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                <tr>
+                    <th style="width: 28px;"></th>
+                    <th>Usuario</th>
+                    <th>Email</th>
+                    <th>Taller</th>
+                    <th class="text-end">Asistencia</th>
+                    <th class="text-end">Encuesta</th>
+                    <th>Estado</th>
+                    <th>PDF</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var row in Model.Rows)
+                {
+                    <tr>
+                        <td>
+                            @if (row.CanSelect)
+                            {
+                                <input class="form-check-input" type="checkbox" name="SelectedInscripcionIds" value="@row.InscripcionId" />
+                            }
+                        </td>
+                        <td>@row.UserFullName</td>
+                        <td class="text-muted">@row.UserEmail</td>
+                        <td>
+                            <div class="fw-semibold">@row.TallerTitulo</div>
+                            <div class="text-muted small">@row.CursoTitulo</div>
+                        </td>
+                        <td class="text-end">
+                            <span class="badge @(row.AsistenciaOk ? "bg-success" : "bg-light text-dark")">
+                                @(row.AsistenciaOk ? "Sí" : "No")
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <span class="badge @(row.EncuestaOk ? "bg-success" : row.EncuestaRequired ? "bg-light text-dark" : "bg-secondary")">
+                                @if (!row.EncuestaRequired)
+                                {
+                                    <text>No aplica</text>
+                                }
+                                else if (row.EncuestaOk)
+                                {
+                                    <text>Sí</text>
+                                }
+                                else
+                                {
+                                    <text>No</text>
+                                }
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge @row.EstadoBadgeClass">@row.EstadoText</span>
+                        </td>
+                        <td>
+                            @if (row.CertificadoId.HasValue && row.Estado == EstadoCertificado.Aprobado && row.HasPdf)
+                            {
+                                <a asp-page="/Certificates/Download" asp-route-id="@row.CertificadoId.Value" class="btn btn-sm btn-outline-primary">
+                                    Descargar
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted small">—</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="Paginación" class="mt-3">
+                <ul class="pagination justify-content-center mb-0">
+                    <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Model.PageUrl(Model.PageNumber - 1)">Anterior</a>
+                    </li>
+                    @for (var i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.TotalPages, Model.PageNumber + 2); i++)
+                    {
+                        <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                            <a class="page-link" href="@Model.PageUrl(i)">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link" href="@Model.PageUrl(Model.PageNumber + 1)">Siguiente</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    </form>
+</div>
+

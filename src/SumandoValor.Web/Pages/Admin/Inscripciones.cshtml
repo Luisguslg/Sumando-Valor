@@ -67,18 +67,22 @@
                             <span class="text-muted">No</span>
                         }
                     </td>
-                    <td>
-                        <form method="post" asp-page-handler="ToggleAsistencia" asp-route-id="@inscripcion.Id" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-outline-info">
-                                @(inscripcion.Asistencia ? "Quitar Asistencia" : "Marcar Asistencia")
-                            </button>
-                        </form>
-                        @if (inscripcion.Estado == EstadoInscripcion.Activa)
-                        {
-                            <form method="post" asp-page-handler="Cancelar" asp-route-id="@inscripcion.Id" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Está seguro de cancelar esta inscripción?');">Cancelar</button>
+                    <td class="text-center">
+                        <div class="admin-actions">
+                            <form method="post" asp-page-handler="ToggleAsistencia" asp-route-id="@inscripcion.Id" class="m-0">
+                                <button type="submit" class="btn btn-sm btn-outline-primary">
+                                    @(inscripcion.Asistencia ? "Quitar asistencia" : "Marcar asistencia")
+                                </button>
                             </form>
-                        }
+                            @if (inscripcion.Estado == EstadoInscripcion.Activa)
+                            {
+                                <form method="post" asp-page-handler="Cancelar" asp-route-id="@inscripcion.Id" class="m-0">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Está seguro de cancelar esta inscripción?');">
+                                        Cancelar
+                                    </button>
+                                </form>
+                            }
+                        </div>
                     </td>
                 </tr>
             }

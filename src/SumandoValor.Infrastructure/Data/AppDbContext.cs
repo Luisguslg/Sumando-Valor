@@ -87,6 +87,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Certificado>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.TallerId, e.UserId }).IsUnique();
             entity.HasIndex(e => e.TallerId);
             entity.HasIndex(e => e.UserId);
             entity.HasOne(e => e.Taller)
@@ -103,8 +104,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<EncuestaSatisfaccion>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.TallerId, e.UserId }).IsUnique();
             entity.HasIndex(e => e.TallerId);
             entity.HasIndex(e => e.UserId);
+            entity.Property(e => e.Rating1_5).IsRequired();
+            entity.Property(e => e.Comentario).HasMaxLength(2000);
             entity.Property(e => e.ScorePromedio).HasPrecision(5, 2);
             entity.HasOne(e => e.Taller)
                 .WithMany(t => t.Encuestas)

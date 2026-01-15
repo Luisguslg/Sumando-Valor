@@ -5,7 +5,7 @@ using SumandoValor.Infrastructure.Services;
 
 namespace SumandoValor.Web.Pages.Dev;
 
-[Authorize]
+[Authorize(Roles = "Admin")]
 public class EmailsModel : PageModel
 {
     private readonly IDevEmailStore _emailStore;
