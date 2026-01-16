@@ -39,7 +39,8 @@ function Ensure-Dir([string]$Path) {
 
 function Grant-AppPoolModify([string]$Path, [string]$Pool) {
   $acct = "IIS AppPool\$Pool"
-  & icacls $Path /grant "$acct:(OI)(CI)M" /T | Out-Null
+  # NOTE: PowerShell treats "$var:" as a scoped variable reference; use ${} to delimit.
+  & icacls "$Path" /grant "${acct}:(OI)(CI)M" /T | Out-Null
 }
 
 function Set-IisEnvVar([string]$Site, [string]$Name, [string]$Value) {
