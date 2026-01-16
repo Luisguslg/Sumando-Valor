@@ -80,6 +80,9 @@ if ([string]::IsNullOrWhiteSpace($SqlPassword)) {
   $ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec)
   try { $SqlPassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr) } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr) }
 }
+if ([string]::IsNullOrWhiteSpace($SqlUser) -or [string]::IsNullOrWhiteSpace($SqlPassword)) {
+  throw "SQL User/Password no pueden estar vacíos (elegiste SQL Auth)."
+}
 
 Ensure-Dir $InstallDir
 
@@ -117,15 +120,16 @@ foreach ($b in $existingHttp) {
     $parts = $b.bindingInformation -split ":", 3
     $ip = $parts[0]
     $port = [int]$parts[1]
-    $host = $parts[2]
-    Remove-WebBinding -Name $SiteName -Protocol "http" -IPAddress $ip -Port $port -HostHeader $host -ErrorAction SilentlyContinue
+    $hostHeader = if ($parts.Count -ge 3) { $parts[2] } else { "" }
+    if ($null -eq $hostHeader) { $hostHeader = "" }
+    Remove-WebBinding -Name $SiteName -Protocol "http" -IPAddress $ip -Port $port -HostHeader $hostHeader -ErrorAction SilentlyContinue
   } catch { }
 }
 
 if ([string]::IsNullOrWhiteSpace($HostName)) {
-  New-WebBinding -Name $SiteName -Protocol "http" -Port $HttpPort | Out-Null
+  try { New-WebBinding -Name $SiteName -Protocol "http" -Port $HttpPort | Out-Null } catch { }
 } else {
-  New-WebBinding -Name $SiteName -Protocol "http" -Port $HttpPort -HostHeader $HostName | Out-Null
+  try { New-WebBinding -Name $SiteName -Protocol "http" -Port $HttpPort -HostHeader $HostName | Out-Null } catch { }
 }
 
 Write-Host "Variables de entorno (IIS) para el sitio"
