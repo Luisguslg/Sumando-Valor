@@ -1,0 +1,28 @@
+PASOS (Servidor IIS - PowerShell como Administrador)
+===================================================
+
+0) Confirmar que existen:
+   - C:\Temp\SumandoValor_publish.zip
+   - C:\Temp\02_iis_install.ps1
+
+1) Ejecutar instalación/actualización (pega y reemplaza TU_USUARIO_SQL / TU_PASSWORD_SQL)
+
+powershell -ExecutionPolicy Bypass -File C:\Temp\02_iis_install.ps1 `
+  -ZipPath "C:\Temp\SumandoValor_publish.zip" `
+  -SiteName "SumandoValor" `
+  -AppPoolName "SumandoValorAppPool" `
+  -SqlServer "VECCSAPP10\KPMGDV" `
+  -SqlDatabase "SumandoValorDb" `
+  -SmtpHost "mail.ve.kworld.kpmg.com" `
+  -SmtpPort 25 `
+  -SmtpEnableSsl $false
+
+NOTA: este script ahora te pedirá (en pantalla) el SQL User y SQL Password (sin mostrarlos),
+para evitar escribir credenciales en comandos o archivos.
+
+2) Abrir:
+   - http://localhost/
+
+3) Probar correos:
+   - /Admin/EmailDiagnostics
+

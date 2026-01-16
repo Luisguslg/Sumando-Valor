@@ -42,6 +42,25 @@ function Grant-AppPoolModify([string]$Path, [string]$Pool) {
   & icacls $Path /grant "$acct:(OI)(CI)M" /T | Out-Null
 }
 
+function Set-IisEnvVar([string]$Site, [string]$Name, [string]$Value) {
+  $psPath = "IIS:\Sites\$Site"
+  $filter = "system.webServer/aspNetCore/environmentVariables"
+
+  # Remove existing with same name (avoid duplicates / invalid config)
+  $existing = Get-WebConfigurationProperty -PSPath $psPath -Filter $filter -Name "." -ErrorAction SilentlyContinue
+  if ($existing) {
+    $toRemove = @()
+    foreach ($item in $existing.Collection) {
+      if ($item["name"] -eq $Name) { $toRemove += $item }
+    }
+    foreach ($item in $toRemove) {
+      Remove-WebConfigurationProperty -PSPath $psPath -Filter $filter -Name "." -AtElement @{ name = $Name } -ErrorAction SilentlyContinue
+    }
+  }
+
+  Add-WebConfigurationProperty -PSPath $psPath -Filter $filter -Name "." -Value @{ name = $Name; value = $Value } | Out-Null
+}
+
 Assert-Admin
 Ensure-Module
 
@@ -51,8 +70,13 @@ if (-not (Test-Path $ZipPath)) {
   throw "No existe el ZIP: $ZipPath"
 }
 
-if ([string]::IsNullOrWhiteSpace($SqlUser) -or [string]::IsNullOrWhiteSpace($SqlPassword)) {
-  throw "Debes pasar SqlUser y SqlPassword (SQL Auth) para configurar la conexión remota."
+if ([string]::IsNullOrWhiteSpace($SqlUser)) {
+  $SqlUser = Read-Host "SQL User (SQL Auth)"
+}
+if ([string]::IsNullOrWhiteSpace($SqlPassword)) {
+  $sec = Read-Host "SQL Password (SQL Auth)" -AsSecureString
+  $ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec)
+  try { $SqlPassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr) } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr) }
 }
 
 Ensure-Dir $InstallDir
@@ -84,20 +108,24 @@ if (-not (Test-Path "IIS:\Sites\$SiteName")) {
 }
 
 Write-Host "Bindings (HTTP)"
-Get-WebBinding -Name $SiteName -Protocol "http" -ErrorAction SilentlyContinue | Remove-WebBinding -ErrorAction SilentlyContinue
-New-WebBinding -Name $SiteName -Protocol "http" -Port $HttpPort -HostHeader $HostName
+Get-WebBinding -Name $SiteName -Protocol "http" -ErrorAction SilentlyContinue | ForEach-Object {
+  try { Remove-WebBinding -Name $SiteName -Protocol "http" -Port $_.bindingInformation.Split(':')[1] -HostHeader $_.Host -ErrorAction SilentlyContinue } catch {}
+}
+if ([string]::IsNullOrWhiteSpace($HostName)) {
+  New-WebBinding -Name $SiteName -Protocol "http" -Port $HttpPort | Out-Null
+} else {
+  New-WebBinding -Name $SiteName -Protocol "http" -Port $HttpPort -HostHeader $HostName | Out-Null
+}
 
 Write-Host "Variables de entorno (IIS) para el sitio"
 $conn = "Server=$SqlServer;Database=$SqlDatabase;User Id=$SqlUser;Password=$SqlPassword;TrustServerCertificate=True;MultipleActiveResultSets=True;"
+Set-IisEnvVar -Site $SiteName -Name "ASPNETCORE_ENVIRONMENT" -Value "Production"
+Set-IisEnvVar -Site $SiteName -Name "ConnectionStrings__DefaultConnection" -Value $conn
 
-$appcmd = "$env:windir\System32\inetsrv\appcmd.exe"
-& $appcmd set config "$SiteName" -section:system.webServer/aspNetCore /+"environmentVariables.[name='ASPNETCORE_ENVIRONMENT',value='Production']" /commit:apphost | Out-Null
-& $appcmd set config "$SiteName" -section:system.webServer/aspNetCore /+"environmentVariables.[name='ConnectionStrings__DefaultConnection',value='$conn']" /commit:apphost | Out-Null
-
-& $appcmd set config "$SiteName" -section:system.webServer/aspNetCore /+"environmentVariables.[name='Email__Smtp__Enabled',value='true']" /commit:apphost | Out-Null
-& $appcmd set config "$SiteName" -section:system.webServer/aspNetCore /+"environmentVariables.[name='Email__Smtp__Host',value='$SmtpHost']" /commit:apphost | Out-Null
-& $appcmd set config "$SiteName" -section:system.webServer/aspNetCore /+"environmentVariables.[name='Email__Smtp__Port',value='$SmtpPort']" /commit:apphost | Out-Null
-& $appcmd set config "$SiteName" -section:system.webServer/aspNetCore /+"environmentVariables.[name='Email__Smtp__EnableSsl',value='$($SmtpEnableSsl.ToString().ToLower())']" /commit:apphost | Out-Null
+Set-IisEnvVar -Site $SiteName -Name "Email__Smtp__Enabled" -Value "true"
+Set-IisEnvVar -Site $SiteName -Name "Email__Smtp__Host" -Value $SmtpHost
+Set-IisEnvVar -Site $SiteName -Name "Email__Smtp__Port" -Value "$SmtpPort"
+Set-IisEnvVar -Site $SiteName -Name "Email__Smtp__EnableSsl" -Value "$($SmtpEnableSsl.ToString().ToLower())"
 
 Write-Host "Reiniciando IIS"
 iisreset | Out-Null
