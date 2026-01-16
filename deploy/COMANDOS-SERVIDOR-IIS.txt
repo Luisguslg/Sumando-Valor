@@ -11,6 +11,7 @@ powershell -ExecutionPolicy Bypass -File C:\Temp\02_iis_install.ps1 `
   -ZipPath "C:\Temp\SumandoValor_publish.zip" `
   -SiteName "SumandoValorNuevo" `
   -AppPoolName "SumandoValorNuevoAppPool" `
+  -DbAuth "Windows" `
   -SqlServer "VECCSAPP10\KPMGDV" `
   -SqlDatabase "SumandoValorDb" `
   -SmtpHost "mail.ve.kworld.kpmg.com" `
@@ -18,6 +19,7 @@ powershell -ExecutionPolicy Bypass -File C:\Temp\02_iis_install.ps1 `
 
 NOTA: este script ahora te pedirá (en pantalla) el SQL User y SQL Password (sin mostrarlos),
 para evitar escribir credenciales en comandos o archivos. No pueden quedar en blanco.
+Si usas DBAuth=Windows, te pedirá el usuario VE\... y su password para configurar el AppPool.
 
 2) Abrir:
    - http://localhost/

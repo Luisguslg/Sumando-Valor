@@ -7,11 +7,19 @@ param(
   [int]$HttpPort = 80,
   [string]$HostName = "",
 
+  # DB auth mode: "Sql" or "Windows"
+  [ValidateSet("Sql", "Windows")]
+  [string]$DbAuth = "Sql",
+
   # DB (SQL Auth)
   [string]$SqlServer = "VECCSAPP10\KPMGDV",
   [string]$SqlDatabase = "SumandoValorDb",
   [string]$SqlUser = "",
   [string]$SqlPassword = "",
+
+  # DB (Windows Auth via AppPool identity)
+  [string]$WindowsAuthUser = "",
+  [string]$WindowsAuthPassword = "",
 
   # SMTP (sin usuario/clave)
   [string]$SmtpHost = "mail.ve.kworld.kpmg.com",
@@ -72,16 +80,30 @@ if (-not (Test-Path $ZipPath)) {
   throw "No existe el ZIP: $ZipPath"
 }
 
-if ([string]::IsNullOrWhiteSpace($SqlUser)) {
-  $SqlUser = Read-Host "SQL User (SQL Auth)"
-}
-if ([string]::IsNullOrWhiteSpace($SqlPassword)) {
-  $sec = Read-Host "SQL Password (SQL Auth)" -AsSecureString
-  $ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec)
-  try { $SqlPassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr) } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr) }
-}
-if ([string]::IsNullOrWhiteSpace($SqlUser) -or [string]::IsNullOrWhiteSpace($SqlPassword)) {
-  throw "SQL User/Password no pueden estar vacíos (elegiste SQL Auth)."
+if ($DbAuth -eq "Sql") {
+  if ([string]::IsNullOrWhiteSpace($SqlUser)) {
+    $SqlUser = Read-Host "SQL User (SQL Auth)"
+  }
+  if ([string]::IsNullOrWhiteSpace($SqlPassword)) {
+    $sec = Read-Host "SQL Password (SQL Auth)" -AsSecureString
+    $ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec)
+    try { $SqlPassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr) } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr) }
+  }
+  if ([string]::IsNullOrWhiteSpace($SqlUser) -or [string]::IsNullOrWhiteSpace($SqlPassword)) {
+    throw "SQL User/Password no pueden estar vacíos (DBAuth=Sql)."
+  }
+} else {
+  if ([string]::IsNullOrWhiteSpace($WindowsAuthUser)) {
+    $WindowsAuthUser = Read-Host "Windows user para AppPool (ej: VE\\usuario)"
+  }
+  if ([string]::IsNullOrWhiteSpace($WindowsAuthPassword)) {
+    $sec2 = Read-Host "Password del Windows user (secreto)" -AsSecureString
+    $ptr2 = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec2)
+    try { $WindowsAuthPassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr2) } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr2) }
+  }
+  if ([string]::IsNullOrWhiteSpace($WindowsAuthUser) -or [string]::IsNullOrWhiteSpace($WindowsAuthPassword)) {
+    throw "WindowsAuthUser/WindowsAuthPassword no pueden estar vacíos (DBAuth=Windows)."
+  }
 }
 
 Ensure-Dir $InstallDir
@@ -104,6 +126,13 @@ if (-not (Test-Path "IIS:\AppPools\$AppPoolName")) {
 
 Write-Host "Configurando AppPool: No Managed Code"
 Set-ItemProperty "IIS:\AppPools\$AppPoolName" -Name managedRuntimeVersion -Value ""
+
+if ($DbAuth -eq "Windows") {
+  Write-Host "Configurando Identity del AppPool (Windows Auth): $WindowsAuthUser"
+  Set-ItemProperty "IIS:\AppPools\$AppPoolName" -Name processModel.identityType -Value 3
+  Set-ItemProperty "IIS:\AppPools\$AppPoolName" -Name processModel.userName -Value $WindowsAuthUser
+  Set-ItemProperty "IIS:\AppPools\$AppPoolName" -Name processModel.password -Value $WindowsAuthPassword
+}
 
 if (-not (Test-Path "IIS:\Sites\$SiteName")) {
   Write-Host "Creando Sitio: $SiteName -> $InstallDir"
@@ -133,7 +162,11 @@ if ([string]::IsNullOrWhiteSpace($HostName)) {
 }
 
 Write-Host "Variables de entorno (IIS) para el sitio"
-$conn = "Server=$SqlServer;Database=$SqlDatabase;User Id=$SqlUser;Password=$SqlPassword;TrustServerCertificate=True;MultipleActiveResultSets=True;"
+$conn = if ($DbAuth -eq "Windows") {
+  "Server=$SqlServer;Database=$SqlDatabase;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True;"
+} else {
+  "Server=$SqlServer;Database=$SqlDatabase;User Id=$SqlUser;Password=$SqlPassword;TrustServerCertificate=True;MultipleActiveResultSets=True;"
+}
 Set-IisEnvVar -Site $SiteName -Name "ASPNETCORE_ENVIRONMENT" -Value "Production"
 Set-IisEnvVar -Site $SiteName -Name "ConnectionStrings__DefaultConnection" -Value $conn
 
