@@ -294,21 +294,7 @@ Para que **sí** envíe real en producción deben cumplirse:
 - Nombre: `cert_{certId}_{tallerId}_{userId}_{guid}.pdf` (no colisiona, no sobrescribe).
 - Descarga: endpoint protegido `/Certificates/Download`.
 
-## PARTE 7 — Checklist de pruebas en producción
-
-1) Home carga y assets (CSS/imagenes) OK
-2) Registro + confirmación email (si SMTP real)
-3) Login / logout (Admin y Beneficiario)
-4) Inscripción a taller (cupos)
-5) Encuesta (si aplica) en `/Profile/Talleres`
-6) Admin marca asistencia
-7) Admin aprueba certificado
-8) Beneficiario descarga PDF
-9) Export CSV en Admin
-10) `/Admin/EmailDiagnostics` envía correo real
-11) Revisar logs IIS / Event Viewer (errores al iniciar suelen ser connection string/SMTP/permisos)
-
-## PARTE 8 — Seguridad y buenas prácticas
+## Seguridad y buenas prácticas
 
 - No subir secretos al repo:
   - `appsettings.Production.json` está ignorado por `.gitignore`
@@ -317,66 +303,7 @@ Para que **sí** envíe real en producción deben cumplirse:
   - En **Development** está en `true`
   - En **Producción** se recomienda `false`
   - Si se activa en prod, **Seed:AdminPassword debe ser explícito** (no se permite el default)
-- `/Admin`
-- `/Admin/Cursos`
-- `/Admin/Talleres`
-- `/Admin/Inscripciones`
-- `/Admin/Encuestas`
-- `/Admin/Certificados`
-- `/Admin/Usuarios`
-- `/Admin/EmailDiagnostics`
 
-## Notas QA (interno)
-
-Notas de verificación interna: `docs/qa-notes.md`.
-
-## Checklist de pruebas (flujo completo)
-
-> Estos pasos son para validar end-to-end. Úsalos en local; si luego quieres, puedes moverlos a `docs/qa-notes.md`.
-
-### 0) Preparación
-1. Aplicar migraciones (ver sección “Base de datos / migraciones”).
-2. Ejecutar web: `cd src/SumandoValor.Web; dotnet run`.
-3. Iniciar sesión como Admin:
-   - `admin@sumandovalor.org` / `Admin123!`
-
-### 1) Email / Confirmación (Development)
-1. Registrar un usuario Beneficiario en `/Account/Register`.
-2. Abrir `/Dev/Emails` (con Admin) y usar el enlace de confirmación.
-3. Iniciar sesión con el usuario en `/Account/Login`.
-
-### 2) Crear Curso + Taller (Admin)
-1. Admin: crear curso en `/Admin/Cursos`.
-2. Admin: crear taller en `/Admin/Talleres/Create`:
-   - Modalidad Virtual/Híbrido → debe pedir Plataforma Digital.
-   - Cupos pequeños (ej. 2) para probar sobrepaso.
-
-### 3) Inscripciones + cupos (Beneficiario)
-1. Beneficiario: entrar a `/Cursos/{id}` y abrir un taller.
-2. Inscribirse desde `/Talleres/{id}`:
-   - Debe mostrar “Inscripción realizada con éxito.”
-3. Intentar inscribirse de nuevo → debe indicar “Ya estás inscrito”.
-4. Crear usuarios adicionales (Usuario2/Usuario3) y llenar cupos.
-5. Intentar Usuario4 cuando cupos=0 → “No hay cupos disponibles”.
-
-### 4) Admin: asistencia / cancelación
-1. Admin: `/Admin/Inscripciones`:
-   - Marcar asistencia del usuario.
-   - Cancelar inscripción (confirma) y verificar que libera cupo.
-
-### 5) Encuesta (Beneficiario)
-1. Admin: marcar el taller como **Finalizado** (editando taller).
-2. Beneficiario: ir a `/Profile/Talleres`:
-   - Si el taller **RequiereEncuesta** y está finalizado, aparece la encuesta embebida.
-   - Enviar rating 1–5 (comentario opcional).
-3. Admin: validar resultados en `/Admin/Encuestas` y exportar CSV.
-
-### 6) Certificado (Admin → Beneficiario)
-1. Admin: `/Admin/Certificados`:
-   - Filtrar por taller.
-   - Seleccionar filas elegibles (asistencia ok + encuesta ok si aplica + taller finalizado).
-   - “Aprobar seleccionados” → genera PDF en `App_Data/Certificates` y habilita descarga.
-2. Beneficiario: `/Profile/Talleres` → botón “Descargar certificado (PDF)”.
 3. Descargar: `/Certificates/Download?id={certId}` debe permitir solo al dueño (o Admin).
 
 ### 7) Usuarios (Admin)
