@@ -8,8 +8,11 @@ param(
   [string]$HostName = "",
 
   # DB auth mode: "Sql" or "Windows"
-  [ValidateSet("Sql", "Windows")]
-  [string]$DbAuth = "Sql",
+  # - Sql: User/Password (SQL login)
+  # - WindowsUser: AppPool corre con un usuario de dominio (requiere password)
+  # - AppPool: Windows Auth usando la identidad del AppPool (NO requiere password)
+  [ValidateSet("Sql", "WindowsUser", "AppPool")]
+  [string]$DbAuth = "AppPool",
 
   # DB (SQL Auth)
   [string]$SqlServer = "VECCSAPP10\KPMGDV",
@@ -17,7 +20,7 @@ param(
   [string]$SqlUser = "",
   [string]$SqlPassword = "",
 
-  # DB (Windows Auth via AppPool identity)
+  # DB (Windows Auth via domain user on AppPool)
   [string]$WindowsAuthUser = "",
   [string]$WindowsAuthPassword = "",
 
@@ -92,7 +95,7 @@ if ($DbAuth -eq "Sql") {
   if ([string]::IsNullOrWhiteSpace($SqlUser) -or [string]::IsNullOrWhiteSpace($SqlPassword)) {
     throw "SQL User/Password no pueden estar vacíos (DBAuth=Sql)."
   }
-} else {
+} elseif ($DbAuth -eq "WindowsUser") {
   if ([string]::IsNullOrWhiteSpace($WindowsAuthUser)) {
     $WindowsAuthUser = Read-Host "Windows user para AppPool (ej: VE\\usuario)"
   }
@@ -102,8 +105,10 @@ if ($DbAuth -eq "Sql") {
     try { $WindowsAuthPassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr2) } finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr2) }
   }
   if ([string]::IsNullOrWhiteSpace($WindowsAuthUser) -or [string]::IsNullOrWhiteSpace($WindowsAuthPassword)) {
-    throw "WindowsAuthUser/WindowsAuthPassword no pueden estar vacíos (DBAuth=Windows)."
+    throw "WindowsAuthUser/WindowsAuthPassword no pueden estar vacíos (DBAuth=WindowsUser)."
   }
+} else {
+  # AppPool: no prompts
 }
 
 Ensure-Dir $InstallDir
@@ -127,7 +132,7 @@ if (-not (Test-Path "IIS:\AppPools\$AppPoolName")) {
 Write-Host "Configurando AppPool: No Managed Code"
 Set-ItemProperty "IIS:\AppPools\$AppPoolName" -Name managedRuntimeVersion -Value ""
 
-if ($DbAuth -eq "Windows") {
+if ($DbAuth -eq "WindowsUser") {
   Write-Host "Configurando Identity del AppPool (Windows Auth): $WindowsAuthUser"
   Set-ItemProperty "IIS:\AppPools\$AppPoolName" -Name processModel.identityType -Value 3
   Set-ItemProperty "IIS:\AppPools\$AppPoolName" -Name processModel.userName -Value $WindowsAuthUser
@@ -162,7 +167,7 @@ if ([string]::IsNullOrWhiteSpace($HostName)) {
 }
 
 Write-Host "Variables de entorno (IIS) para el sitio"
-$conn = if ($DbAuth -eq "Windows") {
+$conn = if ($DbAuth -in @("WindowsUser","AppPool")) {
   "Server=$SqlServer;Database=$SqlDatabase;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True;"
 } else {
   "Server=$SqlServer;Database=$SqlDatabase;User Id=$SqlUser;Password=$SqlPassword;TrustServerCertificate=True;MultipleActiveResultSets=True;"
