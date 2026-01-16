@@ -3,6 +3,7 @@ param(
   [string]$AppPoolName = "SumandoValorAppPool",
   [string]$ZipPath = "C:\Temp\SumandoValor_publish.zip",
   [string]$InstallDir = "C:\inetpub\sumandovalor\app",
+  [ValidateRange(1, 65535)]
   [int]$HttpPort = 80,
   [string]$HostName = "",
 
@@ -109,9 +110,18 @@ if (-not (Test-Path "IIS:\Sites\$SiteName")) {
 }
 
 Write-Host "Bindings (HTTP)"
-Get-WebBinding -Name $SiteName -Protocol "http" -ErrorAction SilentlyContinue | ForEach-Object {
-  try { Remove-WebBinding -Name $SiteName -Protocol "http" -Port $_.bindingInformation.Split(':')[1] -HostHeader $_.Host -ErrorAction SilentlyContinue } catch {}
+$existingHttp = @(Get-WebBinding -Name $SiteName -Protocol "http" -ErrorAction SilentlyContinue)
+foreach ($b in $existingHttp) {
+  try {
+    # bindingInformation format: IP:Port:HostHeader
+    $parts = $b.bindingInformation -split ":", 3
+    $ip = $parts[0]
+    $port = [int]$parts[1]
+    $host = $parts[2]
+    Remove-WebBinding -Name $SiteName -Protocol "http" -IPAddress $ip -Port $port -HostHeader $host -ErrorAction SilentlyContinue
+  } catch { }
 }
+
 if ([string]::IsNullOrWhiteSpace($HostName)) {
   New-WebBinding -Name $SiteName -Protocol "http" -Port $HttpPort | Out-Null
 } else {
