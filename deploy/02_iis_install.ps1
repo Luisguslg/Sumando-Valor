@@ -33,6 +33,9 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+$ScriptVersion = "2026-01-16.2"
+$TranscriptPath = Join-Path $env:TEMP "SumandoValor_deploy.log"
+
 function Assert-Admin {
   $id = [Security.Principal.WindowsIdentity]::GetCurrent()
   $p = New-Object Security.Principal.WindowsPrincipal($id)
@@ -78,6 +81,12 @@ Assert-Admin
 Ensure-Module
 
 Write-Host "== SumandoValor: IIS Install/Update ==" -ForegroundColor Cyan
+Write-Host ("ScriptVersion: {0}" -f $ScriptVersion) -ForegroundColor Cyan
+Write-Host ("Log: {0}" -f $TranscriptPath) -ForegroundColor Cyan
+
+try {
+  Start-Transcript -Path $TranscriptPath -Append | Out-Null
+} catch { }
 
 if (-not (Test-Path $ZipPath)) {
   throw "No existe el ZIP: $ZipPath"
@@ -187,3 +196,4 @@ iisreset | Out-Null
 
 Write-Host "OK. Sitio: http://localhost:$HttpPort/" -ForegroundColor Green
 
+try { Stop-Transcript | Out-Null } catch { }
