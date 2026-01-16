@@ -77,6 +77,40 @@ public class RegisterModel : PageModel
             return Page();
         }
 
+        // If the email already exists, don't just say "ya estás registrado" when the real issue is
+        // that the user might be pending confirmation (and SMTP may have failed previously).
+        var existing = await _userManager.FindByEmailAsync(Input.Email);
+        if (existing != null)
+        {
+            if (existing.EmailConfirmed)
+            {
+                ModelState.AddModelError(string.Empty, "Este email ya está registrado.");
+                return Page();
+            }
+
+            try
+            {
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(existing);
+                var callbackUrl = Url.Page(
+                    "/Account/ConfirmEmail",
+                    pageHandler: null,
+                    values: new { userId = existing.Id, code = code },
+                    protocol: Request.Scheme);
+
+                await _emailService.SendEmailConfirmationAsync(existing.Email!, callbackUrl ?? string.Empty);
+                _logger.LogInformation("Reenvío de confirmación solicitado para {Email}.", existing.Email);
+
+                TempData["FlashInfo"] = "Este email ya estaba registrado pero aún no estaba confirmado. Te reenviamos el correo de confirmación.";
+                return RedirectToPage("./Login");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "No se pudo reenviar el correo de confirmación para {Email}.", existing.Email);
+                ModelState.AddModelError(string.Empty, "Este email ya está registrado, pero no pudimos reenviar el correo de confirmación. Revisa la configuración de correo en el servidor.");
+                return Page();
+            }
+        }
+
         var user = new ApplicationUser
         {
             UserName = Input.Email,
@@ -109,11 +143,20 @@ public class RegisterModel : PageModel
                 values: new { userId = user.Id, code = code },
                 protocol: Request.Scheme);
 
-            await _emailService.SendEmailConfirmationAsync(user.Email, callbackUrl ?? string.Empty);
+            try
+            {
+                await _emailService.SendEmailConfirmationAsync(user.Email!, callbackUrl ?? string.Empty);
+                _logger.LogInformation("Usuario {Email} se registró. Email de confirmación enviado.", user.Email);
+                TempData["FlashInfo"] = "Registro exitoso. Te enviamos un correo para confirmar tu cuenta antes de iniciar sesión.";
+            }
+            catch (Exception ex)
+            {
+                // The user account is created, but they won't be able to sign in until confirmed.
+                // We surface a clear message and log the root cause for server troubleshooting.
+                _logger.LogError(ex, "Usuario {Email} se registró, pero falló el envío del email de confirmación.", user.Email);
+                TempData["FlashError"] = "Tu cuenta fue creada, pero no pudimos enviar el correo de confirmación. Contacta al administrador para revisar el correo del servidor.";
+            }
 
-            _logger.LogInformation("Usuario {Email} se registró. Email de confirmación enviado.", user.Email);
-
-            TempData["FlashInfo"] = "Registro exitoso. Por favor revisa tu email para confirmar tu cuenta antes de iniciar sesión. En modo Development, puedes ver el enlace en /Dev/Emails";
             return RedirectToPage("./Login");
         }
 

@@ -28,6 +28,11 @@ public sealed class SmtpEmailService : IEmailService
             throw new InvalidOperationException("Configuración SMTP incompleta. Verifique Email:Smtp:Host y Email:Smtp:FromAddress.");
         }
 
+        // Emit a safe summary to help diagnose relay/auth issues (no secrets).
+        _logger.LogInformation(
+            "SMTP config: Host={Host}, Port={Port}, EnableSsl={EnableSsl}, UseDefaultCredentials={UseDefaultCredentials}, HasUser={HasUser}, From={From}",
+            _options.Host, _options.Port, _options.EnableSsl, _options.UseDefaultCredentials, !string.IsNullOrWhiteSpace(_options.User), _options.FromAddress);
+
         using var message = new MailMessage
         {
             From = new MailAddress(_options.FromAddress, _options.FromName),
