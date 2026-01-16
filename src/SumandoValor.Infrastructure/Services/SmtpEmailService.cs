@@ -49,6 +49,13 @@ public sealed class SmtpEmailService : IEmailService
             UseDefaultCredentials = false
         };
 
+        // Fail fast instead of hanging the HTTP request when outbound SMTP is blocked/unreachable.
+        // Note: Timeout is in milliseconds.
+        if (_options.TimeoutMs > 0)
+        {
+            client.Timeout = _options.TimeoutMs;
+        }
+
         if (!string.IsNullOrWhiteSpace(_options.User))
         {
             client.Credentials = new NetworkCredential(_options.User, _options.Password);

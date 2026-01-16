@@ -7,6 +7,10 @@ public sealed class SmtpEmailOptions
     public int Port { get; set; } = 587;
     public bool EnableSsl { get; set; } = true;
 
+    // Prevent requests from hanging indefinitely if the SMTP server is unreachable/blocked.
+    // SmtpClient.Timeout is in milliseconds.
+    public int TimeoutMs { get; set; } = 15000;
+
     // If User is empty:
     // - UseDefaultCredentials=true -> uses the process identity (Windows Auth / domain relay scenarios)
     // - UseDefaultCredentials=false -> sends without auth (internal IP-restricted relay scenarios)
