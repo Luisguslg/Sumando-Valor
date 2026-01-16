@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using SumandoValor.Infrastructure.Data;
 using SumandoValor.Infrastructure.Services;
@@ -9,6 +10,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+// Log effective DB target (without secrets). Useful to diagnose env var / user-secrets overrides on different machines.
+try
+{
+    var csb = new SqlConnectionStringBuilder(connectionString);
+    builder.Logging.AddFilter("DbConnection", LogLevel.Information);
+    builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Information);
+    builder.Services.AddSingleton(new DbConnectionInfo(csb.DataSource, csb.InitialCatalog, csb.IntegratedSecurity));
+}
+catch
+{
+    // Ignore: do not block startup if connection string is not parseable.
+}
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -120,6 +134,17 @@ builder.Services.AddAntiforgery(options =>
 
 var app = builder.Build();
 
+// Emit DB target once at startup (safe: no credentials).
+using (var scope = app.Services.CreateScope())
+{
+    var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("DbConnection");
+    var info = scope.ServiceProvider.GetService<DbConnectionInfo>();
+    if (info != null)
+    {
+        logger.LogInformation("DB target: Server={Server}; Database={Database}; IntegratedSecurity={IntegratedSecurity}", info.Server, info.Database, info.IntegratedSecurity);
+    }
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -166,3 +191,5 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+internal sealed record DbConnectionInfo(string Server, string Database, bool IntegratedSecurity);
