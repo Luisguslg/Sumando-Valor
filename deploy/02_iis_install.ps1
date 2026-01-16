@@ -15,7 +15,7 @@ param(
   # SMTP (sin usuario/clave)
   [string]$SmtpHost = "mail.ve.kworld.kpmg.com",
   [int]$SmtpPort = 25,
-  [bool]$SmtpEnableSsl = $false
+  [object]$SmtpEnableSsl = $false
 )
 
 Set-StrictMode -Version Latest
@@ -126,7 +126,9 @@ Set-IisEnvVar -Site $SiteName -Name "ConnectionStrings__DefaultConnection" -Valu
 Set-IisEnvVar -Site $SiteName -Name "Email__Smtp__Enabled" -Value "true"
 Set-IisEnvVar -Site $SiteName -Name "Email__Smtp__Host" -Value $SmtpHost
 Set-IisEnvVar -Site $SiteName -Name "Email__Smtp__Port" -Value "$SmtpPort"
-Set-IisEnvVar -Site $SiteName -Name "Email__Smtp__EnableSsl" -Value "$($SmtpEnableSsl.ToString().ToLower())"
+$smtpSslNormalized = "$SmtpEnableSsl".Trim().ToLower()
+if ($smtpSslNormalized -in @("true", "1", "yes", "y")) { $smtpSslNormalized = "true" } else { $smtpSslNormalized = "false" }
+Set-IisEnvVar -Site $SiteName -Name "Email__Smtp__EnableSsl" -Value $smtpSslNormalized
 
 Write-Host "Reiniciando IIS"
 iisreset | Out-Null
