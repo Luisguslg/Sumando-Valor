@@ -49,12 +49,10 @@ public sealed class SmtpEmailService : IEmailService
             UseDefaultCredentials = false
         };
 
-        // Fail fast instead of hanging the HTTP request when outbound SMTP is blocked/unreachable.
-        // Note: Timeout is in milliseconds.
+        // Best-effort: SmtpClient.Timeout is not reliably honored by SendMailAsync in all environments,
+        // so we also enforce a hard timeout below with Task.WhenAny.
         if (_options.TimeoutMs > 0)
-        {
             client.Timeout = _options.TimeoutMs;
-        }
 
         if (!string.IsNullOrWhiteSpace(_options.User))
         {
@@ -79,7 +77,19 @@ public sealed class SmtpEmailService : IEmailService
 
         try
         {
-            await client.SendMailAsync(message);
+            _logger.LogInformation("Enviando email SMTP: To={To}, Subject={Subject}", to, subject);
+
+            var sendTask = client.SendMailAsync(message);
+            if (_options.TimeoutMs > 0)
+            {
+                var completed = await Task.WhenAny(sendTask, Task.Delay(_options.TimeoutMs));
+                if (completed != sendTask)
+                {
+                    throw new TimeoutException($"Timeout enviando email SMTP después de {_options.TimeoutMs}ms (Host={_options.Host}, Port={_options.Port}).");
+                }
+            }
+
+            await sendTask;
             _logger.LogInformation("Email SMTP enviado: To={To}, Subject={Subject}", to, subject);
         }
         catch (Exception ex)
