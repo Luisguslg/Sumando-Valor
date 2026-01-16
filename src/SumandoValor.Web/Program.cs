@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Principal;
 using SumandoValor.Infrastructure.Data;
 using SumandoValor.Infrastructure.Services;
 using SumandoValor.Web.Services.Certificates;
@@ -142,6 +143,19 @@ using (var scope = app.Services.CreateScope())
     if (info != null)
     {
         logger.LogInformation("DB target: Server={Server}; Database={Database}; IntegratedSecurity={IntegratedSecurity}", info.Server, info.Database, info.IntegratedSecurity);
+    }
+
+    // On Windows/IIS, this shows the real identity used for Integrated Security (often the AppPool identity).
+    try
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            logger.LogInformation("Process identity (Windows): {Identity}", WindowsIdentity.GetCurrent().Name);
+        }
+    }
+    catch
+    {
+        // Best-effort only. Never block startup due to identity probing.
     }
 }
 
