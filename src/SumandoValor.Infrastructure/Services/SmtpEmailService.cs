@@ -50,7 +50,19 @@ public sealed class SmtpEmailService : IEmailService
         }
         else
         {
-            client.Credentials = CredentialCache.DefaultNetworkCredentials;
+            // Three scenarios:
+            // 1) Internal relay without auth (recommended if IT restricts by IP): User empty + UseDefaultCredentials=false
+            // 2) Relay using Windows Auth (domain): User empty + UseDefaultCredentials=true
+            // 3) Authenticated SMTP: User set
+            if (_options.UseDefaultCredentials)
+            {
+                client.UseDefaultCredentials = true;
+            }
+            else
+            {
+                client.UseDefaultCredentials = false;
+                client.Credentials = null;
+            }
         }
 
         try

@@ -57,7 +57,8 @@ public sealed class CertificatePdfGenerator
                         {
                             panel
                                 .Background(Colors.White)
-                                .BorderRadius(18)
+                                .Border(1)
+                                .BorderColor(Colors.Grey.Lighten2)
                                 .PaddingVertical(24)
                                 .PaddingHorizontal(26)
                                 .Column(p =>
@@ -78,7 +79,8 @@ public sealed class CertificatePdfGenerator
                                             {
                                                 card
                                                     .Background("#EEE9FF")
-                                                    .BorderRadius(16)
+                                                    .Border(1)
+                                                    .BorderColor(Colors.Grey.Lighten2)
                                                     .Padding(14)
                                                     .Column(c =>
                                                     {

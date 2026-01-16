@@ -154,8 +154,33 @@ public class CertificadosModel : PageModel
                 Fecha = ins.Taller.FechaFin ?? ins.Taller.FechaInicio
             });
 
-            var relative = Path.Combine("App_Data", "Certificates", $"cert_{cert.Id}.pdf");
-            var physical = Path.Combine(_env.ContentRootPath, relative);
+            // FIX: never overwrite PDFs. Generate a unique filename per issuance and (optionally) delete the previous file.
+            if (!string.IsNullOrWhiteSpace(cert.UrlPdf))
+            {
+                try
+                {
+                    var oldNormalized = cert.UrlPdf.Replace('/', Path.DirectorySeparatorChar);
+                    var oldPhysical = Path.Combine(_env.ContentRootPath, oldNormalized);
+                    if (System.IO.File.Exists(oldPhysical))
+                    {
+                        System.IO.File.Delete(oldPhysical);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "No se pudo eliminar PDF anterior del certificado. CertId={CertId}", cert.Id);
+                }
+            }
+
+            string relative;
+            string physical;
+            do
+            {
+                var fileName = $"cert_{cert.Id}_{ins.TallerId}_{ins.UserId}_{Guid.NewGuid():N}.pdf";
+                relative = Path.Combine("App_Data", "Certificates", fileName);
+                physical = Path.Combine(_env.ContentRootPath, relative);
+            } while (System.IO.File.Exists(physical));
+
             await System.IO.File.WriteAllBytesAsync(physical, pdfBytes);
 
             cert.UrlPdf = relative.Replace(Path.DirectorySeparatorChar, '/');

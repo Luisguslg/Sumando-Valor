@@ -10,12 +10,13 @@ public static class DbInitializer
         AppDbContext context,
         UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole> roleManager,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        bool isDevelopment)
     {
         await context.Database.MigrateAsync();
 
         await SeedRolesAsync(roleManager);
-        await SeedAdminUserAsync(userManager, configuration);
+        await SeedAdminUserAsync(userManager, configuration, isDevelopment);
     }
 
     private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
@@ -33,10 +34,23 @@ public static class DbInitializer
 
     private static async Task SeedAdminUserAsync(
         UserManager<ApplicationUser> userManager,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        bool isDevelopment)
     {
+        var createAdmin = bool.TryParse(configuration["Seed:CreateAdmin"], out var b) && b;
+        if (!isDevelopment && !createAdmin)
+        {
+            // Production safety: do not create an admin unless explicitly enabled.
+            return;
+        }
+
         var adminEmail = configuration["Seed:AdminEmail"] ?? "admin@sumandovalor.org";
         var adminPassword = configuration["Seed:AdminPassword"] ?? "Admin123!";
+
+        if (!isDevelopment && (string.IsNullOrWhiteSpace(adminPassword) || adminPassword == "Admin123!"))
+        {
+            throw new InvalidOperationException("Seed:AdminPassword debe configurarse explícitamente en producción (no se permite el valor por defecto).");
+        }
 
         var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
         if (existingAdmin != null)

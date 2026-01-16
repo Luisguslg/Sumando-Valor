@@ -45,6 +45,39 @@ var devEmailPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data",
 builder.Services.AddSingleton<IDevEmailStore>(_ => new FileDevEmailStore(devEmailPath));
 
 builder.Services.Configure<SmtpEmailOptions>(builder.Configuration.GetSection("Email:Smtp"));
+// Compatibility: support legacy keys from the old ASP.NET MVC app (Ejemplo/Web.config).
+// This allows configuring SMTP via IIS environment variables like ServidorCorreo/PuertoCorreo/etc.
+builder.Services.PostConfigure<SmtpEmailOptions>(options =>
+{
+    var cfg = builder.Configuration;
+
+    if (bool.TryParse(cfg["EnviarCorreo"], out var legacyEnabled))
+        options.Enabled = legacyEnabled;
+
+    if (string.IsNullOrWhiteSpace(options.Host))
+        options.Host = cfg["ServidorCorreo"] ?? options.Host;
+
+    if (int.TryParse(cfg["PuertoCorreo"], out var legacyPort))
+        options.Port = legacyPort;
+
+    if (bool.TryParse(cfg["Enablessl"], out var legacySsl))
+        options.EnableSsl = legacySsl;
+
+    var legacyFrom = cfg["CorreoDeServicios"];
+    if (!string.IsNullOrWhiteSpace(legacyFrom))
+    {
+        // Prefer configured FromAddress, but fall back to legacy "CorreoDeServicios"
+        if (string.IsNullOrWhiteSpace(options.FromAddress))
+            options.FromAddress = legacyFrom;
+
+        // If password is present and user not set, use the same account as user
+        if (string.IsNullOrWhiteSpace(options.User) && !string.IsNullOrWhiteSpace(cfg["CorreoPassword"]))
+            options.User = legacyFrom;
+    }
+
+    if (string.IsNullOrWhiteSpace(options.Password))
+        options.Password = cfg["CorreoPassword"] ?? options.Password;
+});
 
 var captchaProvider = builder.Configuration["Captcha:Provider"] ?? "None";
 if (builder.Environment.IsDevelopment() || captchaProvider == "None")
@@ -105,12 +138,18 @@ using (var scope = app.Services.CreateScope())
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var configuration = services.GetRequiredService<IConfiguration>();
 
-        await DbInitializer.InitializeAsync(context, userManager, roleManager, configuration);
+        await DbInitializer.InitializeAsync(context, userManager, roleManager, configuration, app.Environment.IsDevelopment());
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "Error al inicializar la base de datos.");
+
+        // In production we fail fast: DB connectivity/migrations must be fixed before serving traffic.
+        if (!app.Environment.IsDevelopment())
+        {
+            throw;
+        }
     }
 }
 
