@@ -51,6 +51,8 @@ src/SumandoValor.Web/App_Data/
 # Publish output (local)
 publish/
 **/publish/
+artifacts/
+**/artifacts/
 
 # Production/local configuration (do not commit secrets)
 # Copy from appsettings.Production.example.json and set secrets via IIS env vars.

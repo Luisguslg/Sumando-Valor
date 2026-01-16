@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using SumandoValor.Infrastructure.Data;
 using SumandoValor.Infrastructure.Services;
@@ -100,6 +101,17 @@ else
 
 builder.Services.AddRazorPages();
 builder.Services.AddSingleton<CertificatePdfGenerator>();
+
+// Production hardening: persist DataProtection keys to disk so auth cookies remain valid after app restarts.
+// (Avoids "ephemeral key repository" warnings and random logout issues.)
+if (!builder.Environment.IsDevelopment())
+{
+    var keysPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "DataProtection-Keys");
+    Directory.CreateDirectory(keysPath);
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo(keysPath))
+        .SetApplicationName("SumandoValor");
+}
 
 builder.Services.AddAntiforgery(options =>
 {

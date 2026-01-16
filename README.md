@@ -118,6 +118,24 @@ Objetivo: un deploy repetible donde:
 
 ## PARTE 3 — Deploy a IIS (paso a paso)
 
+### Deploy “mínimo esfuerzo” (recomendado)
+
+En este repo hay 2 scripts que automatizan casi todo:
+- `deploy/01_publish.ps1` (en tu PC): genera `artifacts/SumandoValor_publish.zip`
+- `deploy/02_iis_install.ps1` (en el servidor): descomprime, crea carpetas/permisos, configura IIS y variables (BD + correo), reinicia IIS
+
+Uso:
+1) En tu PC:
+   - Ejecuta `deploy/01_publish.ps1`
+   - Copia `artifacts/SumandoValor_publish.zip` al servidor (ej. `C:\Temp\SumandoValor_publish.zip`)
+2) En el servidor (PowerShell Admin):
+   - Ejecuta `deploy/02_iis_install.ps1` pasando `SqlUser`/`SqlPassword` (SQL Auth)
+
+Qué se despliega:
+- **Solo** el contenido del ZIP (equivalente a `dotnet publish`).
+Qué NO se despliega:
+- `src/`, `tests/`, `.git/`, `.vs/`, etc.
+
 ### 3.0 Requisitos del servidor (una sola vez)
 
 En el servidor IIS:
