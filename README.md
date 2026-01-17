@@ -263,10 +263,8 @@ Entonces el servidor **abre TCP** pero **no recibe respuesta SMTP a tiempo** (po
 Esto casi siempre es **infra/relay/política de red** (no código).
 
 Acción recomendada:
-- Ejecuta el probe incluido en `ops/SMTP_PROBE.txt` en el servidor IIS.
-- Con ese resultado, IT puede habilitar:
-  - **Relay interno por IP** (puerto 25 sin auth), o
-  - **SMTP autenticado** (normalmente 587/TLS), según la política corporativa.
+- Pedir a IT un **SMTP relay interno por IP** (puerto 25 sin auth) restringido por la IP de salida del servidor IIS.
+- Plantilla lista para enviar: `ops/SMTP_IT_REQUEST.txt`.
 
 ### 5.1 Diagnóstico
 
