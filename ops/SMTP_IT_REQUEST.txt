@@ -1,0 +1,43 @@
+PLANTILLA PARA IT — Habilitar envío de correos desde SumandoValor (IIS)
+
+Contexto
+- Aplicación: SumandoValor (ASP.NET Core en IIS)
+- Servidor IIS: (poner hostname)
+- Sitio: sumandovalor.kpmg.com (o el que aplique)
+
+Problema actual (evidencia)
+- La app intenta enviar email por SMTP y cae en timeout (15s).
+- Ejecutando `ops/SMTP_PROBE.txt` en el servidor IIS:
+  - NO se recibe banner SMTP (220) en:
+    - mail.ve.kworld.kpmg.com:25
+    - mail.ve.kworld.kpmg.com:587
+- DNS de `mail.ve.kworld.kpmg.com` resuelve a endpoints de Exchange Online (Outlook/EOP), por ejemplo:
+  - 52.97.233.130
+  - (también hay AAAA IPv6)
+
+Solicitud (lo que necesitamos)
+Opción A (preferida): SMTP Relay interno por IP (sin auth)
+- Proveer un host de relay para aplicaciones (ej: mailrelay.<dominio> o el que usen internamente)
+- Puerto: 25 (o el que indiquen)
+- Permitir relay desde la IP del servidor IIS (whitelist por IP)
+- Confirmar si requiere STARTTLS/SSL (normalmente NO para relay interno por IP, pero depende de política)
+
+Opción B: SMTP autenticado (submission)
+- Proveer host/puerto correctos (típicamente 587 + TLS)
+- Proveer cuenta de servicio + password (o mecanismo permitido)
+
+Datos que IT debe devolver (para configurar IIS)
+- SMTP_HOST = ________
+- SMTP_PORT = ________
+- SMTP_ENABLE_SSL (true/false) = ________
+- Requiere auth? (sí/no) = ________
+  - SMTP_USER = ________
+  - SMTP_PASSWORD = ________
+- Restricciones:
+  - IP permitida del IIS (confirmar) = ________
+  - FromAddress permitido (ej: sumandovalor@kpmg.com) = ________
+
+Nota
+- `Test-NetConnection` puede salir "OK" (TCP), pero si el servidor no entrega banner SMTP o hay inspección, la app igual hace timeout.
+- Necesitamos que desde el IIS se pueda completar el handshake SMTP (recibir 220 y responder EHLO).
+

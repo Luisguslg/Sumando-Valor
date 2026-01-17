@@ -4,12 +4,11 @@ SMTP PROBE (IIS) — detectar si el servidor responde el banner SMTP (220) y qu�
 
 2) Pegar y ejecutar:
 
-$hostName = "mail.ve.kworld.kpmg.com"
+$hosts = @(
+  "mail.ve.kworld.kpmg.com",
+  "smtp.office365.com"
+)
 $ports = @(25,587)
-
-Write-Host "== DNS (A/AAAA) ==" -ForegroundColor Cyan
-try { Resolve-DnsName $hostName -Type A   | Select-Object Name,IPAddress } catch { Write-Host $_ -ForegroundColor Yellow }
-try { Resolve-DnsName $hostName -Type AAAA| Select-Object Name,IPAddress } catch { Write-Host $_ -ForegroundColor Yellow }
 
 function Read-SmtpBanner {
   param(
@@ -39,17 +38,28 @@ function Read-SmtpBanner {
   }
 }
 
-foreach ($p in $ports) {
-  Write-Host "== PROBANDO $hostName:$p ==" -ForegroundColor Cyan
-  try {
-    $banner = Read-SmtpBanner -TargetHost $hostName -Port $p -TimeoutMs 5000
-    if ([string]::IsNullOrWhiteSpace($banner)) {
-      Write-Host "SIN BANNER (conectó pero no respondió linea 1)" -ForegroundColor Yellow
-    } else {
-      Write-Host "BANNER: $banner" -ForegroundColor Green
+foreach ($h in $hosts) {
+  Write-Host ""
+  Write-Host "==============================" -ForegroundColor DarkGray
+  Write-Host "HOST: $h" -ForegroundColor Cyan
+  Write-Host "==============================" -ForegroundColor DarkGray
+
+  Write-Host "== DNS (A/AAAA) ==" -ForegroundColor Cyan
+  try { Resolve-DnsName $h -Type A    | Select-Object Name,IPAddress } catch { Write-Host $_ -ForegroundColor Yellow }
+  try { Resolve-DnsName $h -Type AAAA | Select-Object Name,IPAddress } catch { Write-Host $_ -ForegroundColor Yellow }
+
+  foreach ($p in $ports) {
+    Write-Host "== PROBANDO $h:$p ==" -ForegroundColor Cyan
+    try {
+      $banner = Read-SmtpBanner -TargetHost $h -Port $p -TimeoutMs 5000
+      if ([string]::IsNullOrWhiteSpace($banner)) {
+        Write-Host "SIN BANNER (conectó pero no respondió linea 1)" -ForegroundColor Yellow
+      } else {
+        Write-Host "BANNER: $banner" -ForegroundColor Green
+      }
+    } catch {
+      Write-Host "ERROR: $($_.Exception.Message)" -ForegroundColor Red
     }
-  } catch {
-    Write-Host "ERROR: $($_.Exception.Message)" -ForegroundColor Red
   }
 }
 
@@ -57,4 +67,10 @@ foreach ($p in $ports) {
 - Si en 25 NO hay banner (o CONNECT timeout): IT/firewall/relay está bloqueando a nivel de aplicación.
 - Si en 587 sí hay banner: usa SMTP autenticado (587 + TLS) en la app.
 - Si hay banner en ambos: el SMTP responde; entonces el problema es auth/relay/FromAddress (saldrá como SmtpException, no Timeout).
+
+4) Si sospechas problema de IPv6:
+- Toma una IP v4 del bloque "DNS (A)" y prueba directo por IP (evita AAAA):
+  - Ejemplo:
+    $banner = Read-SmtpBanner -TargetHost "52.97.233.130" -Port 25 -TimeoutMs 5000
+    $banner
 

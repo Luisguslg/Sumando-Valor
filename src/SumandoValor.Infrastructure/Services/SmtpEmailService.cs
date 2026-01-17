@@ -46,7 +46,8 @@ public sealed class SmtpEmailService : IEmailService
         {
             EnableSsl = _options.EnableSsl,
             DeliveryMethod = SmtpDeliveryMethod.Network,
-            UseDefaultCredentials = false
+            // Respect the configuration. If User is provided we will override credentials below anyway.
+            UseDefaultCredentials = _options.UseDefaultCredentials
         };
 
         // Best-effort: SmtpClient.Timeout is not reliably honored by SendMailAsync in all environments,
