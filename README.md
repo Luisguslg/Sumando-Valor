@@ -252,6 +252,22 @@ Si esto falla:
 - Es **red/firewall** o el host/puerto es incorrecto.
 - La app no puede enviar emails si el servidor no puede conectar al SMTP.
 
+### 5.1.1 Caso real: `System.TimeoutException ... después de 15000ms`
+
+Si en logs ves algo como:
+- `Enviando email SMTP...`
+- y luego `System.TimeoutException: Timeout enviando email SMTP después de 15000ms (Host=..., Port=25)`
+
+Entonces el servidor **abre TCP** pero **no recibe respuesta SMTP a tiempo** (por ejemplo, no llega el banner `220`).
+
+Esto casi siempre es **infra/relay/política de red** (no código).
+
+Acción recomendada:
+- Ejecuta el probe incluido en `ops/SMTP_PROBE.txt` en el servidor IIS.
+- Con ese resultado, IT puede habilitar:
+  - **Relay interno por IP** (puerto 25 sin auth), o
+  - **SMTP autenticado** (normalmente 587/TLS), según la política corporativa.
+
 ### 5.1 Diagnóstico
 
 Hay dos escenarios típicos corporativos:
