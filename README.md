@@ -171,7 +171,7 @@ Configurar variables en el **App Pool** (recomendado) o en `web.config`:
 - `ASPNETCORE_ENVIRONMENT=Production`
 - `ConnectionStrings__DefaultConnection=...`
 - `Email__Smtp__Enabled=true`
-- `Email__Smtp__Host=...`
+- `Email__Smtp__Host=...` (hostname/FQDN **sin** `http://` y sin formato tipo markdown)
 - `Email__Smtp__Port=25` (relay) o `587` (auth)
 - `Email__Smtp__EnableSsl=false/true`
 - `Email__Smtp__UseDefaultCredentials=false/true`
@@ -182,6 +182,45 @@ Configurar variables en el **App Pool** (recomendado) o en `web.config`:
 - `Email__ContactRecipient=fundacionkpmg@kpmg.com`
 - `Seed__CreateAdmin=false` (recomendado)
 - `Seed__AdminPassword=...` (si `Seed__CreateAdmin=true`, obligatorio en prod)
+
+#### Ejemplo real (IIS Production / `web.config`)
+
+> Nota: **NO** commitear secretos reales. Si necesitas tener este bloque en el servidor, deja `Seed__AdminPassword` fuera o cámbialo luego y vuelve `Seed__CreateAdmin=false`.
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <location path="." inheritInChildApplications="false">
+    <system.webServer>
+      <handlers>
+        <add name="aspNetCore" path="*" verb="*" modules="AspNetCoreModuleV2" resourceType="Unspecified" />
+      </handlers>
+      <aspNetCore processPath="dotnet"
+                  arguments=".\SumandoValor.Web.dll"
+                  hostingModel="inprocess"
+                  stdoutLogEnabled="true"
+                  stdoutLogFile=".\logs\stdout">
+        <environmentVariables>
+          <environmentVariable name="ASPNETCORE_ENVIRONMENT" value="Production" />
+          <environmentVariable name="ConnectionStrings__DefaultConnection" value="Server=VECCSAPP10,61057;Database=SumandoValorDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True;" />
+
+          <environmentVariable name="Email__Smtp__Enabled" value="true" />
+          <environmentVariable name="Email__Smtp__Host" value="smtp-host-corporativo" />
+          <environmentVariable name="Email__Smtp__Port" value="25" />
+          <environmentVariable name="Email__Smtp__EnableSsl" value="false" />
+          <environmentVariable name="Email__Smtp__UseDefaultCredentials" value="true" />
+          <environmentVariable name="Email__Smtp__FromAddress" value="sumandovalor@kpmg.com" />
+          <environmentVariable name="Email__Smtp__FromName" value="Sumando Valor" />
+
+          <environmentVariable name="Seed__CreateAdmin" value="false" />
+          <environmentVariable name="Seed__AdminEmail" value="admin@sumandovalor.org" />
+          <!-- Seed__AdminPassword: SOLO si vas a recrear admin de forma controlada -->
+        </environmentVariables>
+      </aspNetCore>
+    </system.webServer>
+  </location>
+</configuration>
+```
 
 ## PARTE 4 — SQL Server remoto
 
