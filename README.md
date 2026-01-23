@@ -1,134 +1,207 @@
-# Sumando Valor - Plataforma Web
+# Sumando Valor – Plataforma Web
 
-Plataforma web (Razor Pages + .NET 8) para la gestión de cursos, talleres, inscripciones, encuestas y certificados de la Fundación KPMG Venezuela.
+Plataforma web desarrollada en **ASP.NET Core (.NET 8, Razor Pages)** para la **Fundación KPMG Venezuela**, orientada a la gestión de **cursos**, **talleres**, **inscripciones**, **encuestas** y **certificados**, con control de roles y despliegue en **IIS**.
 
-## Roles y flujos
+## 1. Introducción
 
-- **Admin**: gestiona cursos/talleres/inscripciones, revisa encuestas, aprueba certificados, administra usuarios, diagnostica correos.
-- **Beneficiario**: se registra, confirma email, se inscribe a talleres, responde encuestas (si aplica) y descarga certificados (si aplica).
+Sumando Valor centraliza y digitaliza el proceso de formación ofrecido por la Fundación, permitiendo:
 
-Rutas clave:
-- **Público**: `/`, `/Cursos`, `/Cursos/{id}`, `/Talleres/{id}`, `/Contact`
-- **Cuenta/Perfil**: `/Account/Login`, `/Account/Register`, `/Profile`, `/Profile/Talleres`
-- **Admin**: `/Admin/*` (Cursos, Talleres, Inscripciones, Encuestas, Certificados, Usuarios, EmailDiagnostics)
+- Publicación de cursos y talleres.
+- Inscripción controlada de beneficiarios.
+- Gestión administrativa de eventos.
+- Recolección de encuestas de satisfacción.
+- Emisión y descarga segura de certificados en PDF.
+- Notificaciones por correo electrónico.
 
-## Arquitectura (Producción)
+### Roles del sistema
 
-Diagrama textual:
+- **Administrador (Admin)**: gestiona cursos, talleres, inscripciones, encuestas, certificados, usuarios y diagnósticos de correo.
+- **Beneficiario**: se registra, confirma email, se inscribe en talleres, responde encuestas (cuando aplica) y descarga certificados aprobados.
 
-```
+### Rutas clave (referenciales; pueden variar según el estado actual del proyecto)
+
+**Públicas**
+
+- `/`
+- `/Cursos`
+- `/Cursos/{id}`
+- `/Talleres/{id}`
+- `/Contact`
+
+**Cuenta / Perfil**
+
+- `/Account/Login`
+- `/Account/Register`
+- `/Profile`
+- `/Profile/Talleres`
+
+**Administración**
+
+- `/Admin/*`
+- `/Admin/Cursos`
+- `/Admin/Talleres`
+- `/Admin/Inscripciones`
+- `/Admin/EmailDiagnostics`
+- (Encuestas, Certificados y Usuarios según estado actual del proyecto)
+
+## 2. Arquitectura
+
+### Diagrama textual (Producción)
+
 Usuario (Browser)
    │
    ▼
-IIS (ASP.NET Core Module)  ─────────►  Kestrel (.NET 8 / Razor Pages)
-   │                                     │
-   │                                     ├─ EF Core (migraciones) ──► SQL Server remoto
-   │                                     ├─ SMTP (relay o auth) ────► Servidor SMTP corporativo
-   │                                     └─ Archivos (PDF) ─────────► C:\inetpub\sumandovalor\App_Data\Certificates
+IIS (ASP.NET Core Module - ANCM)
    │
-   └─ Static files (wwwroot)
+   ▼
+Kestrel (.NET 8 / Razor Pages)
+   ├─ ASP.NET Identity (Roles)
+   ├─ EF Core (Migraciones)
+   ├─ SMTP (correo real)
+   ├─ QuestPDF (PDFs)
+   └─ File System (App_Data)
+        ├─ Certificates
+        └─ DataProtection-Keys
+
+### Componentes principales
+
+- **Backend/Frontend**: Razor Pages (.NET 8).
+- **Persistencia**: SQL Server.
+- **Autenticación/Autorización**: ASP.NET Identity (Roles).
+- **Correo**: servicio SMTP configurable por entorno.
+- **PDFs**: QuestPDF, almacenamiento fuera de `wwwroot`.
+
+## 3. Tecnologías y dependencias
+
+- .NET 8 (ASP.NET Core)
+- Razor Pages
+- Entity Framework Core
+- SQL Server
+- ASP.NET Identity
+- QuestPDF
+- IIS (ASP.NET Core Module V2)
+- SMTP (relay corporativo o autenticado)
+
+## 4. Requisitos del servidor (Producción)
+
+- Windows Server (2019 o superior).
+- IIS instalado con:
+  - Static Content
+  - ASP.NET Core Module (incluido en el Hosting Bundle)
+- .NET 8 Hosting Bundle instalado.
+- Acceso a SQL Server.
+- Acceso de red al servidor SMTP.
+- Permisos NTFS sobre carpetas de la aplicación (ver secciones 8 y 10).
+
+## 5. Configuración por entorno
+
+### Development
+
+- Base de datos de desarrollo (según configuración local).
+- Correos simulados (`DevelopmentEmailService`).
+- Emails guardados en `App_Data/DevEmails`.
+- Visualización (solo dev): `/Dev/Emails`.
+
+### Production (IIS)
+
+- SQL Server remoto.
+- SMTP real (`SmtpEmailService`).
+- PDFs persistentes en disco.
+- DataProtection keys persistidas en disco.
+
+## 6. Base de datos
+
+### Migraciones
+
+Las migraciones se encuentran en:
+
+`src/SumandoValor.Infrastructure/Migrations`
+
+### Opción A – Migración manual (recomendada)
+
+Ejecutar desde la raíz del repo:
+
+```powershell
+dotnet ef database update `
+  --project src\SumandoValor.Infrastructure `
+  --startup-project src\SumandoValor.Web
 ```
 
-## PARTE 1 — Auditoría actual (obligatorio)
+### Opción B – Migración automática al iniciar
 
-### 1.1 ¿Cómo se crea hoy la base de datos?
+La aplicación ejecuta migraciones automáticamente en el arranque (cuando la conexión es válida).
 
-- **Migrations EF Core** viven en: `src/SumandoValor.Infrastructure/Migrations`.
-- En el arranque, la app ejecuta **migraciones automáticamente**:
+### Autenticación SQL (referencia)
 
-```98:116:src/SumandoValor.Web/Program.cs
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<AppDbContext>();
-        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        var configuration = services.GetRequiredService<IConfiguration>();
+- **Windows Authentication**: requiere que la identidad del App Pool tenga permisos en SQL Server.
+- **SQL Authentication**: suele ser más simple de operar en producción.
 
-        await DbInitializer.InitializeAsync(context, userManager, roleManager, configuration, app.Environment.IsDevelopment());
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Error al inicializar la base de datos.");
+Permisos mínimos durante migraciones: capacidad de ejecutar DDL (en muchos entornos se usa `db_owner`).
 
-        // In production we fail fast: DB connectivity/migrations must be fixed before serving traffic.
-        if (!app.Environment.IsDevelopment())
-        {
-            throw;
-        }
-    }
-}
+## 7. Correos electrónicos
+
+### Flujo
+
+- Abstracción: `IEmailService`
+- Implementaciones:
+  - `DevelopmentEmailService`
+  - `SmtpEmailService`
+
+### Diagnóstico
+
+- Ruta Admin: `/Admin/EmailDiagnostics`
+
+### Variables de entorno (IIS) – Producción (sin secretos)
+
+```text
+Email__Smtp__Enabled=true
+Email__Smtp__Host=goemairs.go.kworld.kpmg.com
+Email__Smtp__Port=25
+Email__Smtp__EnableSsl=false
+Email__Smtp__UseDefaultCredentials=true
+Email__Smtp__FromAddress=sumandovalor@kpmg.com
+Email__Smtp__FromName=Sumando Valor
 ```
 
-Y `DbInitializer` aplica migraciones y siembra roles:
+### Troubleshooting típico
 
-```7:27:src/SumandoValor.Infrastructure/Data/DbInitializer.cs
-public static async Task InitializeAsync(
-    AppDbContext context,
-    UserManager<ApplicationUser> userManager,
-    RoleManager<IdentityRole> roleManager,
-    IConfiguration configuration,
-    bool isDevelopment)
-{
-    await context.Database.MigrateAsync();
+- Host incorrecto (error común).
+- Firewall bloqueando puertos (25/587).
+- Relay SMTP sin permiso por IP.
+- Timeout SMTP (infraestructura/red).
 
-    await SeedRolesAsync(roleManager);
-    await SeedAdminUserAsync(userManager, configuration, isDevelopment);
-}
+## 8. Certificados / PDFs
+
+- Generación: QuestPDF.
+- Almacenamiento: `App_Data/Certificates` (fuera de `wwwroot`).
+- Naming (referencial):
+
+```text
+cert_{certId}_{tallerId}_{userId}_{guid}.pdf
 ```
 
-### 1.2 ¿Dónde están las connection strings?
+- Descarga protegida (referencial): `/Certificates/Download?id={certId}`
 
-- `src/SumandoValor.Web/appsettings.json` → `ConnectionStrings:DefaultConnection`
-- Se puede (y se debe en IIS) sobreescribir por **variables de entorno**:
-  - `ConnectionStrings__DefaultConnection`
+### Seguridad
 
-### 1.3 ¿Qué implementación de correo existe hoy?
+- Solo el usuario dueño o un Admin puede descargar.
+- PDFs anteriores se eliminan al regenerar (según implementación actual).
 
-- Abstracción: `SumandoValor.Infrastructure.Services.IEmailService`
-- **Development**: `DevelopmentEmailService` guarda emails en disco (`App_Data/DevEmails`) y se ven en `/Dev/Emails`.
-- **Producción/IIS**: `SmtpEmailService` (SMTP real), configurable por `Email:Smtp:*`.
+### Permisos NTFS
 
-### 1.4 ¿Dónde se generan y guardan los PDFs?
+Dar **Modify** a la identidad del App Pool sobre `App_Data/Certificates`.
 
-- Se generan con QuestPDF en: `src/SumandoValor.Web/Services/Certificates/CertificatePdfGenerator.cs`.
-- Se guardan en: `App_Data/Certificates` (fuera de `wwwroot`).
-- Descarga segura: `/Certificates/Download?id={certId}` valida:
-  - Certificado aprobado
-  - Usuario dueño o Admin
-  - Ruta bajo `App_Data/Certificates`
+## 9. Seguridad
 
-### 1.5 ¿Por qué “se sobrescribían” los PDFs?
+- Roles y autorización por página.
+- Archivos sensibles fuera de `wwwroot`.
+- DataProtection keys persistidas en:
+  - `App_Data/DataProtection-Keys`
+- No se almacenan secretos en el repositorio.
 
-- Antes el nombre podía ser determinístico por certificado (o regenerado sobre el mismo archivo).
-- **Fix**: ahora se genera un **nombre único por emisión** (incluye `certId`, `tallerId`, `userId` y `Guid`) y nunca se sobrescribe; si existía un PDF anterior, se elimina antes de apuntar al nuevo.
+## 10. Deploy en IIS (paso a paso)
 
-## PARTE 2 — Estrategia de deploy (diseño)
-
-Objetivo: un deploy repetible donde:
-- La app se publica desde tu PC (`dotnet publish` Release).
-- Se copia al servidor por RDP.
-- IIS configura variables de entorno (sin secretos en Git).
-- SQL Server remoto se prepara desde tu PC (con `dotnet ef` apuntando remoto) o automáticamente al primer arranque.
-- PDFs se guardan en carpeta segura y con permisos NTFS correctos.
-- SMTP real queda verificable con `/Admin/EmailDiagnostics`.
-
-## PARTE 3 — Deploy a IIS (paso a paso)
-
-### Publicación (Release)
-
-La forma recomendada de desplegar es generar una carpeta publicada (Release) y copiarla al servidor IIS.
-
-### 3.0 Requisitos del servidor (una sola vez)
-
-En el servidor IIS:
-- Instalar **.NET 8 Hosting Bundle** (incluye ASP.NET Core Module para IIS).
-- Habilitar IIS con **Static Content**.
-
-### 3.1 Publicación desde tu PC (Release)
+### 10.1 Publicar desde desarrollo
 
 Desde la raíz del repo:
 
@@ -136,218 +209,56 @@ Desde la raíz del repo:
 dotnet publish src\SumandoValor.Web\SumandoValor.Web.csproj -c Release -o .\publish
 ```
 
-Se genera la carpeta `.\publish` (no se sube a git).
+### 10.2 Copiar al servidor
 
-**No copies** secretos ni configs locales al repo. En el servidor, configura por env vars o un `appsettings.Production.json` local (ignorado por git).
+Ejemplo:
 
-### 3.2 Copiar al servidor (RDP)
-
-Recomendado:
-- Carpeta destino: `C:\inetpub\sumandovalor\`
-- Copiar el contenido de `.\publish\` → `C:\inetpub\sumandovalor\app\` (por ejemplo)
-- Crear carpeta: `C:\inetpub\sumandovalor\App_Data\Certificates\`
-
-Permisos NTFS (crítico):
-- Dar **Modify** a la identidad del App Pool (ej. `IIS AppPool\SumandoValor`) sobre:
+- Carpeta destino del sitio: `C:\inetpub\sumandovalor\app\`
+- Crear:
   - `C:\inetpub\sumandovalor\App_Data\Certificates\`
-  - (Opcional) `C:\inetpub\sumandovalor\logs\` si habilitas stdout logs
+  - `C:\inetpub\sumandovalor\App_Data\DataProtection-Keys\`
 
-### 3.3 Configuración IIS (sitio)
+### 10.3 IIS
 
-1) Crear **Application Pool**
+**App Pool**
+
 - .NET CLR: **No Managed Code**
-- Pipeline: Integrated
-- Identity: ApplicationPoolIdentity (ok)
+- Identity: `ApplicationPoolIdentity` (o identidad definida por infraestructura)
 
-2) Crear **Sitio**
-- Physical path: `C:\inetpub\sumandovalor\app\`
-- Binding: host/puerto según IT
-- Ideal: HTTPS con certificado
+**Site**
 
-### 3.4 Variables de entorno / config (IIS)
+- Physical Path: carpeta publicada
+- Binding: según infraestructura (host/puerto/certificado)
 
-Configurar variables en el **App Pool** (recomendado) o en `web.config`:
+### 10.4 Variables de entorno / web.config
 
-- `ASPNETCORE_ENVIRONMENT=Production`
-- `ConnectionStrings__DefaultConnection=...`
-- `Email__Smtp__Enabled=true`
-- `Email__Smtp__Host=...` (hostname/FQDN **sin** `http://` y sin formato tipo markdown)
-- `Email__Smtp__Port=25` (relay) o `587` (auth)
-- `Email__Smtp__EnableSsl=false/true`
-- `Email__Smtp__UseDefaultCredentials=false/true`
-- `Email__Smtp__User=...` (solo si SMTP autenticado)
-- `Email__Smtp__Password=...` (solo si SMTP autenticado)
-- `Email__Smtp__FromAddress=...`
-- `Email__Smtp__FromName=Sumando Valor`
-- `Email__ContactRecipient=fundacionkpmg@kpmg.com`
-- `Seed__CreateAdmin=false` (recomendado)
-- `Seed__AdminPassword=...` (si `Seed__CreateAdmin=true`, obligatorio en prod)
+Definir variables de entorno en IIS (recomendado) o en `web.config`.  
+**Nunca** versionar contraseñas en Git.
 
-#### Ejemplo real (IIS Production / `web.config`)
+### 10.5 Logs
 
-> Nota: **NO** commitear secretos reales. Si necesitas tener este bloque en el servidor, deja `Seed__AdminPassword` fuera o cámbialo luego y vuelve `Seed__CreateAdmin=false`.
+`logs\stdout` (si se habilita en `web.config`) requiere permisos de escritura NTFS.
 
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
-  <location path="." inheritInChildApplications="false">
-    <system.webServer>
-      <handlers>
-        <add name="aspNetCore" path="*" verb="*" modules="AspNetCoreModuleV2" resourceType="Unspecified" />
-      </handlers>
-      <aspNetCore processPath="dotnet"
-                  arguments=".\SumandoValor.Web.dll"
-                  hostingModel="inprocess"
-                  stdoutLogEnabled="true"
-                  stdoutLogFile=".\logs\stdout">
-        <environmentVariables>
-          <environmentVariable name="ASPNETCORE_ENVIRONMENT" value="Production" />
-          <environmentVariable name="ConnectionStrings__DefaultConnection" value="Server=VECCSAPP10,61057;Database=SumandoValorDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True;" />
+## 11. Checklist post-deploy
 
-          <environmentVariable name="Email__Smtp__Enabled" value="true" />
-          <environmentVariable name="Email__Smtp__Host" value="smtp-host-corporativo" />
-          <environmentVariable name="Email__Smtp__Port" value="25" />
-          <environmentVariable name="Email__Smtp__EnableSsl" value="false" />
-          <environmentVariable name="Email__Smtp__UseDefaultCredentials" value="true" />
-          <environmentVariable name="Email__Smtp__FromAddress" value="sumandovalor@kpmg.com" />
-          <environmentVariable name="Email__Smtp__FromName" value="Sumando Valor" />
+- La app inicia sin errores.
+- Migraciones aplicadas correctamente.
+- Login / Registro funcional.
+- Envío de correos probado (ideal: `/Admin/EmailDiagnostics`).
+- PDFs se generan y descargan.
+- Roles Admin/Beneficiario correctos.
+- Permisos NTFS validados.
 
-          <environmentVariable name="Seed__CreateAdmin" value="false" />
-          <environmentVariable name="Seed__AdminEmail" value="admin@sumandovalor.org" />
-          <!-- Seed__AdminPassword: SOLO si vas a recrear admin de forma controlada -->
-        </environmentVariables>
-      </aspNetCore>
-    </system.webServer>
-  </location>
-</configuration>
-```
+## 12. Por confirmar / Pendiente de definición
 
-## PARTE 4 — SQL Server remoto
+- ¿El CRUD completo de Encuestas ya está habilitado en Admin o solo parcialmente?
+- ¿El flujo exacto de aprobación de certificados requiere:
+  - aprobación manual obligatoria siempre?
+  - o automática tras encuesta aprobada?
+- ¿El CRUD de Usuarios (Admin) incluye:
+  - paginación?
+  - activación/desactivación?
+  - asignación de rol Admin desde UI?
+- ¿Existe política de retención/eliminación de certificados antiguos?
+- ¿El SMTP corporativo permite envío externo o solo interno?
 
-### 4.1 Crear/actualizar BD desde tu PC (recomendado)
-
-Opción A (controlado): ejecutar migraciones desde tu PC hacia el SQL remoto:
-
-```powershell
-dotnet ef database update `
-  --project src\SumandoValor.Infrastructure `
-  --startup-project src\SumandoValor.Web `
-  --connection "Server=SERVIDOR;Database=SumandoValorDb;User Id=...;Password=...;TrustServerCertificate=True;MultipleActiveResultSets=True;"
-```
-
-Opción B (automático): la app en producción ejecuta `Database.Migrate()` al iniciar. Si la conexión es correcta, crea/actualiza la BD sola.
-
-### 4.2 Autenticación (Windows vs SQL)
-
-- **Windows Auth**: el App Pool ejecuta como `ApplicationPoolIdentity` (máquina local). Para usar Windows Auth real, normalmente se requiere cuenta de dominio y configurar SPN/Delegation (depende de IT).
-- **SQL Auth (más simple)**: crear login SQL y otorgar permisos en la DB.
-
-Permisos mínimos para EF migrations: típicamente **db_owner** durante migraciones (o permisos DDL equivalentes).
-
-## PARTE 5 — Email real (producción)
-
-### 5.0 Estado actual (IIS / Production)
-
-- **En Production** la app usa **SMTP real** (no modo dev).
-- La configuración se inyecta por **variables de entorno en IIS** (no se guardan credenciales en el repo).
-- Estrategia típica corporativa (recomendada): **SMTP relay interno por puerto 25**, **sin SSL**, **sin autenticación**, restringido por **IP del servidor IIS**.
-
-> Nota: el problema histórico de “no envía correos” se debió a **SMTP Host incorrecto**; al corregir el host (y permitir el relay) el envío funciona.
-
-### 5.0.1 Compatibilidad con keys “legacy” (proyecto antiguo)
-
-En el proyecto antiguo se usaban keys “legacy” como:
-- `ServidorCorreo` (host)
-- `PuertoCorreo` (port)
-- `EnviarCorreo` (enabled)
-- `CorreoDeServicios` (from / user)
-- `CorreoPassword` (password)
-- `Enablessl` (ssl)
-
-En esta app .NET 8 ya soportamos esos keys como **fallback**, por lo que en IIS puedes configurar **o** `Email__Smtp__*` **o** esos legacy keys como variables de entorno.
-
-### 5.1 Diagnóstico (antes de culpar a la app)
-
-Desde el servidor IIS (PowerShell) prueba conectividad:
-
-```powershell
-Test-NetConnection -ComputerName <SMTP_HOST> -Port 25
-Test-NetConnection -ComputerName <SMTP_HOST> -Port 587
-```
-
-Si esto falla:
-- Es **red/firewall** o el host/puerto es incorrecto.
-- La app no puede enviar emails si el servidor no puede conectar al SMTP.
-
-### 5.1.1 Caso real: `System.TimeoutException ... después de 15000ms`
-
-Si en logs ves algo como:
-- `Enviando email SMTP...`
-- y luego `System.TimeoutException: Timeout enviando email SMTP después de 15000ms (Host=..., Port=25)`
-
-Entonces el servidor **abre TCP** pero **no recibe respuesta SMTP a tiempo** (por ejemplo, no llega el banner `220`).
-
-Esto casi siempre es **infra/relay/política de red** (no código).
-
-Acción recomendada:
-- Validar host/puerto/relay con IT (el servidor IIS debe poder llegar y el relay debe permitir la IP de salida).
-
-### 5.1 Diagnóstico
-
-Hay dos escenarios típicos corporativos:
-
-- **Opción A (preferida si IT lo permite)**: SMTP relay interno por IP (puerto 25), sin auth.
-  - Riesgo: si no restringen por IP, es un relay abierto (NO aceptable).
-  - Requisito: IT debe **restringir por IP** (la IP del servidor IIS) y/o por red.
-
-- **Opción B (fallback)**: SMTP autenticado (587/TLS).
-
-### 5.2 Configuración recomendada
-
-**A) Relay interno sin auth**
-- `Email__Smtp__Port=25`
-- `Email__Smtp__EnableSsl=false` (según IT)
-- `Email__Smtp__User=` (vacío)
-- `Email__Smtp__UseDefaultCredentials=false`
-
-**B) SMTP autenticado**
-- `Email__Smtp__Port=587`
-- `Email__Smtp__EnableSsl=true`
-- `Email__Smtp__User=...`
-- `Email__Smtp__Password=...`
-
-Prueba: `/Admin/EmailDiagnostics`
-
-### 5.3 “Debe enviar de verdad”: checklist rápido
-
-Para que **sí** envíe real en producción deben cumplirse:
-- `ASPNETCORE_ENVIRONMENT=Production`
-- `Email__Smtp__Enabled=true`
-- Host/Port correctos y accesibles desde el servidor (Test-NetConnection OK)
-- Si es relay por IP: IT debe permitir la IP del IIS
-- Si es autenticado: user/password válidos
-- `Email__Smtp__FromAddress` permitido por el servidor SMTP (algunas orgs lo restringen)
-
-## PARTE 6 — PDFs persistentes y seguros (crítico)
-
-- Carpeta: `App_Data/Certificates` (NO pública).
-- Nombre: `cert_{certId}_{tallerId}_{userId}_{guid}.pdf` (no colisiona, no sobrescribe).
-- Descarga: endpoint protegido `/Certificates/Download`.
-
-## Seguridad y buenas prácticas
-
-- No subir secretos al repo:
-  - `appsettings.Production.json` está ignorado por `.gitignore`
-  - Preferir variables de entorno en IIS
-- `Seed:CreateAdmin`:
-  - En **Development** está en `true`
-  - En **Producción** se recomienda `false`
-  - Si se activa en prod, **Seed:AdminPassword debe ser explícito** (no se permite el default)
-
-3. Descargar: `/Certificates/Download?id={certId}` debe permitir solo al dueño (o Admin).
-
-### 7) Usuarios (Admin)
-1. Admin: `/Admin/Usuarios`:
-   - Buscar por nombre/email/cédula, filtrar por estado y rol.
-   - Activar/Desactivar usuario (con confirm).
-   - Hacer/Quitar Admin (no permite quitar al último admin).
