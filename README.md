@@ -207,29 +207,17 @@ Permisos mínimos para EF migrations: típicamente **db_owner** durante migracio
 
 ## PARTE 5 — Email real (producción)
 
-### 5.0 Cómo conseguir los datos SMTP (si no los tienes)
+### 5.0 Estado actual (IIS / Production)
 
-En este repo **no guardamos credenciales SMTP** (por seguridad). La carpeta `Ejemplo/` que existe en la raíz **no contiene SMTP**; su `web.config` es de archivos estáticos.
+- **En Production** la app usa **SMTP real** (no modo dev).
+- La configuración se inyecta por **variables de entorno en IIS** (no se guardan credenciales en el repo).
+- Estrategia típica corporativa (recomendada): **SMTP relay interno por puerto 25**, **sin SSL**, **sin autenticación**, restringido por **IP del servidor IIS**.
 
-Para obtener SMTP real necesitas uno de estos 3 caminos:
+> Nota: el problema histórico de “no envía correos” se debió a **SMTP Host incorrecto**; al corregir el host (y permitir el relay) el envío funciona.
 
-1) **IT / Infra (recomendado)**: pedir un “SMTP relay” para la app.
-   - Te deben dar: **Host**, **Puerto** (25 normalmente), si usa **SSL/TLS**, y si requiere **auth**.
-   - Ideal corporativo: **relay sin auth** restringido por **IP del servidor IIS** (no relay abierto).
+### 5.0.1 Compatibilidad con keys “legacy” (proyecto antiguo)
 
-2) **Revisar un despliegue anterior** (si existe):
-   - En el servidor, buscar en la carpeta del sitio por:
-     - `appsettings.Production.json`, `appsettings.json`, `web.config`
-   - En IIS Manager:
-     - Sitio/AppPool → **Configuration Editor** → `system.webServer/aspNetCore` → `environmentVariables`
-     - Ahí suelen estar `Email__Smtp__Host`, `Email__Smtp__User`, etc.
-
-3) **Correo autenticado (Office365/Exchange/SMTP corporativo)**:
-   - IT te debe dar usuario/clave (o cuenta de servicio) + host/puerto/TLS.
-
-### 5.0.1 Si vienes del proyecto antiguo (Ejemplo/Web.config)
-
-En `Ejemplo/Web.config` se usaban keys “legacy” como:
+En el proyecto antiguo se usaban keys “legacy” como:
 - `ServidorCorreo` (host)
 - `PuertoCorreo` (port)
 - `EnviarCorreo` (enabled)
@@ -263,8 +251,7 @@ Entonces el servidor **abre TCP** pero **no recibe respuesta SMTP a tiempo** (po
 Esto casi siempre es **infra/relay/política de red** (no código).
 
 Acción recomendada:
-- Pedir a IT un **SMTP relay interno por IP** (puerto 25 sin auth) restringido por la IP de salida del servidor IIS.
-- Plantilla lista para enviar: `ops/SMTP_IT_REQUEST.txt`.
+- Validar host/puerto/relay con IT (el servidor IIS debe poder llegar y el relay debe permitir la IP de salida).
 
 ### 5.1 Diagnóstico
 
