@@ -1,0 +1,13 @@
+Sumando Valor — Conexiones BD (Local vs Remota)
+
+IMPORTANTE
+- NO pegues estas líneas como "comentarios" en appsettings.json (JSON no soporta comentarios).
+- Para cambiar de local a remota: reemplaza el valor de ConnectionStrings:DefaultConnection en:
+  - src/SumandoValor.Web/appsettings.Development.json (para probar local en tu PC)
+
+CONEXIÓN LOCAL (esta PC)
+Server=localhost;Database=SumandoValorDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True;
+
+CONEXIÓN REMOTA (PC/Servidor donde ya funciona)
+Server=VECCSAPP10,61057;Database=SumandoValorDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True;
+

@@ -150,7 +150,7 @@ public class CertificadosModel : PageModel
             {
                 NombreCompleto = $"{user.Nombres} {user.Apellidos}".Trim(),
                 TallerTitulo = ins.Taller.Titulo,
-                CursoTitulo = ins.Taller.Curso.Titulo,
+                DuracionTexto = FormatDuration(ins.Taller.FechaInicio, ins.Taller.FechaFin),
                 Fecha = ins.Taller.FechaFin ?? ins.Taller.FechaInicio
             });
 
@@ -325,6 +325,28 @@ public class CertificadosModel : PageModel
         if (ins.Taller.RequiereEncuesta && !encuestaSet.Contains((ins.TallerId, ins.UserId)))
             return false;
         return true;
+    }
+
+    private static string FormatDuration(DateTime start, DateTime? end)
+    {
+        if (end == null)
+            return "—";
+
+        var diff = end.Value - start;
+        if (diff.TotalMinutes <= 0)
+            return "—";
+
+        if (diff.TotalHours < 1)
+            return $"{Math.Round(diff.TotalMinutes)} min";
+
+        if (diff.TotalHours < 24)
+            return $"{Math.Round(diff.TotalHours, 1):0.#} h";
+
+        var days = (int)Math.Floor(diff.TotalDays);
+        var hours = Math.Round(diff.TotalHours - (days * 24), 1);
+        if (hours <= 0.1)
+            return $"{days} d";
+        return $"{days} d {hours:0.#} h";
     }
 
     public sealed class Row

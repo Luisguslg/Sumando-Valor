@@ -24,7 +24,7 @@ public sealed class CertificatePdfGenerator
 
         var nombre = (data.NombreCompleto ?? string.Empty).Trim();
         var taller = (data.TallerTitulo ?? string.Empty).Trim();
-        var curso = (data.CursoTitulo ?? string.Empty).Trim();
+        var duracion = (data.DuracionTexto ?? string.Empty).Trim();
         var fecha = data.Fecha.ToString("dd/MM/yyyy");
 
         var doc = Document.Create(container =>
@@ -46,66 +46,37 @@ public sealed class CertificatePdfGenerator
                         layers.Layer().Background(Colors.Grey.Lighten3);
                     }
 
-                    // The template has printed text inside the central boxes. To avoid overlap,
-                    // we "mask" that area and draw our own clean blocks on top.
+                    // The template already includes the graphic boxes and labels.
+                    // We only place the dynamic values (name, taller, duración, fecha) in the blank areas.
                     layers.PrimaryLayer().Column(col =>
                     {
-                        // Push down to the area where the recipient name and info blocks live in the template.
-                        col.Item().Height(245);
+                        // Position roughly at the blank line under "Otorga el siguiente certificado a:"
+                        col.Item().Height(210);
 
-                        col.Item().PaddingHorizontal(70).Element(panel =>
+                        col.Item().AlignCenter()
+                            .Text(string.IsNullOrWhiteSpace(nombre) ? "-" : nombre)
+                            .FontSize(34)
+                            .SemiBold()
+                            .FontColor("#00338D");
+
+                        // Space down to the row of 3 info boxes
+                        col.Item().Height(120);
+
+                        col.Item().PaddingHorizontal(78).Row(row =>
                         {
-                            panel
-                                .Background(Colors.White)
-                                .Border(1)
-                                .BorderColor(Colors.Grey.Lighten2)
-                                .PaddingVertical(24)
-                                .PaddingHorizontal(26)
-                                .Column(p =>
-                                {
-                                    p.Item().AlignCenter()
-                                        .Text(string.IsNullOrWhiteSpace(nombre) ? "-" : nombre)
-                                        .FontSize(30)
-                                        .Bold()
-                                        .FontColor(Colors.Black);
+                            void BoxValue(string value)
+                            {
+                                row.RelativeItem().AlignCenter().AlignMiddle().Height(58).Text(string.IsNullOrWhiteSpace(value) ? "—" : value)
+                                    .FontSize(14)
+                                    .SemiBold()
+                                    .FontColor("#0B1F5C");
+                            }
 
-                                    p.Item().Height(16);
-
-                                    p.Item().Row(row =>
-                                    {
-                                        void Block(string label, string value)
-                                        {
-                                            row.RelativeItem().Element(card =>
-                                            {
-                                                card
-                                                    .Background("#EEE9FF")
-                                                    .Border(1)
-                                                    .BorderColor(Colors.Grey.Lighten2)
-                                                    .Padding(14)
-                                                    .Column(c =>
-                                                    {
-                                                        c.Item().AlignCenter()
-                                                            .Text(label)
-                                                            .FontSize(11)
-                                                            .FontColor(Colors.Blue.Darken3);
-
-                                                        c.Item().Height(6);
-                                                        c.Item().AlignCenter()
-                                                            .Text(string.IsNullOrWhiteSpace(value) ? "-" : value)
-                                                            .FontSize(13)
-                                                            .SemiBold()
-                                                            .FontColor(Colors.Black);
-                                                    });
-                                            });
-                                        }
-
-                                        Block("Taller", taller);
-                                        row.ConstantItem(12);
-                                        Block("Curso", curso);
-                                        row.ConstantItem(12);
-                                        Block("Fecha", fecha);
-                                    });
-                                });
+                            BoxValue(taller);
+                            row.ConstantItem(28);
+                            BoxValue(duracion);
+                            row.ConstantItem(28);
+                            BoxValue(fecha);
                         });
                     });
                 });
@@ -120,7 +91,7 @@ public sealed class CertificatePdfData
 {
     public string NombreCompleto { get; init; } = string.Empty;
     public string TallerTitulo { get; init; } = string.Empty;
-    public string? CursoTitulo { get; init; }
+    public string? DuracionTexto { get; init; }
     public DateTime Fecha { get; init; }
 }
 

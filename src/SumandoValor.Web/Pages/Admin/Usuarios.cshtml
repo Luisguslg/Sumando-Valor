@@ -56,6 +56,7 @@
             <tbody>
             @foreach (var u in Model.Rows)
             {
+    var canManageAdmins = User.IsInRole("SuperAdmin");
                 <tr>
                     <td>
                         <div class="fw-semibold">@u.FullName</div>
@@ -84,7 +85,7 @@
                                 </button>
                             </form>
 
-                            @if (!u.IsAdmin)
+                            @if (canManageAdmins && !u.IsAdmin)
                             {
                                 <form method="post" asp-page-handler="MakeAdmin" asp-route-id="@u.UserId" class="m-0">
                                     <button type="submit" class="btn btn-sm btn-outline-primary w-100 w-md-auto"
@@ -93,7 +94,7 @@
                                     </button>
                                 </form>
                             }
-                            else
+                            else if (canManageAdmins && u.IsAdmin)
                             {
                                 <form method="post" asp-page-handler="RemoveAdmin" asp-route-id="@u.UserId" class="m-0">
                                     <button type="submit" class="btn btn-sm btn-outline-danger w-100 w-md-auto"
@@ -101,6 +102,13 @@
                                         Quitar Admin
                                     </button>
                                 </form>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-primary w-100 w-md-auto" disabled
+                                        title="Solo SuperAdmin puede gestionar Admins">
+                                    Admin
+                                </button>
                             }
                         </div>
                     </td>

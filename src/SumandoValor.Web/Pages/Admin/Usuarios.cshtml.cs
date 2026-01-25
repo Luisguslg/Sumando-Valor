@@ -109,6 +109,7 @@ public class UsuariosModel : PageModel
 
     public async Task<IActionResult> OnPostToggleActiveAsync(string id)
     {
+        var actorIsSuperAdmin = User.IsInRole("SuperAdmin");
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
         {
@@ -119,14 +120,26 @@ public class UsuariosModel : PageModel
         var isActive = user.LockoutEnd == null || user.LockoutEnd <= DateTimeOffset.UtcNow;
         if (isActive)
         {
-            // safety: do not deactivate last admin
             var roles = await _userManager.GetRolesAsync(user);
-            if (roles.Contains("Admin"))
+            if (roles.Contains("Admin") || roles.Contains("SuperAdmin"))
             {
+                if (!actorIsSuperAdmin)
+                {
+                    TempData["FlashError"] = "Solo SuperAdmin puede desactivar administradores.";
+                    return RedirectToPage(new { Search, Status, Role, page = PageNumber });
+                }
+
                 var admins = await _userManager.GetUsersInRoleAsync("Admin");
                 if (admins.Count <= 1)
                 {
                     TempData["FlashError"] = "No puedes desactivar al último administrador.";
+                    return RedirectToPage(new { Search, Status, Role, page = PageNumber });
+                }
+
+                var superAdmins = await _userManager.GetUsersInRoleAsync("SuperAdmin");
+                if (roles.Contains("SuperAdmin") && superAdmins.Count <= 1)
+                {
+                    TempData["FlashError"] = "No puedes desactivar al último SuperAdmin.";
                     return RedirectToPage(new { Search, Status, Role, page = PageNumber });
                 }
             }
@@ -148,6 +161,12 @@ public class UsuariosModel : PageModel
 
     public async Task<IActionResult> OnPostMakeAdminAsync(string id)
     {
+        if (!User.IsInRole("SuperAdmin"))
+        {
+            TempData["FlashError"] = "Solo SuperAdmin puede asignar rol Admin.";
+            return RedirectToPage(new { Search, Status, Role, page = PageNumber });
+        }
+
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
         {
@@ -171,11 +190,28 @@ public class UsuariosModel : PageModel
 
     public async Task<IActionResult> OnPostRemoveAdminAsync(string id)
     {
+        if (!User.IsInRole("SuperAdmin"))
+        {
+            TempData["FlashError"] = "Solo SuperAdmin puede revocar rol Admin.";
+            return RedirectToPage(new { Search, Status, Role, page = PageNumber });
+        }
+
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
         {
             TempData["FlashError"] = "Usuario no encontrado.";
             return RedirectToPage();
+        }
+
+        var targetRoles = await _userManager.GetRolesAsync(user);
+        if (targetRoles.Contains("SuperAdmin"))
+        {
+            var superAdmins = await _userManager.GetUsersInRoleAsync("SuperAdmin");
+            if (superAdmins.Count <= 1)
+            {
+                TempData["FlashError"] = "No puedes quitar Admin al último SuperAdmin.";
+                return RedirectToPage(new { Search, Status, Role, page = PageNumber });
+            }
         }
 
         var admins = await _userManager.GetUsersInRoleAsync("Admin");

@@ -28,6 +28,7 @@ public class DownloadModel : PageModel
     {
         var cert = await _context.Certificados
             .Include(c => c.Taller)
+            .ThenInclude(t => t.Curso)
             .FirstOrDefaultAsync(c => c.Id == id);
 
         if (cert == null)
@@ -57,7 +58,29 @@ public class DownloadModel : PageModel
         if (!System.IO.File.Exists(physicalPath))
             return NotFound();
 
-        var fileNameSafe = $"certificado_{cert.TallerId}_{DateTime.Now:yyyyMMdd}.pdf";
+        static string SafeFilePart(string? value)
+        {
+            var s = (value ?? string.Empty).Trim();
+            if (s.Length == 0) return "SinNombre";
+
+            foreach (var ch in Path.GetInvalidFileNameChars())
+                s = s.Replace(ch, ' ');
+
+            s = s.Replace('\t', ' ').Replace('\r', ' ').Replace('\n', ' ');
+            while (s.Contains("  "))
+                s = s.Replace("  ", " ");
+
+            s = s.Trim();
+            if (s.Length > 80)
+                s = s.Substring(0, 80).Trim();
+
+            return s.Length == 0 ? "SinNombre" : s;
+        }
+
+        var nombre = SafeFilePart($"{user.Nombres} {user.Apellidos}".Trim());
+        var taller = SafeFilePart(cert.Taller?.Titulo);
+        var fecha = (cert.IssuedAt ?? cert.CreatedAt).ToString("yyyy-MM-dd");
+        var fileNameSafe = $"Certificado - {nombre} - {taller} - {fecha}.pdf";
         _logger.LogInformation("Descarga de certificado CertId={CertId}, UserId={UserId}, Admin={IsAdmin}", cert.Id, user.Id, isAdmin);
 
         var bytes = await System.IO.File.ReadAllBytesAsync(physicalPath);
