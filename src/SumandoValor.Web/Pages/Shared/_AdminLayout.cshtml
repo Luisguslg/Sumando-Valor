@@ -178,7 +178,7 @@
             </a>
             <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Cursos") ? "active" : "")" 
                asp-page="/Admin/Cursos">
-                <i class="bi bi-book"></i> Cursos
+                <i class="bi bi-book"></i> Programa formativo
             </a>
             <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Talleres") ? "active" : "")" 
                asp-page="/Admin/Talleres">
@@ -205,7 +205,7 @@
                 <i class="bi bi-envelope-check"></i> Email Diagnostics
             </a>
             <div class="mt-auto p-3 border-top border-white border-opacity-10">
-                <a href="#" class="nav-link">
+                <a asp-page="/Index" class="nav-link">
                     <i class="bi bi-arrow-left"></i> Volver al sitio
                 </a>
                 @if (User.Identity?.IsAuthenticated == true)

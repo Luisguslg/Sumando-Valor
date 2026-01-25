@@ -2,22 +2,22 @@
 @model SumandoValor.Web.Pages.Cursos.DetailsModel
 @using SumandoValor.Domain.Entities
 @{
-    ViewData["Title"] = Model.Curso?.Titulo ?? "Curso";
+    ViewData["Title"] = Model.Curso?.Titulo ?? "Programa formativo";
 }
 
 @if (Model.Curso == null)
 {
     <div class="alert alert-warning">
-        <p class="mb-0">Curso no encontrado.</p>
+        <p class="mb-0">Programa formativo no encontrado.</p>
     </div>
-    <a asp-page="/Cursos" class="btn btn-secondary">Volver a Cursos</a>
+    <a asp-page="/Cursos" class="btn btn-secondary">Volver a Programa formativo</a>
 }
 else
 {
     @await Html.PartialAsync("_PageHeader", new SumandoValor.Web.Pages.Shared.PageHeaderModel
     {
         Title = Model.Curso.Titulo,
-        Subtitle = string.IsNullOrWhiteSpace(Model.Curso.PublicoObjetivo) ? "Curso formativo" : $"Público objetivo: {Model.Curso.PublicoObjetivo}",
+        Subtitle = string.IsNullOrWhiteSpace(Model.Curso.PublicoObjetivo) ? "Programa formativo" : $"Público objetivo: {Model.Curso.PublicoObjetivo}",
         UseBrandBackground = false
     })
 
@@ -34,7 +34,7 @@ else
         {
             <div class="alert alert-info">
                 <i class="bi bi-info-circle me-2"></i>
-                <p class="mb-0">No hay talleres disponibles para este curso.</p>
+                <p class="mb-0">No hay talleres disponibles para este programa formativo.</p>
             </div>
         }
         else

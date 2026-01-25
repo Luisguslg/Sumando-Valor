@@ -74,3 +74,18 @@
   color: var(--text-secondary) !important;
 }
 
+/* Home: botón blanco "Ver programa formativo" con borde visible y accesible */
+.btn.btn-light.btn-home-outline {
+  border-color: var(--brand-600) !important;
+  border-width: 2px !important;
+}
+
+.btn.btn-light.btn-home-outline:hover {
+  background-color: var(--brand-100) !important;
+  border-color: var(--brand-800) !important;
+}
+
+.btn.btn-light.btn-home-outline:focus-visible {
+  outline: 2px solid var(--brand-600);
+  outline-offset: 2px;
+}

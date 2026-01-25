@@ -14,8 +14,8 @@
 
 <div class="container my-5">
     <div class="d-flex flex-wrap gap-2 mb-5">
-        <a asp-page="/Cursos" class="btn btn-light">
-            <i class="bi bi-journal-bookmark me-1"></i>Ver cursos
+        <a asp-page="/Cursos" class="btn btn-light btn-home-outline">
+            <i class="bi bi-journal-bookmark me-1"></i>Ver programa formativo
         </a>
         @if (User.Identity?.IsAuthenticated == true)
         {
@@ -39,7 +39,7 @@
                         <i class="bi bi-mortarboard text-primary"></i>
                         <h5 class="mb-0 fw-bold">Programas formativos</h5>
                     </div>
-                    <p class="text-muted mb-0">Cursos y talleres orientados a habilidades prácticas, empleabilidad y crecimiento.</p>
+                    <p class="text-muted mb-0">Programas formativos y talleres orientados a habilidades prácticas, empleabilidad y crecimiento.</p>
                 </div>
             </div>
         </div>
@@ -71,7 +71,7 @@
         <div class="col-lg-6">
             <div class="d-flex justify-content-between align-items-end mb-3">
                 <div>
-                    <h2 class="h4 fw-bold mb-1">Cursos destacados</h2>
+                    <h2 class="h4 fw-bold mb-1">Programa formativo destacado</h2>
                     <div class="text-muted">Explora la oferta disponible</div>
                 </div>
                 <a asp-page="/Cursos" class="btn btn-sm btn-outline-primary">Ver todos</a>
@@ -79,7 +79,7 @@
 
             @if (Model.CursosDestacados.Count == 0)
             {
-                <div class="alert alert-info mb-0">No hay cursos publicados por el momento.</div>
+                <div class="alert alert-info mb-0">No hay programas formativos publicados por el momento.</div>
             }
             else
             {
@@ -97,12 +97,12 @@
                                                         <i class="bi bi-journal-bookmark-fill"></i>
                                                     </span>
                                                     <div>
-                                                        <div class="course-media-kicker">Curso</div>
+                                                        <div class="course-media-kicker">Programa formativo</div>
                                                         <div class="fw-semibold">Programa destacado</div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="text-muted small mb-1">Curso</div>
+                                            <div class="text-muted small mb-1">Programa formativo</div>
                                             <h3 class="h5 fw-bold mb-2">@curso.Titulo</h3>
                                             <p class="text-muted mb-0">
                                                 @(curso.Descripcion.Length > 140 ? curso.Descripcion.Substring(0, 140) + "..." : curso.Descripcion)
@@ -174,7 +174,7 @@
             <h2 class="h4 fw-bold mb-2">Sobre Sumando Valor</h2>
             <p class="text-muted mb-3">
                 Sumando Valor es una iniciativa de la Fundación KPMG Venezuela que impulsa oportunidades de aprendizaje y desarrollo.
-                A través de cursos y talleres, buscamos fortalecer habilidades prácticas con enfoque en empleabilidad, ciudadanía y crecimiento.
+                A través de programas formativos y talleres, buscamos fortalecer habilidades prácticas con enfoque en empleabilidad, ciudadanía y crecimiento.
             </p>
             <p class="text-muted mb-3">
                 Nuestro enfoque es claro y accesible: una experiencia simple para explorar, inscribirse y participar en actividades formativas,
