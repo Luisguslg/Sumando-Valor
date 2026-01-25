@@ -180,6 +180,10 @@
                asp-page="/Admin/Cursos">
                 <i class="bi bi-book"></i> Programa formativo
             </a>
+            <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Carrusel") ? "active" : "")"
+               asp-page="/Admin/Carrusel">
+                <i class="bi bi-images"></i> Carrusel
+            </a>
             <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Talleres") ? "active" : "")" 
                asp-page="/Admin/Talleres">
                 <i class="bi bi-calendar-event"></i> Talleres
@@ -191,6 +195,10 @@
             <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Encuestas") ? "active" : "")"
                asp-page="/Admin/Encuestas">
                 <i class="bi bi-clipboard-check"></i> Encuestas
+            </a>
+            <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/SurveyTemplates") ? "active" : "")"
+               asp-page="/Admin/SurveyTemplates/Index">
+                <i class="bi bi-ui-checks"></i> Plantillas de encuesta
             </a>
             <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Certificados") ? "active" : "")"
                asp-page="/Admin/Certificados">

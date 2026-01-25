@@ -1,0 +1,135 @@
+@page "{id:int}"
+@model SumandoValor.Web.Pages.Admin.SurveyTemplates.EditModel
+@using SumandoValor.Domain.Entities.Surveys
+@{
+    ViewData["Title"] = "Editar plantilla de encuesta";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+@if (Model.Template == null)
+{
+    <div class="admin-card">
+        <div class="alert alert-warning mb-0">Plantilla no encontrada.</div>
+    </div>
+    <div class="admin-card">
+        <a asp-page="/Admin/SurveyTemplates/Index" class="btn btn-outline-secondary">Volver</a>
+    </div>
+}
+else
+{
+    <div class="admin-card">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h1 class="h4 mb-1">@Model.Template.Name</h1>
+                <div class="text-muted">@Model.ScopeText</div>
+            </div>
+            <a asp-page="/Admin/SurveyTemplates/Index" class="btn btn-outline-secondary">Volver</a>
+        </div>
+
+        <form method="post" asp-page-handler="UpdateTemplate" class="row g-3 mt-2">
+            <input type="hidden" name="Id" value="@Model.Template.Id" />
+            <div class="col-md-6">
+                <label class="form-label">Nombre</label>
+                <input class="form-control" name="Name" value="@Model.Template.Name" maxlength="200" required />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Activa</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="IsActive" value="true" @(Model.Template.IsActive ? "checked" : "") />
+                    <label class="form-check-label">Sí</label>
+                </div>
+            </div>
+            <div class="col-12">
+                <button class="btn btn-primary" type="submit">Guardar plantilla</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="admin-card">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div>
+                <h2 class="h6 mb-0">Preguntas</h2>
+                <div class="text-muted small">Ordena y agrega preguntas (mínimo viable: rating, texto, opción única).</div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                <tr>
+                    <th style="width: 90px;">Orden</th>
+                    <th>Tipo</th>
+                    <th>Texto</th>
+                    <th>Requerida</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var q in Model.Questions)
+                {
+                    <tr>
+                        <td>@q.Order</td>
+                        <td class="text-muted">@q.Type</td>
+                        <td>@q.Text</td>
+                        <td>@(q.IsRequired ? "Sí" : "No")</td>
+                        <td class="text-center">
+                            <div class="d-inline-flex gap-2">
+                                <form method="post" asp-page-handler="MoveQuestionUp" asp-route-id="@Model.Template.Id" class="m-0">
+                                    <input type="hidden" name="QuestionId" value="@q.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary" title="Subir" @(q.CanMoveUp ? "" : "disabled")>
+                                        <i class="bi bi-arrow-up"></i>
+                                    </button>
+                                </form>
+                                <form method="post" asp-page-handler="MoveQuestionDown" asp-route-id="@Model.Template.Id" class="m-0">
+                                    <input type="hidden" name="QuestionId" value="@q.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary" title="Bajar" @(q.CanMoveDown ? "" : "disabled")>
+                                        <i class="bi bi-arrow-down"></i>
+                                    </button>
+                                </form>
+                                <form method="post" asp-page-handler="DeleteQuestion" asp-route-id="@Model.Template.Id" class="m-0"
+                                      onsubmit="return confirm('¿Eliminar esta pregunta?');">
+                                    <input type="hidden" name="QuestionId" value="@q.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        <hr />
+
+        <form method="post" asp-page-handler="AddQuestion" class="row g-3">
+            <input type="hidden" name="Id" value="@Model.Template.Id" />
+            <div class="col-md-3">
+                <label class="form-label">Tipo</label>
+                <select class="form-select" name="Type" required>
+                    <option value="@SurveyQuestionType.Rating1To5">Rating 1–5</option>
+                    <option value="@SurveyQuestionType.Text">Texto</option>
+                    <option value="@SurveyQuestionType.SingleChoice">Opción única</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Texto</label>
+                <input class="form-control" name="Text" maxlength="500" required />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Requerida</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="IsRequired" value="true" checked />
+                    <label class="form-check-label">Sí</label>
+                </div>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Opciones (solo para “Opción única”, una por línea)</label>
+                <textarea class="form-control" name="Options" rows="3" maxlength="4000"></textarea>
+            </div>
+            <div class="col-12">
+                <button class="btn btn-outline-primary" type="submit">Agregar pregunta</button>
+            </div>
+        </form>
+    </div>
+}
+

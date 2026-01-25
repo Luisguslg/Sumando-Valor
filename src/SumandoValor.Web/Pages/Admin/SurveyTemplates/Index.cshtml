@@ -1,0 +1,53 @@
+@page
+@model SumandoValor.Web.Pages.Admin.SurveyTemplates.IndexModel
+@{
+    ViewData["Title"] = "Plantillas de encuesta";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-card">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+            <h1 class="h4 mb-1">Plantillas de encuesta</h1>
+            <div class="text-muted">Configura preguntas por programa formativo (curso) o por taller.</div>
+        </div>
+        <a asp-page="/Admin/SurveyTemplates/Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Nueva plantilla
+        </a>
+    </div>
+</div>
+
+<div class="admin-card">
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Aplica a</th>
+                <th>Activa</th>
+                <th class="text-end">Preguntas</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var t in Model.Rows)
+            {
+                <tr>
+                    <td class="fw-semibold">@t.Name</td>
+                    <td class="text-muted">@t.ScopeText</td>
+                    <td>
+                        <span class="badge @(t.IsActive ? "bg-success" : "bg-secondary")">@(t.IsActive ? "Sí" : "No")</span>
+                    </td>
+                    <td class="text-end">@t.QuestionCount</td>
+                    <td class="text-center">
+                        <a asp-page="/Admin/SurveyTemplates/Edit" asp-route-id="@t.Id" class="btn btn-sm btn-outline-primary">
+                            Editar
+                        </a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+

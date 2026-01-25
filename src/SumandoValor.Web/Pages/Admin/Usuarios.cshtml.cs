@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using SumandoValor.Domain.Entities;
 using SumandoValor.Infrastructure.Data;
 
 namespace SumandoValor.Web.Pages.Admin;
@@ -147,12 +149,14 @@ public class UsuariosModel : PageModel
             user.LockoutEnabled = true;
             user.LockoutEnd = DateTimeOffset.MaxValue;
             await _userManager.UpdateAsync(user);
+            await LogAuditAsync("ToggleActive", user.Id, new { to = "inactive" });
             TempData["FlashSuccess"] = "Usuario desactivado.";
         }
         else
         {
             user.LockoutEnd = null;
             await _userManager.UpdateAsync(user);
+            await LogAuditAsync("ToggleActive", user.Id, new { to = "active" });
             TempData["FlashSuccess"] = "Usuario activado.";
         }
 
@@ -182,6 +186,7 @@ public class UsuariosModel : PageModel
         }
         else
         {
+            await LogAuditAsync("MakeAdmin", user.Id, new { role = "Admin" });
             TempData["FlashSuccess"] = "Rol Admin asignado.";
         }
 
@@ -229,6 +234,7 @@ public class UsuariosModel : PageModel
         }
         else
         {
+            await LogAuditAsync("RemoveAdmin", user.Id, new { role = "Admin" });
             TempData["FlashSuccess"] = "Rol Admin removido.";
         }
 
@@ -248,6 +254,29 @@ public class UsuariosModel : PageModel
         var parts = qs.Where(kv => !string.IsNullOrWhiteSpace(kv.Value))
             .Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value!)}");
         return "/Admin/Usuarios" + (parts.Any() ? "?" + string.Join("&", parts) : "");
+    }
+
+    private async Task LogAuditAsync(string action, string targetUserId, object details)
+    {
+        try
+        {
+            var actorUserId = _userManager.GetUserId(User) ?? string.Empty;
+            var payload = JsonSerializer.Serialize(details);
+
+            _context.AdminAuditEvents.Add(new AdminAuditEvent
+            {
+                ActorUserId = actorUserId,
+                TargetUserId = targetUserId,
+                Action = action,
+                DetailsJson = payload,
+                CreatedAt = DateTime.UtcNow
+            });
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "No se pudo registrar auditoría admin (Action={Action})", action);
+        }
     }
 
     public sealed class Row

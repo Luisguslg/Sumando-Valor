@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SumandoValor.Domain.Entities;
+using SumandoValor.Domain.Entities.Surveys;
 
 namespace SumandoValor.Infrastructure.Data;
 
@@ -18,6 +19,12 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Certificado> Certificados { get; set; }
     public DbSet<EncuestaSatisfaccion> EncuestasSatisfaccion { get; set; }
     public DbSet<MensajeContacto> MensajesContacto { get; set; }
+    public DbSet<AdminAuditEvent> AdminAuditEvents { get; set; }
+    public DbSet<CarouselItem> CarouselItems { get; set; }
+    public DbSet<SurveyTemplate> SurveyTemplates { get; set; }
+    public DbSet<SurveyQuestion> SurveyQuestions { get; set; }
+    public DbSet<SurveyResponse> SurveyResponses { get; set; }
+    public DbSet<SurveyAnswer> SurveyAnswers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -129,6 +136,65 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.Email).IsRequired().HasMaxLength(200);
             entity.Property(e => e.Titulo).IsRequired().HasMaxLength(200);
             entity.Property(e => e.Mensaje).IsRequired().HasMaxLength(2000);
+        });
+
+        builder.Entity<AdminAuditEvent>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.CreatedAt);
+            entity.HasIndex(e => e.ActorUserId);
+            entity.HasIndex(e => e.TargetUserId);
+            entity.Property(e => e.Action).IsRequired().HasMaxLength(80);
+            entity.Property(e => e.DetailsJson).HasMaxLength(4000);
+        });
+
+        builder.Entity<CarouselItem>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.SortOrder);
+            entity.HasIndex(e => e.IsActive);
+            entity.Property(e => e.FileName).IsRequired().HasMaxLength(260);
+            entity.Property(e => e.AltText).IsRequired().HasMaxLength(200);
+        });
+
+        builder.Entity<SurveyTemplate>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.IsActive);
+            entity.HasIndex(e => e.CursoId);
+            entity.HasIndex(e => e.TallerId);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.HasMany(e => e.Questions)
+                .WithOne(q => q.Template)
+                .HasForeignKey(q => q.TemplateId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<SurveyQuestion>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.TemplateId, e.Order });
+            entity.Property(e => e.Text).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.OptionsJson).HasMaxLength(4000);
+        });
+
+        builder.Entity<SurveyResponse>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => new { e.TallerId, e.UserId }).IsUnique();
+            entity.HasIndex(e => e.TemplateId);
+            entity.Property(e => e.UserId).IsRequired().HasMaxLength(450);
+            entity.HasMany(e => e.Answers)
+                .WithOne(a => a.Response)
+                .HasForeignKey(a => a.ResponseId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<SurveyAnswer>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.QuestionId);
+            entity.Property(e => e.Value).IsRequired().HasMaxLength(2000);
         });
     }
 }

@@ -1,0 +1,90 @@
+@page
+@model SumandoValor.Web.Pages.Admin.CarruselModel
+@{
+    ViewData["Title"] = "Carrusel";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-card">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h1 class="h4 mb-1">Carrusel</h1>
+            <div class="text-muted">Imágenes del hero (inicio). Subir, ordenar y activar/desactivar.</div>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" asp-page-handler="Upload" class="row g-2 align-items-end">
+        <div class="col-md-5">
+            <label class="form-label small">Imagen (jpg/png/webp)</label>
+            <input class="form-control" type="file" name="File" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required />
+        </div>
+        <div class="col-md-5">
+            <label class="form-label small">Texto alternativo (alt)</label>
+            <input class="form-control" type="text" name="AltText" maxlength="200" placeholder="Descripción breve de la imagen" required />
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100" type="submit">
+                <i class="bi bi-upload me-1"></i>Subir
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="admin-card">
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+            <tr>
+                <th>Vista</th>
+                <th>Alt</th>
+                <th class="text-center">Orden</th>
+                <th>Estado</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td style="width: 180px;">
+                        <img src="~/uploads/carousel/@item.FileName" alt="@item.AltText" style="width: 160px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #e5e7eb;" />
+                    </td>
+                    <td class="text-muted">@item.AltText</td>
+                    <td class="text-center">@item.SortOrder</td>
+                    <td>
+                        <span class="badge @(item.IsActive ? "bg-success" : "bg-secondary")">
+                            @(item.IsActive ? "Activo" : "Inactivo")
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <div class="d-inline-flex flex-wrap gap-2 justify-content-center">
+                            <form method="post" asp-page-handler="MoveUp" asp-route-id="@item.Id" class="m-0">
+                                <button class="btn btn-sm btn-outline-secondary" type="submit" title="Subir" @(item.CanMoveUp ? "" : "disabled")>
+                                    <i class="bi bi-arrow-up"></i>
+                                </button>
+                            </form>
+                            <form method="post" asp-page-handler="MoveDown" asp-route-id="@item.Id" class="m-0">
+                                <button class="btn btn-sm btn-outline-secondary" type="submit" title="Bajar" @(item.CanMoveDown ? "" : "disabled")>
+                                    <i class="bi bi-arrow-down"></i>
+                                </button>
+                            </form>
+                            <form method="post" asp-page-handler="ToggleActive" asp-route-id="@item.Id" class="m-0">
+                                <button class="btn btn-sm @(item.IsActive ? "btn-outline-secondary" : "btn-outline-success")" type="submit">
+                                    @(item.IsActive ? "Desactivar" : "Activar")
+                                </button>
+                            </form>
+                            <form method="post" asp-page-handler="Delete" asp-route-id="@item.Id" class="m-0"
+                                  onsubmit="return confirm('¿Eliminar esta imagen del carrusel?');">
+                                <button class="btn btn-sm btn-outline-danger" type="submit">
+                                    Eliminar
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+

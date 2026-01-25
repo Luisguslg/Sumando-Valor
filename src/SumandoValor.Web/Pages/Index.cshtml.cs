@@ -16,9 +16,17 @@ public class IndexModel : PageModel
 
     public List<Curso> CursosDestacados { get; set; } = new();
     public List<Taller> TalleresProximos { get; set; } = new();
+    public List<CarouselItem> CarouselItems { get; set; } = new();
 
     public async Task OnGetAsync()
     {
+        CarouselItems = await _context.CarouselItems
+            .Where(x => x.IsActive)
+            .OrderBy(x => x.SortOrder)
+            .ThenBy(x => x.Id)
+            .Take(10)
+            .ToListAsync();
+
         CursosDestacados = await _context.Cursos
             .Where(c => c.Estado == EstatusCurso.Activo)
             .OrderBy(c => c.Orden)

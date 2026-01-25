@@ -1,0 +1,19 @@
+Sumando Valor — Comandos BD LOCAL (localhost)
+
+1) Ir a la raíz del repo
+cd "C:\Users\luisg\Desktop\Sumando Valor\Sumando Valor APP"
+
+2) Ver migraciones disponibles
+dotnet ef migrations list --project src\SumandoValor.Infrastructure --startup-project src\SumandoValor.Web
+
+3) (Recomendado) Aplicar migraciones a tu BD local
+dotnet ef database update --project src\SumandoValor.Infrastructure --startup-project src\SumandoValor.Web
+
+4) (Solo si tu BD local quedó dañada) Reset completo
+dotnet ef database drop --force --project src\SumandoValor.Infrastructure --startup-project src\SumandoValor.Web
+dotnet ef database update --project src\SumandoValor.Infrastructure --startup-project src\SumandoValor.Web
+
+NOTA
+- La conexión usada aquí viene de: src\SumandoValor.Web\appsettings.Development.json
+- Para alternar local/remota, ver: ops\BD_CONEXIONES_LOCAL_Y_REMOTA.txt
+
