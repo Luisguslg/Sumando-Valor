@@ -20,11 +20,8 @@ public class UploadCleanupService
     {
         try
         {
-            // Limpieza automática solo en desarrollo por seguridad.
-            // En producción, se puede habilitar manualmente o mediante configuración.
             if (!isDevelopment)
             {
-                _logger.LogDebug("Limpieza de uploads huérfanos omitida (solo en desarrollo por defecto).");
                 return;
             }
 
@@ -50,11 +47,11 @@ public class UploadCleanupService
                     try
                     {
                         File.Delete(f);
-                        _logger.LogInformation("Deleted orphan upload file: {File}", f);
+                        _logger.LogInformation("Archivo huérfano eliminado: {File}", f);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "Failed deleting orphan upload file: {File}", f);
+                        _logger.LogWarning(ex, "Error al eliminar archivo huérfano: {File}", f);
                     }
                 }
             }
@@ -64,7 +61,7 @@ public class UploadCleanupService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Error during CleanOrphanUploadsAsync");
+            _logger.LogWarning(ex, "Error durante la limpieza de archivos huérfanos");
         }
     }
 }

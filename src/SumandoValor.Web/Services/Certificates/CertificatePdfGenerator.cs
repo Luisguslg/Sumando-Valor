@@ -126,7 +126,7 @@ public sealed class CertificatePdfGenerator
             var path = Path.Combine(_env.WebRootPath, "images", "certificates", "certificado-template.png");
             if (!File.Exists(path))
             {
-                _logger.LogWarning("Certificate template not found at {Path}. Falling back to code-generated certificate.", path);
+                _logger.LogWarning("Plantilla de certificado no encontrada en {Path}. Usando diseño generado en código.", path);
                 return null;
             }
 
@@ -134,7 +134,7 @@ public sealed class CertificatePdfGenerator
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Could not load certificate template. Falling back to code-generated certificate.");
+            _logger.LogWarning(ex, "No se pudo cargar la plantilla de certificado. Usando diseño generado en código.");
             return null;
         }
     }

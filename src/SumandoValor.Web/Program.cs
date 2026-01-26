@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-// Log effective DB target (without secrets). Useful to diagnose env var / user-secrets overrides on different machines.
+// Registrar información de conexión a BD (sin credenciales) para diagnóstico
 try
 {
     var csb = new SqlConnectionStringBuilder(connectionString);
@@ -21,10 +21,10 @@ try
     builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Information);
     builder.Services.AddSingleton(new DbConnectionInfo(csb.DataSource, csb.InitialCatalog, csb.IntegratedSecurity));
 }
-catch
-{
-    // Ignore: do not block startup if connection string is not parseable.
-}
+    catch
+    {
+        // No bloquear inicio si la cadena de conexión no es parseable
+    }
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -60,13 +60,13 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddHttpClient();
 
-// Dev email storage: persist to disk so emails survive restarts (used by /Dev/Emails).
+// Almacenamiento de emails en desarrollo: persistir en disco para que sobrevivan reinicios
 var devEmailPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "DevEmails");
 builder.Services.AddSingleton<IDevEmailStore>(_ => new FileDevEmailStore(devEmailPath));
 
 builder.Services.Configure<SmtpEmailOptions>(builder.Configuration.GetSection("Email:Smtp"));
-// Compatibility: support legacy keys from the old ASP.NET MVC app (Ejemplo/Web.config).
-// This allows configuring SMTP via IIS environment variables like ServidorCorreo/PuertoCorreo/etc.
+// Compatibilidad: soporte para claves legacy de la aplicación anterior
+// Permite configurar SMTP mediante variables de entorno de IIS (ServidorCorreo, PuertoCorreo, etc.)
 builder.Services.PostConfigure<SmtpEmailOptions>(options =>
 {
     var cfg = builder.Configuration;
@@ -86,11 +86,9 @@ builder.Services.PostConfigure<SmtpEmailOptions>(options =>
     var legacyFrom = cfg["CorreoDeServicios"];
     if (!string.IsNullOrWhiteSpace(legacyFrom))
     {
-        // Prefer configured FromAddress, but fall back to legacy "CorreoDeServicios"
         if (string.IsNullOrWhiteSpace(options.FromAddress))
             options.FromAddress = legacyFrom;
 
-        // If password is present and user not set, use the same account as user
         if (string.IsNullOrWhiteSpace(options.User) && !string.IsNullOrWhiteSpace(cfg["CorreoPassword"]))
             options.User = legacyFrom;
     }
@@ -125,8 +123,8 @@ builder.Services.AddScoped<UploadCleanupService>();
 // Rate limiting para endpoints públicos
 builder.Services.AddScoped<SumandoValor.Web.Middleware.RateLimitingMiddleware>();
 
-// Production hardening: persist DataProtection keys to disk so auth cookies remain valid after app restarts.
-// (Avoids "ephemeral key repository" warnings and random logout issues.)
+// En producción: persistir claves de DataProtection en disco para que las cookies de autenticación
+// permanezcan válidas después de reinicios de la aplicación
 if (!builder.Environment.IsDevelopment())
 {
     var keysPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "DataProtection-Keys");
@@ -143,7 +141,7 @@ builder.Services.AddAntiforgery(options =>
 
 var app = builder.Build();
 
-// Emit DB target once at startup (safe: no credentials).
+// Registrar información de BD al inicio (sin credenciales)
 using (var scope = app.Services.CreateScope())
 {
     var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("DbConnection");
@@ -153,17 +151,16 @@ using (var scope = app.Services.CreateScope())
         logger.LogInformation("DB target: Server={Server}; Database={Database}; IntegratedSecurity={IntegratedSecurity}", info.Server, info.Database, info.IntegratedSecurity);
     }
 
-    // On Windows/IIS, this shows the real identity used for Integrated Security (often the AppPool identity).
     try
     {
         if (OperatingSystem.IsWindows())
         {
-            logger.LogInformation("Process identity (Windows): {Identity}", WindowsIdentity.GetCurrent().Name);
+            logger.LogInformation("Identidad del proceso (Windows): {Identity}", WindowsIdentity.GetCurrent().Name);
         }
     }
     catch
     {
-        // Best-effort only. Never block startup due to identity probing.
+        // No bloquear inicio si no se puede obtener la identidad
     }
 }
 
@@ -177,7 +174,7 @@ else
     app.UseDeveloperExceptionPage();
 }
 
-// Security headers (OWASP baseline). Keep minimal to avoid breaking CDN assets.
+// Headers de seguridad (baseline OWASP). Mínimos para no afectar assets de CDN
 app.Use(async (context, next) =>
 {
     context.Response.Headers["X-Content-Type-Options"] = "nosniff";
@@ -218,7 +215,7 @@ using (var scope = app.Services.CreateScope())
 
         await DbInitializer.InitializeAsync(context, userManager, roleManager, configuration, app.Environment.IsDevelopment());
 
-        // Limpieza opcional de uploads huérfanos (solo en Development por seguridad)
+        // Limpieza de uploads huérfanos (solo en desarrollo)
         try
         {
             var uploadCleanupService = services.GetRequiredService<UploadCleanupService>();
@@ -236,7 +233,7 @@ using (var scope = app.Services.CreateScope())
         var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "Error al inicializar la base de datos.");
 
-        // In production we fail fast: DB connectivity/migrations must be fixed before serving traffic.
+        // En producción fallar rápido: la conectividad/migraciones de BD deben estar correctas antes de servir tráfico
         if (!app.Environment.IsDevelopment())
         {
             throw;
