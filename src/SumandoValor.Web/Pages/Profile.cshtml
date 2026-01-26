@@ -206,5 +206,20 @@
                 }
             });
         }
+
+        // Validación de teléfono: solo números
+        const telefonoInputProfile = document.getElementById('Input_Telefono');
+        if (telefonoInputProfile) {
+            telefonoInputProfile.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+            
+            telefonoInputProfile.addEventListener('keypress', function(e) {
+                const char = String.fromCharCode(e.which);
+                if (!/[0-9]/.test(char)) {
+                    e.preventDefault();
+                }
+            });
+        }
     </script>
 }

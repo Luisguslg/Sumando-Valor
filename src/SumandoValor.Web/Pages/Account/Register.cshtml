@@ -276,6 +276,21 @@
             }
         });
 
+        // Validación de teléfono: solo números
+        const telefonoInput = document.getElementById('Input_Telefono');
+        if (telefonoInput) {
+            telefonoInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+            
+            telefonoInput.addEventListener('keypress', function(e) {
+                const char = String.fromCharCode(e.which);
+                if (!/[0-9]/.test(char)) {
+                    e.preventDefault();
+                }
+            });
+        }
+
         @if (Model.ShowCaptcha && !string.IsNullOrEmpty(Model.CaptchaSiteKey))
         {
             <text>
