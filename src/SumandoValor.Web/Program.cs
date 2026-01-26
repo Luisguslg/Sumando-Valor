@@ -122,6 +122,9 @@ builder.Services.AddRazorPages();
 builder.Services.AddSingleton<CertificatePdfGenerator>();
 builder.Services.AddScoped<UploadCleanupService>();
 
+// Rate limiting para endpoints públicos
+builder.Services.AddScoped<SumandoValor.Web.Middleware.RateLimitingMiddleware>();
+
 // Production hardening: persist DataProtection keys to disk so auth cookies remain valid after app restarts.
 // (Avoids "ephemeral key repository" warnings and random logout issues.)
 if (!builder.Environment.IsDevelopment())
@@ -192,6 +195,9 @@ app.Use(async (context, next) =>
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+// Rate limiting para endpoints públicos (antes de routing para mejor performance)
+app.UseMiddleware<SumandoValor.Web.Middleware.RateLimitingMiddleware>();
 
 app.UseRouting();
 

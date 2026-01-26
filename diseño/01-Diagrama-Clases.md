@@ -6,23 +6,13 @@ Este documento describe las clases principales del modelo de dominio de la aplic
 
 ```mermaid
 classDiagram
+    %% Entidades principales
     class ApplicationUser {
         +string Id
         +string Email
-        +string UserName
         +string Nombres
         +string Apellidos
         +string Cedula
-        +string Sexo
-        +DateTime FechaNacimiento
-        +bool TieneDiscapacidad
-        +string DiscapacidadDescripcion
-        +string NivelEducativo
-        +string SituacionLaboral
-        +string CanalConocio
-        +string Estado
-        +string Ciudad
-        +string Telefono
         +DateTime CreatedAt
         +ICollection~Inscripcion~ Inscripciones
         +ICollection~Certificado~ Certificados
@@ -33,32 +23,16 @@ classDiagram
         +int Id
         +string Titulo
         +string Descripcion
-        +string PublicoObjetivo
-        +bool EsPublico
-        +DateTime FechaCreacion
         +EstatusCurso Estado
-        +int? Orden
         +ICollection~Taller~ Talleres
     }
 
     class Taller {
         +int Id
-        +int CursoId
         +string Titulo
-        +string Descripcion
         +DateTime FechaInicio
-        +DateTime? FechaFin
-        +TimeSpan HoraInicio
-        +ModalidadTaller Modalidad
-        +string PlataformaDigital
         +int CuposMaximos
-        +int CuposDisponibles
         +EstatusTaller Estatus
-        +bool PermiteCertificado
-        +bool RequiereEncuesta
-        +string FacilitadorTexto
-        +DateTime CreatedAt
-        +DateTime? UpdatedAt
         +Curso Curso
         +ICollection~Inscripcion~ Inscripciones
         +ICollection~Certificado~ Certificados
@@ -67,125 +41,92 @@ classDiagram
 
     class Inscripcion {
         +int Id
-        +int TallerId
-        +string UserId
         +EstadoInscripcion Estado
         +bool Asistencia
-        +DateTime CreatedAt
         +Taller Taller
     }
 
     class Certificado {
         +int Id
-        +int TallerId
-        +string UserId
         +EstadoCertificado Estado
         +string UrlPdf
-        +DateTime? IssuedAt
-        +DateTime CreatedAt
         +Taller Taller
     }
 
     class EncuestaSatisfaccion {
         +int Id
-        +int TallerId
-        +string UserId
         +int Rating1_5
-        +string Comentario
-        +string PayloadJson
-        +decimal? ScorePromedio
-        +DateTime CreatedAt
         +Taller Taller
     }
 
-    class MensajeContacto {
-        +int Id
-        +string Nombre
-        +string Email
-        +string Titulo
-        +string Mensaje
-        +EstadoMensaje Estado
-        +DateTime CreatedAt
-    }
-
-    class CarouselItem {
-        +int Id
-        +string FileName
-        +string AltText
-        +int SortOrder
-        +bool IsActive
-        +DateTime CreatedAt
-    }
-
-    class SiteImage {
-        +int Id
-        +string Key
-        +string FileName
-        +string AltText
-        +DateTime UpdatedAt
-    }
-
-    class AdminAuditEvent {
-        +int Id
-        +string ActorUserId
-        +string TargetUserId
-        +string Action
-        +string DetailsJson
-        +DateTime CreatedAt
-    }
-
+    %% Sistema de Encuestas
     class SurveyTemplate {
         +int Id
         +string Name
-        +string Description
         +bool IsActive
-        +DateTime CreatedAt
         +ICollection~SurveyQuestion~ Questions
+        +ICollection~SurveyResponse~ Responses
     }
 
     class SurveyQuestion {
         +int Id
-        +int TemplateId
-        +SurveyQuestionType Type
         +string Text
-        +int Order
-        +bool IsRequired
-        +string OptionsJson
+        +SurveyQuestionType Type
         +SurveyTemplate Template
     }
 
     class SurveyResponse {
         +int Id
-        +int TemplateId
-        +int TallerId
-        +string UserId
-        +DateTime CreatedAt
         +SurveyTemplate Template
         +ICollection~SurveyAnswer~ Answers
     }
 
     class SurveyAnswer {
         +int Id
-        +int ResponseId
-        +int QuestionId
         +string Value
         +SurveyResponse Response
     }
 
-    %% Relaciones
-    ApplicationUser ||--o{ Inscripcion : "tiene"
-    ApplicationUser ||--o{ Certificado : "tiene"
-    ApplicationUser ||--o{ EncuestaSatisfaccion : "tiene"
+    %% Entidades auxiliares
+    class MensajeContacto {
+        +int Id
+        +string Nombre
+        +string Email
+    }
+
+    class CarouselItem {
+        +int Id
+        +string FileName
+        +bool IsActive
+    }
+
+    class SiteImage {
+        +int Id
+        +string Key
+        +string FileName
+    }
+
+    class AdminAuditEvent {
+        +int Id
+        +string Action
+        +DateTime CreatedAt
+    }
+
+    %% Relaciones principales - Core del negocio
+    ApplicationUser "1" --> "*" Inscripcion : tiene
+    ApplicationUser "1" --> "*" Certificado : tiene
+    ApplicationUser "1" --> "*" EncuestaSatisfaccion : tiene
     
-    Curso ||--o{ Taller : "contiene"
+    Curso "1" --> "*" Taller : contiene
     
-    Taller ||--o{ Inscripcion : "tiene"
-    Taller ||--o{ Certificado : "genera"
-    Taller ||--o{ EncuestaSatisfaccion : "tiene"
-    
-    SurveyTemplate ||--o{ SurveyQuestion : "contiene"
-    SurveyTemplate ||--o{ SurveyResponse : "tiene"
-    SurveyResponse ||--o{ SurveyAnswer : "contiene"
+    Taller "1" --> "*" Inscripcion : tiene
+    Taller "1" --> "*" Certificado : genera
+    Taller "1" --> "*" EncuestaSatisfaccion : tiene
+
+    %% Relaciones - Sistema de Encuestas
+    SurveyTemplate "1" --> "*" SurveyQuestion : contiene
+    SurveyTemplate "1" --> "*" SurveyResponse : tiene
+    SurveyResponse "1" --> "*" SurveyAnswer : contiene
 ```
 
 ## Enumeraciones

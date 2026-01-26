@@ -79,7 +79,7 @@ public class LoginModel : PageModel
 
             if (result.Succeeded)
             {
-                _logger.LogInformation("Usuario {Email} inició sesión", Input.Email);
+                _logger.LogInformation("Usuario inició sesión exitosamente. UserId={UserId}", user?.Id);
                 return LocalRedirect(returnUrl);
             }
             if (result.RequiresTwoFactor)
@@ -88,7 +88,7 @@ public class LoginModel : PageModel
             }
             if (result.IsLockedOut)
             {
-                _logger.LogWarning("Cuenta bloqueada para {Email}", Input.Email);
+                _logger.LogWarning("Intento de login en cuenta bloqueada. UserId={UserId}", user?.Id);
                 if (user != null && user.LockoutEnd.HasValue)
                 {
                     var lockoutEnd = user.LockoutEnd.Value;

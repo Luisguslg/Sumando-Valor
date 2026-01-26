@@ -46,7 +46,7 @@ public class ResetPasswordModel : PageModel
         var result = await _userManager.ResetPasswordAsync(user, Input.Code, Input.Password);
         if (result.Succeeded)
         {
-            _logger.LogInformation("Contraseña restablecida para {Email}", Input.Email);
+            _logger.LogInformation("Contraseña restablecida exitosamente. UserId={UserId}", user.Id);
             return RedirectToPage("./ResetPasswordConfirmation");
         }
 

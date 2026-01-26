@@ -49,7 +49,7 @@ public class ForgotPasswordModel : PageModel
 
             await _emailService.SendPasswordResetAsync(user.Email ?? string.Empty, callbackUrl ?? string.Empty);
 
-            _logger.LogInformation("Email de recuperación de contraseña enviado a {Email}", user.Email);
+            _logger.LogInformation("Email de recuperación de contraseña enviado. UserId={UserId}", user.Id);
         }
 
         return RedirectToPage("./ForgotPasswordConfirmation");

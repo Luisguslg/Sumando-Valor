@@ -71,7 +71,7 @@ public class ProfileModel : PageModel
         var result = await _userManager.UpdateAsync(user);
         if (result.Succeeded)
         {
-            _logger.LogInformation("Usuario {Email} actualizó su perfil", user.Email);
+            _logger.LogInformation("Usuario actualizó su perfil. UserId={UserId}", user.Id);
             TempData["FlashSuccess"] = "Perfil actualizado exitosamente.";
             return RedirectToPage();
         }

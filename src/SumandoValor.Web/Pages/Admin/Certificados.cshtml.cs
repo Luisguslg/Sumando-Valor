@@ -155,7 +155,7 @@ public class CertificadosModel : PageModel
                 VerificationCode = $"SV-{cert.Id:D6}"
             });
 
-            // FIX: never overwrite PDFs. Generate a unique filename per issuance and (optionally) delete the previous file.
+            // Generar nombre único para cada emisión de certificado. Si ya existe uno previo, eliminarlo.
             if (!string.IsNullOrWhiteSpace(cert.UrlPdf))
             {
                 try
@@ -200,7 +200,7 @@ public class CertificadosModel : PageModel
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "No se pudo enviar notificación de certificado. CertId={CertId}, Email={Email}", cert.Id, user.Email);
+                    _logger.LogWarning(ex, "No se pudo enviar notificación de certificado. CertId={CertId}, UserId={UserId}", cert.Id, user.Id);
                 }
             }
         }

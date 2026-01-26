@@ -6,21 +6,22 @@ Este documento describe el modelo de datos completo con todas las tablas, campos
 
 ```mermaid
 erDiagram
+    %% Core del negocio - Agrupación principal
     AspNetUsers ||--o{ Inscripciones : "tiene"
     AspNetUsers ||--o{ Certificados : "tiene"
     AspNetUsers ||--o{ EncuestasSatisfaccion : "tiene"
-    AspNetUsers ||--o{ SurveyResponses : "tiene"
     
     Cursos ||--o{ Talleres : "contiene"
     
     Talleres ||--o{ Inscripciones : "tiene"
     Talleres ||--o{ Certificados : "genera"
     Talleres ||--o{ EncuestasSatisfaccion : "tiene"
-    Talleres ||--o{ SurveyResponses : "tiene"
     
+    %% Sistema de Encuestas - Agrupación separada
     SurveyTemplates ||--o{ SurveyQuestions : "contiene"
     SurveyTemplates ||--o{ SurveyResponses : "tiene"
-    
+    Talleres ||--o{ SurveyResponses : "tiene"
+    AspNetUsers ||--o{ SurveyResponses : "tiene"
     SurveyResponses ||--o{ SurveyAnswers : "contiene"
     SurveyQuestions ||--o{ SurveyAnswers : "responde"
 

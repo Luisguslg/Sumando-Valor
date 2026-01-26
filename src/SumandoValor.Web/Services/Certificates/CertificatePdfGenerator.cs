@@ -38,7 +38,7 @@ public sealed class CertificatePdfGenerator
                 {
                     if (templateBytes == null)
                     {
-                        // Fallback: generate the certificate design in code if the template is missing.
+                        // Si no hay plantilla, generar diseño básico en código
                         root.Padding(40).Border(2).BorderColor("#00338D").Padding(26).Column(col =>
                         {
                             col.Spacing(16);
@@ -88,7 +88,6 @@ public sealed class CertificatePdfGenerator
                                 .Text(string.IsNullOrWhiteSpace(nombre) ? "—" : nombre)
                                 .FontSize(34).SemiBold().FontColor("#00338D");
 
-                            // Spacing to the three info cards already drawn in the template
                             col.Item().PaddingTop(145).Row(row =>
                             {
                                 void CardValue(string value)

@@ -6,46 +6,41 @@ Este documento describe la arquitectura de componentes y las capas de la aplicac
 
 ```mermaid
 graph TB
-    subgraph "Capa de Presentación"
+    subgraph Presentacion["Capa de Presentación"]
         A[Razor Pages]
         B[Views/CSHTML]
-        C[Static Files/wwwroot]
+        C[Static Files]
     end
 
-    subgraph "Capa de Aplicación"
+    subgraph Aplicacion["Capa de Aplicación"]
         D[Page Models]
         E[View Models]
-        F[Helpers]
     end
 
-    subgraph "Capa de Servicios"
+    subgraph Servicios["Capa de Servicios"]
         G[Email Service]
         H[Captcha Validator]
-        I[Certificate PDF Generator]
-        J[Upload Cleanup Service]
+        I[PDF Generator]
     end
 
-    subgraph "Capa de Infraestructura"
+    subgraph Infraestructura["Capa de Infraestructura"]
         K[AppDbContext]
-        L[Entity Framework Core]
-        M[Identity Framework]
-        N[SMTP Client]
-        O[HTTP Client]
+        L[EF Core]
+        M[Identity]
     end
 
-    subgraph "Capa de Dominio"
+    subgraph Dominio["Capa de Dominio"]
         P[Entities]
-        Q[Enums]
-        R[Helpers/Catalogos]
     end
 
-    subgraph "Sistemas Externos"
+    subgraph Externos["Sistemas Externos"]
         S[(SQL Server)]
         T[SMTP Server]
-        U[Cloudflare Turnstile]
+        U[Cloudflare]
         V[File System]
     end
 
+    %% Flujo principal
     A --> D
     B --> A
     C --> A
@@ -55,20 +50,19 @@ graph TB
     D --> I
     D --> K
     E --> P
-    G --> N
+    
+    %% Servicios a infraestructura
+    G --> T
     G --> V
-    H --> O
     H --> U
     I --> V
-    J --> V
+    
+    %% Infraestructura a dominio y externos
     K --> L
     K --> M
     L --> S
     M --> S
-    N --> T
-    O --> U
-    P --> Q
-    P --> R
+    L --> P
 ```
 
 ## Descripción de Componentes

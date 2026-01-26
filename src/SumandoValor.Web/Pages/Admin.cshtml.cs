@@ -44,12 +44,11 @@ public class AdminModel : PageModel
         
         if (totalCuposMaximos > 0)
         {
+            var tallerIds = talleresAbiertos.Select(t => t.Id).ToList();
             var inscripcionesActivas = await _context.Inscripciones
-                .Where(i => i.Estado == EstadoInscripcion.Activa 
-                    && talleresAbiertos.Select(t => t.Id).Contains(i.TallerId))
+                .Where(i => i.Estado == EstadoInscripcion.Activa && tallerIds.Contains(i.TallerId))
                 .CountAsync();
             
-            // Calcular porcentaje con precisión decimal y redondear
             var porcentaje = (double)inscripcionesActivas * 100.0 / totalCuposMaximos;
             CuposOcupados = (int)Math.Round(porcentaje, 0);
         }

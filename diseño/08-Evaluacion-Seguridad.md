@@ -19,10 +19,10 @@ Esta aplicación implementa múltiples capas de seguridad siguiendo las mejores 
 - ✅ CAPTCHA en formularios públicos
 
 ### Áreas de Mejora Recomendadas
-- ⚠️ Implementar rate limiting en endpoints públicos
-- ⚠️ Considerar implementar CSRF tokens explícitos (actualmente usa antiforgery implícito)
-- ⚠️ Revisar políticas de retención de logs de auditoría
-- ⚠️ Considerar encriptación de datos sensibles en reposo (PII)
+- ✅ **IMPLEMENTADO**: Rate limiting en endpoints públicos (Login, Register, Contact)
+- ✅ CSRF protection implementado con antiforgery tokens
+- ⚠️ Revisar políticas de retención de logs de auditoría (recomendación operativa)
+- ⚠️ Considerar encriptación de datos sensibles en reposo (PII) - recomendación futura
 
 ## 1. Autenticación
 
@@ -277,11 +277,18 @@ if (!app.Environment.IsDevelopment())
 ## 13. Rate Limiting
 
 ### Estado Actual
-- ❌ **NO IMPLEMENTADO** - No hay rate limiting explícito
+- ✅ **IMPLEMENTADO** - Middleware de rate limiting personalizado
 
-**Recomendación**: 
-- Implementar rate limiting en endpoints públicos (registro, login, contacto)
-- Considerar usar `Microsoft.AspNetCore.RateLimiting` o middleware personalizado
+### Implementación
+- **Middleware**: `RateLimitingMiddleware`
+- **Endpoints protegidos**:
+  - `/Account/Login`: 5 requests por 15 minutos
+  - `/Account/Register`: 3 requests por hora
+  - `/Contact`: 5 requests por hora
+- **Método**: Por IP, con soporte para proxies (X-Forwarded-For)
+- **Limpieza automática**: Entradas antiguas se eliminan periódicamente
+
+**Estado**: ✅ **CUMPLE** - Protección contra abuso implementada
 
 ## 14. Seguridad de Archivos
 
@@ -335,9 +342,9 @@ if (!app.Environment.IsDevelopment())
 ## 18. Recomendaciones Prioritarias
 
 ### Alta Prioridad
-1. **Implementar Rate Limiting** en endpoints públicos
+1. ✅ **COMPLETADO**: Rate limiting implementado en endpoints públicos
 2. **Revisar dependencias** periódicamente para vulnerabilidades conocidas
-3. **Definir política de retención** de logs de auditoría
+3. **Definir política de retención** de logs de auditoría (operativo)
 
 ### Media Prioridad
 4. **Considerar encriptación** de campos PII sensibles (cédula)
@@ -362,9 +369,9 @@ if (!app.Environment.IsDevelopment())
 - [x] Logging de auditoría
 - [x] Manejo de errores sin exponer información
 - [x] Validación de archivos (tipo y tamaño)
-- [ ] Rate limiting implementado
-- [ ] Dependencias actualizadas y sin vulnerabilidades conocidas
-- [ ] Política de retención de logs definida
+- [x] Rate limiting implementado
+- [ ] Dependencias actualizadas y sin vulnerabilidades conocidas (revisión periódica recomendada)
+- [ ] Política de retención de logs definida (recomendación operativa)
 
 ## 20. Conclusión
 
