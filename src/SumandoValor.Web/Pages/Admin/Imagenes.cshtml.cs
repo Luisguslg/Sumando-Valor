@@ -28,21 +28,30 @@ public class ImagenesModel : PageModel
     public string AboutMainAlt { get; set; } = "Fundación KPMG Venezuela";
     public string? WorkshopCardUrl { get; set; }
     public string WorkshopCardAlt { get; set; } = "Taller";
+    public string? HomePillarsUrl { get; set; }
+    public string HomePillarsAlt { get; set; } = "Pilares de formación";
 
     public async Task OnGetAsync()
     {
         var img = await _context.SiteImages.AsNoTracking().FirstOrDefaultAsync(x => x.Key == "AboutMain");
         if (img != null)
         {
-            AboutMainUrl = "/uploads/site/" + img.FileName;
+            AboutMainUrl = Url.Content("~/uploads/site/" + img.FileName);
             AboutMainAlt = img.AltText;
         }
 
         var w = await _context.SiteImages.AsNoTracking().FirstOrDefaultAsync(x => x.Key == "WorkshopCard");
         if (w != null)
         {
-            WorkshopCardUrl = "/uploads/site/" + w.FileName;
+            WorkshopCardUrl = Url.Content("~/uploads/site/" + w.FileName);
             WorkshopCardAlt = w.AltText;
+        }
+
+        var p = await _context.SiteImages.AsNoTracking().FirstOrDefaultAsync(x => x.Key == "HomePillars");
+        if (p != null)
+        {
+            HomePillarsUrl = Url.Content("~/uploads/site/" + p.FileName);
+            HomePillarsAlt = p.AltText;
         }
     }
 
@@ -137,6 +146,12 @@ public class ImagenesModel : PageModel
 
     public async Task<IActionResult> OnPostDeleteWorkshopCardAsync()
         => await DeleteSingleAsync("WorkshopCard");
+
+    public async Task<IActionResult> OnPostUploadHomePillarsAsync(IFormFile file, string altText)
+        => await UpsertSingleAsync("HomePillars", file, altText);
+
+    public async Task<IActionResult> OnPostDeleteHomePillarsAsync()
+        => await DeleteSingleAsync("HomePillars");
 
     private async Task<IActionResult> UpsertSingleAsync(string key, IFormFile file, string altText)
     {

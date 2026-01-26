@@ -17,9 +17,18 @@ public class IndexModel : PageModel
     public List<Curso> CursosDestacados { get; set; } = new();
     public List<Taller> TalleresProximos { get; set; } = new();
     public List<CarouselItem> CarouselItems { get; set; } = new();
+    public string? HomePillarsImageUrl { get; set; }
+    public string HomePillarsImageAlt { get; set; } = "Pilares de formación";
 
     public async Task OnGetAsync()
     {
+        var pillars = await _context.SiteImages.AsNoTracking().FirstOrDefaultAsync(x => x.Key == "HomePillars");
+        if (pillars != null)
+        {
+            HomePillarsImageUrl = Url.Content("~/uploads/site/" + pillars.FileName);
+            HomePillarsImageAlt = pillars.AltText;
+        }
+
         CarouselItems = await _context.CarouselItems
             .Where(x => x.IsActive)
             .OrderBy(x => x.SortOrder)

@@ -18,8 +18,8 @@
 </div>
 
 <div class="admin-card">
-    <h2 class="h6 mb-1">Imagen “Tarjeta (Mis Talleres)”</h2>
-    <div class="text-muted mb-3">Se usa como imagen por defecto en las tarjetas/listados de “Mis Talleres”.</div>
+    <h2 class="h6 mb-1">Imagen por defecto “Mis Talleres”</h2>
+    <div class="text-muted mb-3">Se usa en las tarjetas de “Mis Talleres” (no es una imagen por taller).</div>
 
     @if (!string.IsNullOrWhiteSpace(Model.WorkshopCardUrl))
     {
@@ -48,6 +48,41 @@
 
     <form method="post" asp-page-handler="DeleteWorkshopCard" class="mt-2"
           onsubmit="return confirm('¿Eliminar la imagen de tarjeta de taller?');">
+        <button type="submit" class="btn btn-outline-danger">Eliminar</button>
+    </form>
+</div>
+
+<div class="admin-card">
+    <h2 class="h6 mb-1">Imagen Home “Formación con propósito”</h2>
+    <div class="text-muted mb-3">Es la imagen del bloque que aparece al final del Home (tarjeta “Formación con propósito”).</div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.HomePillarsUrl))
+    {
+        <div class="mb-3">
+            <img src="@Model.HomePillarsUrl" alt="@Model.HomePillarsAlt" style="max-width: 100%; height: auto; border-radius: 8px;" />
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">No hay imagen configurada. Se usará la imagen por defecto.</div>
+    }
+
+    <form method="post" enctype="multipart/form-data" asp-page-handler="UploadHomePillars" class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Archivo (jpg/png/webp, máx 4MB)</label>
+            <input class="form-control" type="file" name="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Texto alternativo (alt)</label>
+            <input class="form-control" type="text" name="altText" value="@Model.HomePillarsAlt" maxlength="200" required />
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Guardar imagen</button>
+        </div>
+    </form>
+
+    <form method="post" asp-page-handler="DeleteHomePillars" class="mt-2"
+          onsubmit="return confirm('¿Eliminar la imagen del Home “Formación con propósito”?');">
         <button type="submit" class="btn btn-outline-danger">Eliminar</button>
     </form>
 </div>

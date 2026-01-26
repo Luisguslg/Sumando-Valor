@@ -61,7 +61,8 @@ public class TalleresModel : PageModel
 
         var workshopImg = await _context.SiteImages.AsNoTracking().FirstOrDefaultAsync(x => x.Key == "WorkshopCard");
         if (workshopImg != null)
-            WorkshopCardImageUrl = "/uploads/site/" + workshopImg.FileName;
+            // Use Url.Content to respect PathBase (IIS virtual directories)
+            WorkshopCardImageUrl = Url.Content("~/uploads/site/" + workshopImg.FileName);
 
         // Global survey availability (same for all talleres)
         var hasActiveSurvey = await _context.SurveyTemplates.AnyAsync(t => t.IsActive);

@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model IndexModel
 @{
     ViewData["Title"] = "Inicio";
@@ -221,7 +221,9 @@ else
             <div class="card card-kpmg h-100">
                 <div class="card-body p-4 p-lg-5">
                     <div class="card-media mb-3">
-                        <img src="~/images/sections/pilares.jpg" alt="Pilares de formación" loading="lazy" decoding="async" />
+                        <img src="@(Model.HomePillarsImageUrl ?? Url.Content("~/images/sections/pilares.jpg"))"
+                             alt="@(string.IsNullOrWhiteSpace(Model.HomePillarsImageAlt) ? "Pilares de formación" : Model.HomePillarsImageAlt)"
+                             loading="lazy" decoding="async" />
                     </div>
                     <div class="fw-bold mb-1">Formación con propósito</div>
                     <div class="text-muted">

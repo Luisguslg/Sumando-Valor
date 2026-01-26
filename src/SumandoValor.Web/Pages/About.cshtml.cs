@@ -21,7 +21,8 @@ public class AboutModel : PageModel
         var img = await _context.SiteImages.AsNoTracking().FirstOrDefaultAsync(x => x.Key == "AboutMain");
         if (img != null)
         {
-            AboutImageUrl = "/uploads/site/" + img.FileName;
+            // Use Url.Content to respect PathBase (IIS virtual directories)
+            AboutImageUrl = Url.Content("~/uploads/site/" + img.FileName);
             AboutImageAlt = img.AltText;
         }
     }
