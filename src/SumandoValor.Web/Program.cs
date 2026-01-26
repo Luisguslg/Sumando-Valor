@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Principal;
 using SumandoValor.Infrastructure.Data;
 using SumandoValor.Infrastructure.Services;
+using SumandoValor.Web.Services;
 using SumandoValor.Web.Services.Certificates;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -119,6 +120,7 @@ else
 
 builder.Services.AddRazorPages();
 builder.Services.AddSingleton<CertificatePdfGenerator>();
+builder.Services.AddScoped<UploadCleanupService>();
 
 // Production hardening: persist DataProtection keys to disk so auth cookies remain valid after app restarts.
 // (Avoids "ephemeral key repository" warnings and random logout issues.)
@@ -213,10 +215,8 @@ using (var scope = app.Services.CreateScope())
         // Limpieza opcional de uploads huérfanos (solo en Development por seguridad)
         try
         {
-            var env = services.GetRequiredService<IWebHostEnvironment>();
-            var loggerFactory = services.GetRequiredService<ILoggerFactory>();
-            var dbInitLogger = loggerFactory.CreateLogger("DbInitializer");
-            await DbInitializer.CleanOrphanUploadsAsync(context, env, dbInitLogger, app.Environment.IsDevelopment());
+            var uploadCleanupService = services.GetRequiredService<UploadCleanupService>();
+            await uploadCleanupService.CleanOrphanUploadsAsync(context, app.Environment.IsDevelopment());
         }
         catch (Exception ex)
         {
