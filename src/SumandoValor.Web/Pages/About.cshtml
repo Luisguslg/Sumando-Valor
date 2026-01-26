@@ -19,22 +19,25 @@
                     <div class="text-muted small mb-2">Fundación KPMG Venezuela</div>
                     <h2 class="h3 fw-bold mb-3">¿Quiénes somos?</h2>
                     <p class="text-muted mb-3">
-                        La Fundación KPMG Venezuela impulsa iniciativas de responsabilidad social con foco en formación,
-                        voluntariado e impacto comunitario.
+                        La Fundación KPMG Venezuela es una entidad sin fines de lucro, creada en el año 2005 y es el brazo ejecutor
+                        de la Responsabilidad Social Empresarial (RSE) de KPMG Venezuela.
+                    </p>
+                    <p class="text-muted mb-0">
+                        Estamos comprometidos con el desarrollo sostenible del país, contribuyendo con la educación permanente de las
+                        comunidades del entorno, el cuidado del ambiente y promoviendo la mejora de la calidad de vida de los
+                        colaboradores de la Firma.
                     </p>
 
                     <h3 class="h5 fw-bold mt-4 mb-2">Programas de Responsabilidad Social Empresarial (RSE)</h3>
-                    <p class="text-muted mb-3">
-                        A través de nuestros programas RSE buscamos promover oportunidades de aprendizaje,
-                        acompañamiento y colaboración con organizaciones y comunidades.
-                    </p>
+                    <p class="text-muted mb-3">A través de nuestros programas RSE buscamos promover oportunidades de aprendizaje y colaboración.</p>
 
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="p-3 border rounded h-100">
                                 <div class="fw-semibold mb-1">Deja tu Huella</div>
                                 <div class="text-muted small">
-                                    Iniciativa con enfoque ecológico, promoviendo prácticas ambientales y participación activa.
+                                    Fomenta la conciencia ecológica, promoviendo la protección y el respeto del ambiente a partir del uso adecuado
+                                    de los recursos y la implementación de prácticas ambientales responsables.
                                 </div>
                             </div>
                         </div>
@@ -42,32 +45,18 @@
                             <div class="p-3 border rounded h-100">
                                 <div class="fw-semibold mb-1">Sumando Valor</div>
                                 <div class="text-muted small">
-                                    Compartimos conocimiento y experiencia profesional junto a ONG y comunidades para fortalecer capacidades.
+                                    Comparte el conocimiento y experiencia profesional de KPMG Venezuela con las ONG y las comunidades del entorno
+                                    en pro de mejorar su desempeño.
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="p-3 border rounded h-100">
-                                <div class="fw-semibold mb-1">Claridad</div>
-                                <div class="text-muted small">Información simple, jerarquía visual y pasos claros.</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="p-3 border rounded h-100">
-                                <div class="fw-semibold mb-1">Accesibilidad</div>
-                                <div class="text-muted small">Diseño responsivo y lenguaje directo.</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="p-3 border rounded h-100">
-                                <div class="fw-semibold mb-1">Impacto</div>
-                                <div class="text-muted small">Actividades con propósito y foco en resultados.</div>
-                            </div>
-                        </div>
-                    </div>
+                    <h3 class="h5 fw-bold mt-4 mb-2">¿Qué son los talleres Sumando Valor?</h3>
+                    <p class="text-muted mb-0">
+                        Son espacios de formación donde se comparten herramientas y conocimientos prácticos para fortalecer capacidades,
+                        fomentar la empleabilidad y promover el desarrollo personal y comunitario.
+                    </p>
                 </div>
             </div>
         </div>
@@ -76,16 +65,18 @@
             <div class="card card-kpmg h-100">
                 <div class="card-body p-4 p-lg-5">
                     <div class="card-media mb-3">
-                        <img src="~/images/sections/about-kpmg.jpg" alt="Fundación KPMG Venezuela" loading="lazy" decoding="async" />
+                        <img src="@(Model.AboutImageUrl ?? Url.Content("~/images/sections/about-kpmg.jpg"))"
+                             alt="@(string.IsNullOrWhiteSpace(Model.AboutImageAlt) ? "Fundación KPMG Venezuela" : Model.AboutImageAlt)"
+                             loading="lazy" decoding="async" />
                     </div>
                     <h3 class="h5 fw-bold mb-2">Pilares del programa Sumando Valor</h3>
                     <p class="text-muted mb-3">
                         El programa se organiza en pilares que guían la experiencia formativa y el alcance comunitario.
                     </p>
                     <ul class="text-muted mb-0">
-                        <li>Formación y empleabilidad</li>
-                        <li>Comunidad y voluntariado</li>
-                        <li>Alianzas con organizaciones</li>
+                        <li>Formación que suma valor</li>
+                        <li>Una plataforma para aprender</li>
+                        <li>Comunidad y alianzas</li>
                         <li>Sostenibilidad (Deja tu Huella)</li>
                     </ul>
                 </div>

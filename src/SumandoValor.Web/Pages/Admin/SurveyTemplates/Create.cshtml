@@ -1,13 +1,13 @@
 @page
 @model SumandoValor.Web.Pages.Admin.SurveyTemplates.CreateModel
 @{
-    ViewData["Title"] = "Nueva plantilla de encuesta";
+    ViewData["Title"] = "Nueva encuesta";
     Layout = "~/Pages/Shared/_AdminLayout.cshtml";
 }
 
 <div class="admin-card">
-    <h1 class="h4 mb-1">Nueva plantilla de encuesta</h1>
-    <div class="text-muted">Define el alcance (programa formativo o taller) y luego agrega preguntas.</div>
+    <h1 class="h4 mb-1">Nueva encuesta</h1>
+    <div class="text-muted">Crea una encuesta global (se usa igual para todos los talleres) y luego agrega preguntas.</div>
 </div>
 
 <div class="admin-card">
@@ -27,32 +27,14 @@
         </div>
 
         <div class="col-12">
-            <div class="border rounded p-3">
-                <div class="fw-semibold mb-2">Alcance</div>
-                <div class="row g-2">
-                    <div class="col-md-6">
-                        <label class="form-label small">Programa formativo (Curso)</label>
-                        <select class="form-select" asp-for="Input.CursoId" asp-items="Model.Cursos">
-                            <option value="">(No aplica)</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label small">Taller</label>
-                        <select class="form-select" asp-for="Input.TallerId" asp-items="Model.Talleres">
-                            <option value="">(No aplica)</option>
-                        </select>
-                    </div>
-                    <div class="col-12">
-                        <div class="text-muted small">
-                            Debes elegir <strong>solo uno</strong>: o Curso o Taller.
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <label class="form-label">Descripción (opcional)</label>
+            <textarea class="form-control" asp-for="Input.Description" rows="3" maxlength="4000"
+                      placeholder="Ej: Cuéntanos tu experiencia para ayudarnos a mejorar."></textarea>
+            <span class="text-danger" asp-validation-for="Input.Description"></span>
         </div>
 
         <div class="col-12 d-flex gap-2">
-            <button class="btn btn-primary" type="submit">Crear plantilla</button>
+            <button class="btn btn-primary" type="submit">Crear encuesta</button>
             <a asp-page="/Admin/SurveyTemplates/Index" class="btn btn-outline-secondary">Cancelar</a>
         </div>
     </form>

@@ -1,18 +1,18 @@
 @page
 @model SumandoValor.Web.Pages.Admin.SurveyTemplates.IndexModel
 @{
-    ViewData["Title"] = "Plantillas de encuesta";
+    ViewData["Title"] = "Encuestas";
     Layout = "~/Pages/Shared/_AdminLayout.cshtml";
 }
 
 <div class="admin-card">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
         <div>
-            <h1 class="h4 mb-1">Plantillas de encuesta</h1>
-            <div class="text-muted">Configura preguntas por programa formativo (curso) o por taller.</div>
+            <h1 class="h4 mb-1">Encuestas</h1>
+            <div class="text-muted">Gestiona encuestas globales (se usan igual para todos los talleres).</div>
         </div>
         <a asp-page="/Admin/SurveyTemplates/Create" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-1"></i>Nueva plantilla
+            <i class="bi bi-plus-circle me-1"></i>Nueva encuesta
         </a>
     </div>
 </div>
@@ -23,7 +23,7 @@
             <thead>
             <tr>
                 <th>Nombre</th>
-                <th>Aplica a</th>
+                <th>Descripción</th>
                 <th>Activa</th>
                 <th class="text-end">Preguntas</th>
                 <th class="text-center">Acciones</th>
@@ -34,7 +34,7 @@
             {
                 <tr>
                     <td class="fw-semibold">@t.Name</td>
-                    <td class="text-muted">@t.ScopeText</td>
+                    <td class="text-muted">@t.Description</td>
                     <td>
                         <span class="badge @(t.IsActive ? "bg-success" : "bg-secondary")">@(t.IsActive ? "Sí" : "No")</span>
                     </td>

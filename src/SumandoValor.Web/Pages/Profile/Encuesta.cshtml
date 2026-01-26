@@ -27,6 +27,11 @@
                     <div class="fw-bold">@Model.Taller.Titulo</div>
                 </div>
 
+                @if (!string.IsNullOrWhiteSpace(Model.Template.Description))
+                {
+                    <div class="text-muted mb-3">@Model.Template.Description</div>
+                }
+
                 <form method="post">
                     <input type="hidden" asp-for="TallerId" />
                     <input type="hidden" asp-for="TemplateId" />
@@ -62,11 +67,29 @@
                             }
                             else if (q.Type == SurveyQuestionType.Text)
                             {
+                                <input class="form-control"
+                                       name="Answers[@q.Id]"
+                                       maxlength="2000"
+                                       @(q.IsRequired ? "required" : "") />
+                            }
+                            else if (q.Type == SurveyQuestionType.Description)
+                            {
                                 <textarea class="form-control"
                                           name="Answers[@q.Id]"
-                                          rows="3"
+                                          rows="4"
                                           maxlength="2000"
                                           @(q.IsRequired ? "required" : "")></textarea>
+                            }
+                            else if (q.Type == SurveyQuestionType.ScoreNumber)
+                            {
+                                <input class="form-control"
+                                       type="number"
+                                       name="Answers[@q.Id]"
+                                       min="@q.Number.Min"
+                                       max="@q.Number.Max"
+                                       step="@q.Number.Step"
+                                       @(q.IsRequired ? "required" : "") />
+                                <div class="form-text">Rango: @q.Number.Min–@q.Number.Max</div>
                             }
                             else if (q.Type == SurveyQuestionType.SingleChoice)
                             {

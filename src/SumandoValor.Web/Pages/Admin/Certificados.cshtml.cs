@@ -151,7 +151,8 @@ public class CertificadosModel : PageModel
                 NombreCompleto = $"{user.Nombres} {user.Apellidos}".Trim(),
                 TallerTitulo = ins.Taller.Titulo,
                 DuracionTexto = FormatDuration(ins.Taller.FechaInicio, ins.Taller.FechaFin),
-                Fecha = ins.Taller.FechaFin ?? ins.Taller.FechaInicio
+                Fecha = ins.Taller.FechaFin ?? ins.Taller.FechaInicio,
+                VerificationCode = $"SV-{cert.Id:D6}"
             });
 
             // FIX: never overwrite PDFs. Generate a unique filename per issuance and (optionally) delete the previous file.

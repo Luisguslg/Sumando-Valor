@@ -2,7 +2,7 @@
 @model SumandoValor.Web.Pages.Admin.SurveyTemplates.EditModel
 @using SumandoValor.Domain.Entities.Surveys
 @{
-    ViewData["Title"] = "Editar plantilla de encuesta";
+    ViewData["Title"] = "Editar encuesta";
     Layout = "~/Pages/Shared/_AdminLayout.cshtml";
 }
 
@@ -40,8 +40,24 @@ else
                 </div>
             </div>
             <div class="col-12">
-                <button class="btn btn-primary" type="submit">Guardar plantilla</button>
+                <button class="btn btn-primary" type="submit">Guardar encuesta</button>
             </div>
+        </form>
+
+        <form method="post" asp-page-handler="UpdateDescription" class="row g-3 mt-3">
+            <input type="hidden" name="Id" value="@Model.Template.Id" />
+            <div class="col-12">
+                <label class="form-label">Descripción (opcional)</label>
+                <textarea class="form-control" name="Description" rows="3" maxlength="4000">@Model.Template.Description</textarea>
+            </div>
+            <div class="col-12">
+                <button class="btn btn-outline-primary" type="submit">Guardar descripción</button>
+            </div>
+        </form>
+
+        <form method="post" asp-page-handler="DeleteTemplate" asp-route-id="@Model.Template.Id" class="mt-3"
+              onsubmit="return confirm('¿Eliminar esta encuesta? Esto borrará también sus preguntas.');">
+            <button class="btn btn-outline-danger" type="submit">Eliminar encuesta</button>
         </form>
     </div>
 
@@ -49,7 +65,7 @@ else
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
             <div>
                 <h2 class="h6 mb-0">Preguntas</h2>
-                <div class="text-muted small">Ordena y agrega preguntas (mínimo viable: rating, texto, opción única).</div>
+                <div class="text-muted small">Agrega preguntas tipo descripción/texto y puntaje (numérico o radio).</div>
             </div>
         </div>
 
@@ -106,9 +122,11 @@ else
             <div class="col-md-3">
                 <label class="form-label">Tipo</label>
                 <select class="form-select" name="Type" required>
-                    <option value="@SurveyQuestionType.Rating1To5">Rating 1–5</option>
-                    <option value="@SurveyQuestionType.Text">Texto</option>
-                    <option value="@SurveyQuestionType.SingleChoice">Opción única</option>
+                    <option value="@SurveyQuestionType.Description">Descripción (texto largo)</option>
+                    <option value="@SurveyQuestionType.Text">Texto (corto/medio)</option>
+                    <option value="@SurveyQuestionType.Rating1To5">Puntaje (radio 1–5)</option>
+                    <option value="@SurveyQuestionType.ScoreNumber">Puntaje (numérico)</option>
+                    <option value="@SurveyQuestionType.SingleChoice">Radio (opciones)</option>
                 </select>
             </div>
             <div class="col-md-6">
@@ -122,8 +140,20 @@ else
                     <label class="form-check-label">Sí</label>
                 </div>
             </div>
+            <div class="col-md-4">
+                <label class="form-label">Mín (solo “Puntaje numérico”)</label>
+                <input class="form-control" type="number" name="Min" value="1" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Máx (solo “Puntaje numérico”)</label>
+                <input class="form-control" type="number" name="Max" value="5" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Step (solo “Puntaje numérico”)</label>
+                <input class="form-control" type="number" name="Step" value="1" />
+            </div>
             <div class="col-12">
-                <label class="form-label">Opciones (solo para “Opción única”, una por línea)</label>
+                <label class="form-label">Opciones (solo para “Radio (opciones)”, una por línea)</label>
                 <textarea class="form-control" name="Options" rows="3" maxlength="4000"></textarea>
             </div>
             <div class="col-12">

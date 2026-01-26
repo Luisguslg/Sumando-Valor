@@ -56,7 +56,11 @@ public class EncuestaModel : PageModel
             return RedirectToPage("/Profile/Talleres");
         }
 
-        Template = await ResolveTemplateAsync(Taller);
+        Template = await _context.SurveyTemplates
+            .Include(t => t.Questions)
+            .Where(t => t.IsActive)
+            .OrderByDescending(t => t.CreatedAt)
+            .FirstOrDefaultAsync();
         if (Template == null) return Page();
 
         TemplateId = Template.Id;
@@ -129,6 +133,15 @@ public class EncuestaModel : PageModel
                     return Page();
                 }
             }
+            else if (q.Type == SurveyQuestionType.ScoreNumber)
+            {
+                var cfg = QuestionVm.ParseNumberConfig(q.OptionsJson);
+                if (!int.TryParse(val, out var n) || n < cfg.Min || n > cfg.Max)
+                {
+                    TempData["FlashError"] = $"Hay un puntaje inválido (debe ser {cfg.Min} a {cfg.Max}).";
+                    return Page();
+                }
+            }
             else if (q.Type == SurveyQuestionType.SingleChoice)
             {
                 var opts = QuestionVm.ParseOptions(q.OptionsJson);
@@ -173,8 +186,22 @@ public class EncuestaModel : PageModel
             .Select(r => r!.Value)
             .ToList();
 
-        var score = ratings.Count > 0 ? ratings.Average() : 0;
-        var comment = orderedQuestions.FirstOrDefault(q => q.Type == SurveyQuestionType.Text) is { } textQ
+        // Include ScoreNumber questions into the score average too.
+        var numericRatings = orderedQuestions
+            .Where(q => q.Type == SurveyQuestionType.ScoreNumber)
+            .Select(q =>
+            {
+                Answers.TryGetValue(q.Id, out var v);
+                return int.TryParse(v, out var n) ? (int?)n : null;
+            })
+            .Where(r => r.HasValue)
+            .Select(r => r!.Value)
+            .ToList();
+
+        var scoreValues = ratings.Concat(numericRatings).ToList();
+
+        var score = scoreValues.Count > 0 ? scoreValues.Average() : 0;
+        var comment = orderedQuestions.FirstOrDefault(q => q.Type == SurveyQuestionType.Description || q.Type == SurveyQuestionType.Text) is { } textQ
             ? (Answers.TryGetValue(textQ.Id, out var c) ? c?.Trim() : null)
             : null;
 
@@ -189,9 +216,9 @@ public class EncuestaModel : PageModel
         {
             TallerId = TallerId,
             UserId = user.Id,
-            Rating1_5 = ratings.Count > 0 ? (int)Math.Round(score, MidpointRounding.AwayFromZero) : 0,
+            Rating1_5 = scoreValues.Count > 0 ? (int)Math.Round(score, MidpointRounding.AwayFromZero) : 0,
             Comentario = string.IsNullOrWhiteSpace(comment) ? null : comment,
-            ScorePromedio = ratings.Count > 0 ? (decimal)score : null,
+            ScorePromedio = scoreValues.Count > 0 ? (decimal)score : null,
             PayloadJson = payload,
             CreatedAt = DateTime.UtcNow
         });
@@ -200,24 +227,6 @@ public class EncuestaModel : PageModel
 
         TempData["FlashSuccess"] = "¡Gracias! Tu encuesta fue enviada correctamente.";
         return RedirectToPage("/Profile/Talleres");
-    }
-
-    private async Task<SurveyTemplate?> ResolveTemplateAsync(Taller taller)
-    {
-        // Prefer a template bound to this Taller, else a template bound to the Curso.
-        var byTaller = await _context.SurveyTemplates
-            .Include(t => t.Questions)
-            .Where(t => t.IsActive && t.TallerId == taller.Id)
-            .OrderByDescending(t => t.CreatedAt)
-            .FirstOrDefaultAsync();
-        if (byTaller != null) return byTaller;
-
-        var byCurso = await _context.SurveyTemplates
-            .Include(t => t.Questions)
-            .Where(t => t.IsActive && t.CursoId == taller.CursoId && t.TallerId == null)
-            .OrderByDescending(t => t.CreatedAt)
-            .FirstOrDefaultAsync();
-        return byCurso;
     }
 
     public sealed class QuestionVm
@@ -229,6 +238,7 @@ public class EncuestaModel : PageModel
             Text = q.Text;
             IsRequired = q.IsRequired;
             Options = ParseOptions(q.OptionsJson);
+            Number = ParseNumberConfig(q.OptionsJson);
         }
 
         public int Id { get; }
@@ -236,6 +246,7 @@ public class EncuestaModel : PageModel
         public string Text { get; }
         public bool IsRequired { get; }
         public List<string> Options { get; }
+        public NumberConfig Number { get; }
 
         public static List<string> ParseOptions(string? optionsJson)
         {
@@ -250,6 +261,34 @@ public class EncuestaModel : PageModel
                 return new List<string>();
             }
         }
+
+        public static NumberConfig ParseNumberConfig(string? optionsJson)
+        {
+            // Default range if missing/invalid
+            var cfg = new NumberConfig(1, 5, 1);
+            if (string.IsNullOrWhiteSpace(optionsJson))
+                return cfg;
+            try
+            {
+                using var doc = JsonDocument.Parse(optionsJson);
+                if (doc.RootElement.ValueKind != JsonValueKind.Object)
+                    return cfg;
+
+                var min = doc.RootElement.TryGetProperty("min", out var pMin) && pMin.TryGetInt32(out var minVal) ? minVal : cfg.Min;
+                var max = doc.RootElement.TryGetProperty("max", out var pMax) && pMax.TryGetInt32(out var maxVal) ? maxVal : cfg.Max;
+                var step = doc.RootElement.TryGetProperty("step", out var pStep) && pStep.TryGetInt32(out var stepVal) ? stepVal : cfg.Step;
+
+                if (step <= 0) step = 1;
+                if (max < min) (min, max) = (max, min);
+                return new NumberConfig(min, max, step);
+            }
+            catch
+            {
+                return cfg;
+            }
+        }
+
+        public readonly record struct NumberConfig(int Min, int Max, int Step);
     }
 }
 

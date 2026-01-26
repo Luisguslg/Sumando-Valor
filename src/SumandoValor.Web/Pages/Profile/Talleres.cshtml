@@ -45,7 +45,7 @@
                     <div class="card card-kpmg h-100 hover-lift">
                         <div class="card-body p-4 d-flex flex-column">
                             <div class="card-media mb-3">
-                                <img src="~/images/cards/workshop.svg" alt="" loading="lazy" />
+                                <img src="@(Model.WorkshopCardImageUrl ?? Url.Content("~/images/cards/workshop.svg"))" alt="" loading="lazy" />
                             </div>
                             <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
                                 <span class="badge badge-kpmg">@taller.Curso.Titulo</span>
@@ -126,31 +126,9 @@
                                             }
                                             else
                                             {
-                                                <form method="post" asp-page-handler="SubmitEncuesta" class="d-grid gap-2">
-                                                    <input type="hidden" name="EncuestaInput.TallerId" value="@taller.Id" />
-
-                                                    <div>
-                                                        <div class="small text-muted mb-2">Calificación (1–5)</div>
-                                                        <div class="d-flex flex-wrap gap-2">
-                                                            @for (int r = 1; r <= 5; r++)
-                                                            {
-                                                                <div class="form-check form-check-inline m-0">
-                                                                    <input class="form-check-input" type="radio" name="EncuestaInput.Rating1_5" id="rating_@(taller.Id)_@(r)" value="@r" required />
-                                                                    <label class="form-check-label" for="rating_@(taller.Id)_@(r)">@r</label>
-                                                                </div>
-                                                            }
-                                                        </div>
-                                                    </div>
-
-                                                    <div>
-                                                        <label class="form-label small mb-1" for="comentario_@taller.Id">Comentario (opcional)</label>
-                                                        <textarea class="form-control" id="comentario_@taller.Id" name="EncuestaInput.Comentario" rows="3" maxlength="2000"></textarea>
-                                                    </div>
-
-                                                    <button type="submit" class="btn btn-primary">
-                                                        Enviar encuesta
-                                                    </button>
-                                                </form>
+                                                <div class="text-muted small">
+                                                    No hay una encuesta configurada por el administrador.
+                                                </div>
                                             }
                                         </div>
                                     }

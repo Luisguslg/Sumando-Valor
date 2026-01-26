@@ -25,6 +25,7 @@ public class TalleresModel : PageModel
     public Dictionary<int, EncuestaSatisfaccion> EncuestasByTallerId { get; set; } = new();
     public Dictionary<int, Certificado> CertificadosByTallerId { get; set; } = new();
     public Dictionary<int, bool> TemplateAvailableByTallerId { get; set; } = new();
+    public string? WorkshopCardImageUrl { get; set; }
 
     [BindProperty]
     public EncuestaInputModel EncuestaInput { get; set; } = new();
@@ -58,26 +59,15 @@ public class TalleresModel : PageModel
             .Where(c => c.UserId == user.Id && tallerIds.Contains(c.TallerId))
             .ToDictionaryAsync(c => c.TallerId);
 
-        // Survey templates availability (for UI routing to builder-based survey page)
-        var cursoIds = Inscripciones.Select(i => i.Taller.CursoId).Distinct().ToList();
-        var templates = await _context.SurveyTemplates
-            .Where(t => t.IsActive && (t.TallerId != null && tallerIds.Contains(t.TallerId.Value) || (t.TallerId == null && t.CursoId != null && cursoIds.Contains(t.CursoId.Value))))
-            .Select(t => new { t.Id, t.CursoId, t.TallerId })
-            .ToListAsync();
+        var workshopImg = await _context.SiteImages.AsNoTracking().FirstOrDefaultAsync(x => x.Key == "WorkshopCard");
+        if (workshopImg != null)
+            WorkshopCardImageUrl = "/uploads/site/" + workshopImg.FileName;
 
-        var byTaller = templates.Where(t => t.TallerId.HasValue).ToDictionary(t => t.TallerId!.Value, _ => true);
+        // Global survey availability (same for all talleres)
+        var hasActiveSurvey = await _context.SurveyTemplates.AnyAsync(t => t.IsActive);
         foreach (var ins in Inscripciones)
         {
-            var tid = ins.TallerId;
-            if (byTaller.TryGetValue(tid, out var v))
-            {
-                TemplateAvailableByTallerId[tid] = v;
-                continue;
-            }
-
-            // fallback to curso template
-            var hasCursoTemplate = templates.Any(t => t.TallerId == null && t.CursoId == ins.Taller.CursoId);
-            TemplateAvailableByTallerId[tid] = hasCursoTemplate;
+            TemplateAvailableByTallerId[ins.TallerId] = hasActiveSurvey;
         }
     }
 

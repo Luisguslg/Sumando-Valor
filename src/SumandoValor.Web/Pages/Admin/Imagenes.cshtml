@@ -1,0 +1,88 @@
+@page
+@model SumandoValor.Web.Pages.Admin.ImagenesModel
+@{
+    ViewData["Title"] = "Imágenes";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-card">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+            <h1 class="h4 mb-1">Imágenes</h1>
+            <div class="text-muted">Administra imágenes del sitio. Al reemplazar una imagen, se elimina la anterior.</div>
+        </div>
+        <a asp-page="/Admin/Carrusel" class="btn btn-outline-primary">
+            <i class="bi bi-images me-1"></i>Gestionar carrusel
+        </a>
+    </div>
+</div>
+
+<div class="admin-card">
+    <h2 class="h6 mb-1">Imagen “Tarjeta (Mis Talleres)”</h2>
+    <div class="text-muted mb-3">Se usa como imagen por defecto en las tarjetas/listados de “Mis Talleres”.</div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.WorkshopCardUrl))
+    {
+        <div class="mb-3">
+            <img src="@Model.WorkshopCardUrl" alt="@Model.WorkshopCardAlt" style="max-width: 260px; height: auto; border-radius: 8px;" />
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">No hay imagen configurada. Se usará la imagen por defecto.</div>
+    }
+
+    <form method="post" enctype="multipart/form-data" asp-page-handler="UploadWorkshopCard" class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Archivo (jpg/png/webp, máx 4MB)</label>
+            <input class="form-control" type="file" name="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Texto alternativo (alt)</label>
+            <input class="form-control" type="text" name="altText" value="@Model.WorkshopCardAlt" maxlength="200" required />
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Guardar imagen</button>
+        </div>
+    </form>
+
+    <form method="post" asp-page-handler="DeleteWorkshopCard" class="mt-2"
+          onsubmit="return confirm('¿Eliminar la imagen de tarjeta de taller?');">
+        <button type="submit" class="btn btn-outline-danger">Eliminar</button>
+    </form>
+</div>
+
+<div class="admin-card">
+    <h2 class="h6 mb-3">Imagen “Conócenos”</h2>
+
+    @if (!string.IsNullOrWhiteSpace(Model.AboutMainUrl))
+    {
+        <div class="mb-3">
+            <img src="@Model.AboutMainUrl" alt="@Model.AboutMainAlt" style="max-width: 100%; height: auto; border-radius: 8px;" />
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">No hay imagen configurada. Se usará la imagen por defecto.</div>
+    }
+
+    <form method="post" enctype="multipart/form-data" asp-page-handler="UploadAboutMain" class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Archivo (jpg/png/webp, máx 4MB)</label>
+            <input class="form-control" type="file" name="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Texto alternativo (alt)</label>
+            <input class="form-control" type="text" name="altText" value="@Model.AboutMainAlt" maxlength="200" required />
+        </div>
+        <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Guardar imagen</button>
+        </div>
+    </form>
+
+    <form method="post" asp-page-handler="DeleteAboutMain" class="mt-2"
+          onsubmit="return confirm('¿Eliminar la imagen de Conócenos?');">
+        <button type="submit" class="btn btn-outline-danger">Eliminar</button>
+    </form>
+</div>
+

@@ -21,6 +21,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<MensajeContacto> MensajesContacto { get; set; }
     public DbSet<AdminAuditEvent> AdminAuditEvents { get; set; }
     public DbSet<CarouselItem> CarouselItems { get; set; }
+    public DbSet<SiteImage> SiteImages { get; set; }
     public DbSet<SurveyTemplate> SurveyTemplates { get; set; }
     public DbSet<SurveyQuestion> SurveyQuestions { get; set; }
     public DbSet<SurveyResponse> SurveyResponses { get; set; }
@@ -157,13 +158,22 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.AltText).IsRequired().HasMaxLength(200);
         });
 
+        builder.Entity<SiteImage>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.Key).IsUnique();
+            entity.Property(e => e.Key).IsRequired().HasMaxLength(80);
+            entity.Property(e => e.FileName).IsRequired().HasMaxLength(260);
+            entity.Property(e => e.AltText).IsRequired().HasMaxLength(200);
+            entity.HasIndex(e => e.UpdatedAt);
+        });
+
         builder.Entity<SurveyTemplate>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.IsActive);
-            entity.HasIndex(e => e.CursoId);
-            entity.HasIndex(e => e.TallerId);
             entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Description).HasMaxLength(4000);
             entity.HasMany(e => e.Questions)
                 .WithOne(q => q.Template)
                 .HasForeignKey(q => q.TemplateId)

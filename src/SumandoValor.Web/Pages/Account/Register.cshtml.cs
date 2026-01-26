@@ -119,7 +119,9 @@ public class RegisterModel : PageModel
             Apellidos = Input.Apellidos,
             Cedula = Input.Cedula,
             Sexo = Input.Sexo,
-            FechaNacimiento = Input.FechaNacimiento,
+            // UX: keep the form value nullable so the date input is empty on first load.
+            // At this point ModelState is valid, so FechaNacimiento has a value.
+            FechaNacimiento = Input.FechaNacimiento!.Value,
             TieneDiscapacidad = Input.TieneDiscapacidad,
             DiscapacidadDescripcion = Input.TieneDiscapacidad ? Input.DiscapacidadDescripcion : null,
             NivelEducativo = Input.NivelEducativo,
@@ -216,7 +218,7 @@ public class RegisterModel : PageModel
         [Required(ErrorMessage = "La fecha de nacimiento es requerida")]
         [DataType(DataType.Date)]
         [Display(Name = "Fecha de Nacimiento")]
-        public DateTime FechaNacimiento { get; set; }
+        public DateTime? FechaNacimiento { get; set; }
 
         [StringLength(25, ErrorMessage = "El teléfono no puede exceder 25 caracteres")]
         [Display(Name = "Teléfono")]

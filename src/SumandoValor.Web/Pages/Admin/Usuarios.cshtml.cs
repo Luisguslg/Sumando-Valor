@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using SumandoValor.Domain.Entities;
 using SumandoValor.Infrastructure.Data;
@@ -35,6 +36,9 @@ public class UsuariosModel : PageModel
 
     [BindProperty(SupportsGet = true, Name = "page")]
     public int PageNumber { get; set; } = 1;
+
+    [BindProperty]
+    public CreateUserInputModel CreateInput { get; set; } = new();
 
     public List<Row> Rows { get; set; } = new();
     public int TotalCount { get; set; }
@@ -163,11 +167,76 @@ public class UsuariosModel : PageModel
         return RedirectToPage(new { Search, Status, Role, page = PageNumber });
     }
 
+    public async Task<IActionResult> OnPostCreateAsync()
+    {
+        // Re-apply GET-bound query context so redirects keep filters/paging.
+        // (These are SupportsGet; they won't bind automatically on POST.)
+        var search = Request.Query["Search"].ToString();
+        var status = Request.Query["Status"].ToString();
+        var role = Request.Query["Role"].ToString();
+        var page = int.TryParse(Request.Query["page"].ToString(), out var p) ? p : 1;
+
+        if (!ModelState.IsValid)
+        {
+            Search = string.IsNullOrWhiteSpace(search) ? null : search;
+            Status = string.IsNullOrWhiteSpace(status) ? null : status;
+            Role = string.IsNullOrWhiteSpace(role) ? null : role;
+            PageNumber = page;
+            await OnGetAsync();
+            return Page();
+        }
+
+        var existing = await _userManager.FindByEmailAsync(CreateInput.Email);
+        if (existing != null)
+        {
+            TempData["FlashError"] = "Ese email ya existe.";
+            return RedirectToPage(new { Search = search, Status = status, Role = role, page });
+        }
+
+        var user = new ApplicationUser
+        {
+            UserName = CreateInput.Email,
+            Email = CreateInput.Email,
+            EmailConfirmed = true, // Admin-created accounts should be usable even if SMTP is blocked.
+            EmailVerifiedAt = DateTime.UtcNow,
+            Nombres = CreateInput.Nombres,
+            Apellidos = CreateInput.Apellidos,
+            Cedula = CreateInput.Cedula,
+            Sexo = CreateInput.Sexo,
+            FechaNacimiento = CreateInput.FechaNacimiento!.Value,
+            NivelEducativo = CreateInput.NivelEducativo,
+            SituacionLaboral = CreateInput.SituacionLaboral,
+            CanalConocio = CreateInput.CanalConocio,
+            Estado = CreateInput.Estado,
+            Ciudad = CreateInput.Ciudad,
+            Telefono = CreateInput.Telefono,
+            TieneDiscapacidad = false,
+            DiscapacidadDescripcion = null,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        var result = await _userManager.CreateAsync(user, CreateInput.Password);
+        if (!result.Succeeded)
+        {
+            TempData["FlashError"] = "No se pudo crear el usuario.";
+            _logger.LogWarning("Create user failed: {Errors}", string.Join("; ", result.Errors.Select(e => e.Description)));
+            return RedirectToPage(new { Search = search, Status = status, Role = role, page });
+        }
+
+        // Default role
+        var initialRole = CreateInput.InitialRole == "Admin" ? "Admin" : "Beneficiario";
+        await _userManager.AddToRoleAsync(user, initialRole);
+
+        await LogAuditAsync("CreateUser", user.Id, new { role = initialRole, email = user.Email });
+        TempData["FlashSuccess"] = $"Usuario creado ({initialRole}).";
+        return RedirectToPage(new { Search = search, Status = status, Role = role, page });
+    }
+
     public async Task<IActionResult> OnPostMakeAdminAsync(string id)
     {
         if (!User.IsInRole("SuperAdmin"))
         {
-            TempData["FlashError"] = "Solo SuperAdmin puede asignar rol Admin.";
+            TempData["FlashError"] = "Solo SuperAdmin puede asignar el rol Admin.";
             return RedirectToPage(new { Search, Status, Role, page = PageNumber });
         }
 
@@ -176,6 +245,13 @@ public class UsuariosModel : PageModel
         {
             TempData["FlashError"] = "Usuario no encontrado.";
             return RedirectToPage();
+        }
+
+        // SuperAdmins always have Admin; no action needed
+        if ((await _userManager.GetRolesAsync(user)).Contains("SuperAdmin"))
+        {
+            TempData["FlashInfo"] = "Los SuperAdmins ya son Admin por defecto.";
+            return RedirectToPage(new { Search, Status, Role, page = PageNumber });
         }
 
         var res = await _userManager.AddToRoleAsync(user, "Admin");
@@ -197,7 +273,7 @@ public class UsuariosModel : PageModel
     {
         if (!User.IsInRole("SuperAdmin"))
         {
-            TempData["FlashError"] = "Solo SuperAdmin puede revocar rol Admin.";
+            TempData["FlashError"] = "Solo SuperAdmin puede quitar el rol Admin.";
             return RedirectToPage(new { Search, Status, Role, page = PageNumber });
         }
 
@@ -211,12 +287,9 @@ public class UsuariosModel : PageModel
         var targetRoles = await _userManager.GetRolesAsync(user);
         if (targetRoles.Contains("SuperAdmin"))
         {
-            var superAdmins = await _userManager.GetUsersInRoleAsync("SuperAdmin");
-            if (superAdmins.Count <= 1)
-            {
-                TempData["FlashError"] = "No puedes quitar Admin al último SuperAdmin.";
-                return RedirectToPage(new { Search, Status, Role, page = PageNumber });
-            }
+            // Rule: SuperAdmins always keep Admin
+            TempData["FlashError"] = "No puedes quitar el rol Admin a un SuperAdmin.";
+            return RedirectToPage(new { Search, Status, Role, page = PageNumber });
         }
 
         var admins = await _userManager.GetUsersInRoleAsync("Admin");
@@ -288,6 +361,58 @@ public class UsuariosModel : PageModel
         public bool IsActive { get; set; }
         public List<string> Roles { get; set; } = new();
         public bool IsAdmin { get; set; }
+    }
+
+    public sealed class CreateUserInputModel
+    {
+        [Required(ErrorMessage = "El email es requerido")]
+        [EmailAddress(ErrorMessage = "Email inválido")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "La contraseña es requerida")]
+        [StringLength(100, ErrorMessage = "La contraseña debe tener al menos {2} caracteres.", MinimumLength = 8)]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Los nombres son requeridos")]
+        [StringLength(80)]
+        public string Nombres { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Los apellidos son requeridos")]
+        [StringLength(80)]
+        public string Apellidos { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "La cédula es requerida")]
+        [StringLength(20)]
+        public string Cedula { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El sexo es requerido")]
+        public string Sexo { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "La fecha de nacimiento es requerida")]
+        [DataType(DataType.Date)]
+        public DateTime? FechaNacimiento { get; set; }
+
+        [Required(ErrorMessage = "El nivel educativo es requerido")]
+        public string NivelEducativo { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "La situación laboral es requerida")]
+        public string SituacionLaboral { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El canal por el cual conoció es requerido")]
+        public string CanalConocio { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "El estado es requerido")]
+        public string Estado { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "La ciudad es requerida")]
+        public string Ciudad { get; set; } = string.Empty;
+
+        [StringLength(25)]
+        public string? Telefono { get; set; }
+
+        [Required]
+        public string InitialRole { get; set; } = "Beneficiario";
     }
 }
 

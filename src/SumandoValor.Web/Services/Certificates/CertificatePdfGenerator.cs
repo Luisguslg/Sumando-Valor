@@ -6,77 +6,90 @@ namespace SumandoValor.Web.Services.Certificates;
 
 public sealed class CertificatePdfGenerator
 {
-    private readonly IWebHostEnvironment _env;
-
-    public CertificatePdfGenerator(IWebHostEnvironment env)
-    {
-        _env = env;
-    }
-
     public byte[] Generate(CertificatePdfData data)
     {
-        var templatePath = Path.Combine(_env.WebRootPath, "images", "certificates", "certificado-template.png");
-        byte[]? templateBytes = null;
-        if (File.Exists(templatePath))
-        {
-            templateBytes = File.ReadAllBytes(templatePath);
-        }
-
         var nombre = (data.NombreCompleto ?? string.Empty).Trim();
         var taller = (data.TallerTitulo ?? string.Empty).Trim();
         var duracion = (data.DuracionTexto ?? string.Empty).Trim();
         var fecha = data.Fecha.ToString("dd/MM/yyyy");
 
+        // NOTE: We intentionally generate the full certificate design in code.
+        // This avoids IIS publish issues where static template images may not be present,
+        // and prevents "writing on top of an image" misalignment problems.
         var doc = Document.Create(container =>
         {
             container.Page(page =>
             {
                 page.Size(PageSizes.A4);
-                page.Margin(0);
-                page.DefaultTextStyle(x => x.FontFamily(Fonts.Arial).FontSize(16));
+                page.Margin(40);
+                page.DefaultTextStyle(x => x.FontFamily(Fonts.Arial).FontSize(14).FontColor("#0B1F5C"));
 
-                page.Content().Layers(layers =>
+                page.Content().Element(root =>
                 {
-                    if (templateBytes != null)
+                    root.Border(2).BorderColor("#00338D").Padding(26).Column(col =>
                     {
-                        layers.Layer().Image(templateBytes);
-                    }
-                    else
-                    {
-                        layers.Layer().Background(Colors.Grey.Lighten3);
-                    }
+                        col.Spacing(16);
 
-                    // The template already includes the graphic boxes and labels.
-                    // We only place the dynamic values (name, taller, duración, fecha) in the blank areas.
-                    layers.PrimaryLayer().Column(col =>
-                    {
-                        // Position roughly at the blank line under "Otorga el siguiente certificado a:"
-                        col.Item().Height(210);
-
-                        col.Item().AlignCenter()
-                            .Text(string.IsNullOrWhiteSpace(nombre) ? "-" : nombre)
-                            .FontSize(34)
-                            .SemiBold()
-                            .FontColor("#00338D");
-
-                        // Space down to the row of 3 info boxes
-                        col.Item().Height(120);
-
-                        col.Item().PaddingHorizontal(78).Row(row =>
+                        // Header
+                        col.Item().Row(row =>
                         {
-                            void BoxValue(string value)
+                            row.RelativeItem().Column(h =>
                             {
-                                row.RelativeItem().AlignCenter().AlignMiddle().Height(58).Text(string.IsNullOrWhiteSpace(value) ? "—" : value)
-                                    .FontSize(14)
-                                    .SemiBold()
-                                    .FontColor("#0B1F5C");
+                                h.Item().Text("Sumando Valor").FontSize(16).SemiBold().FontColor("#00338D");
+                                h.Item().Text("CERTIFICADO").FontSize(28).Bold().FontColor("#00338D");
+                            });
+
+                            row.ConstantItem(160).AlignRight().AlignMiddle()
+                                .Text("Fundación KPMG\nVenezuela")
+                                .FontSize(12).FontColor(Colors.Grey.Darken2);
+                        });
+
+                        col.Item().LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
+
+                        col.Item().Text("Otorga el siguiente certificado a:").FontSize(14).FontColor(Colors.Grey.Darken2);
+
+                        // Name
+                        col.Item().PaddingVertical(6).AlignCenter().Text(string.IsNullOrWhiteSpace(nombre) ? "—" : nombre)
+                            .FontSize(34).SemiBold().FontColor("#00338D");
+
+                        col.Item().AlignCenter().Text("Por su participación y culminación satisfactoria del taller:")
+                            .FontSize(13).FontColor(Colors.Grey.Darken2);
+
+                        col.Item().PaddingTop(6).AlignCenter().Text(string.IsNullOrWhiteSpace(taller) ? "—" : taller)
+                            .FontSize(18).SemiBold().FontColor("#0B1F5C");
+
+                        col.Item().PaddingTop(18).Row(row =>
+                        {
+                            void InfoBox(string label, string value)
+                            {
+                                row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten1).Padding(12).Column(b =>
+                                {
+                                    b.Item().Text(label).FontSize(11).FontColor(Colors.Grey.Darken2);
+                                    b.Item().PaddingTop(6).Text(string.IsNullOrWhiteSpace(value) ? "—" : value).FontSize(14).SemiBold();
+                                });
                             }
 
-                            BoxValue(taller);
-                            row.ConstantItem(28);
-                            BoxValue(duracion);
-                            row.ConstantItem(28);
-                            BoxValue(fecha);
+                            InfoBox("Duración", duracion);
+                            row.ConstantItem(12);
+                            InfoBox("Fecha", fecha);
+                        });
+
+                        col.Item().PaddingTop(28).Row(row =>
+                        {
+                            row.RelativeItem().AlignLeft().Column(sig =>
+                            {
+                                sig.Item().PaddingBottom(6).LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
+                                sig.Item().Text("Firma / Sello").FontSize(11).FontColor(Colors.Grey.Darken2);
+                            });
+
+                            row.RelativeItem().AlignRight().Column(meta =>
+                            {
+                                meta.Item().AlignRight().Text($"Emitido el {fecha}").FontSize(11).FontColor(Colors.Grey.Darken2);
+                                if (!string.IsNullOrWhiteSpace(data.VerificationCode))
+                                {
+                                    meta.Item().AlignRight().Text($"Código: {data.VerificationCode}").FontSize(11).FontColor(Colors.Grey.Darken2);
+                                }
+                            });
                         });
                     });
                 });
@@ -93,5 +106,6 @@ public sealed class CertificatePdfData
     public string TallerTitulo { get; init; } = string.Empty;
     public string? DuracionTexto { get; init; }
     public DateTime Fecha { get; init; }
+    public string? VerificationCode { get; init; }
 }
 

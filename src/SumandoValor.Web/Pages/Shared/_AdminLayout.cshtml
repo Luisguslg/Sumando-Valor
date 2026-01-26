@@ -124,12 +124,12 @@
             margin-top: 0.5rem;
         }
 
-        /* Admin actions: stack full-width on mobile, compact inline on md+ */
+        /* Admin actions: responsive grid for N buttons */
         .admin-actions {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 0.5rem;
-            max-width: 320px;
+            max-width: 460px;
             margin-inline: auto;
         }
 
@@ -144,10 +144,7 @@
         }
 
         @@media (max-width: 420px) {
-            .admin-actions {
-                grid-template-columns: 1fr;
-                max-width: 220px;
-            }
+            .admin-actions { max-width: 260px; }
         }
         
         @@media (max-width: 768px) {
@@ -180,9 +177,9 @@
                asp-page="/Admin/Cursos">
                 <i class="bi bi-book"></i> Programa formativo
             </a>
-            <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Carrusel") ? "active" : "")"
-               asp-page="/Admin/Carrusel">
-                <i class="bi bi-images"></i> Carrusel
+            <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Imagenes") ? "active" : "")"
+               asp-page="/Admin/Imagenes">
+                <i class="bi bi-images"></i> Imágenes
             </a>
             <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Talleres") ? "active" : "")" 
                asp-page="/Admin/Talleres">
@@ -194,11 +191,11 @@
             </a>
             <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Encuestas") ? "active" : "")"
                asp-page="/Admin/Encuestas">
-                <i class="bi bi-clipboard-check"></i> Encuestas
+                <i class="bi bi-clipboard-data"></i> Resultados encuestas
             </a>
             <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/SurveyTemplates") ? "active" : "")"
                asp-page="/Admin/SurveyTemplates/Index">
-                <i class="bi bi-ui-checks"></i> Plantillas de encuesta
+                <i class="bi bi-ui-checks"></i> Encuestas (configurar)
             </a>
             <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Certificados") ? "active" : "")"
                asp-page="/Admin/Certificados">

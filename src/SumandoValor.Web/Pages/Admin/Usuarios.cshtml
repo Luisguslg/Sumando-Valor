@@ -1,5 +1,6 @@
 @page
 @model SumandoValor.Web.Pages.Admin.UsuariosModel
+@using SumandoValor.Domain.Helpers
 @{
     ViewData["Title"] = "Usuarios";
     Layout = "~/Pages/Shared/_AdminLayout.cshtml";
@@ -12,6 +13,136 @@
             <div class="text-muted">Búsqueda, activación y roles.</div>
         </div>
     </div>
+
+    <details class="mb-3">
+        <summary class="fw-semibold">Crear nuevo usuario</summary>
+        <div class="mt-3">
+            <form method="post" asp-page-handler="Create" class="row g-3">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="col-md-6">
+                    <label asp-for="CreateInput.Email" class="form-label">Email <span class="text-danger">*</span></label>
+                    <input asp-for="CreateInput.Email" class="form-control" autocomplete="off" />
+                    <span asp-validation-for="CreateInput.Email" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="CreateInput.Password" class="form-label">Contraseña <span class="text-danger">*</span></label>
+                    <input asp-for="CreateInput.Password" class="form-control" autocomplete="new-password" />
+                    <span asp-validation-for="CreateInput.Password" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="CreateInput.Nombres" class="form-label">Nombres <span class="text-danger">*</span></label>
+                    <input asp-for="CreateInput.Nombres" class="form-control" />
+                    <span asp-validation-for="CreateInput.Nombres" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="CreateInput.Apellidos" class="form-label">Apellidos <span class="text-danger">*</span></label>
+                    <input asp-for="CreateInput.Apellidos" class="form-control" />
+                    <span asp-validation-for="CreateInput.Apellidos" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="CreateInput.Cedula" class="form-label">Cédula <span class="text-danger">*</span></label>
+                    <input asp-for="CreateInput.Cedula" class="form-control" />
+                    <span asp-validation-for="CreateInput.Cedula" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="CreateInput.Sexo" class="form-label">Sexo <span class="text-danger">*</span></label>
+                    <select asp-for="CreateInput.Sexo" class="form-select">
+                        <option value="">Seleccione...</option>
+                        @foreach (var sexo in Catalogos.Sexos)
+                        {
+                            <option value="@sexo.Key">@sexo.Value</option>
+                        }
+                    </select>
+                    <span asp-validation-for="CreateInput.Sexo" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="CreateInput.FechaNacimiento" class="form-label">Fecha de Nacimiento <span class="text-danger">*</span></label>
+                    <input asp-for="CreateInput.FechaNacimiento" type="date" class="form-control" />
+                    <span asp-validation-for="CreateInput.FechaNacimiento" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="CreateInput.NivelEducativo" class="form-label">Nivel Educativo <span class="text-danger">*</span></label>
+                    <select asp-for="CreateInput.NivelEducativo" class="form-select">
+                        <option value="">Seleccione...</option>
+                        @foreach (var nivel in Catalogos.NivelesEducativos)
+                        {
+                            <option value="@nivel.Key">@nivel.Value</option>
+                        }
+                    </select>
+                    <span asp-validation-for="CreateInput.NivelEducativo" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="CreateInput.SituacionLaboral" class="form-label">Situación Laboral <span class="text-danger">*</span></label>
+                    <select asp-for="CreateInput.SituacionLaboral" class="form-select">
+                        <option value="">Seleccione...</option>
+                        @foreach (var situacion in Catalogos.SituacionesLaborales)
+                        {
+                            <option value="@situacion.Key">@situacion.Value</option>
+                        }
+                    </select>
+                    <span asp-validation-for="CreateInput.SituacionLaboral" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="CreateInput.Estado" class="form-label">Estado <span class="text-danger">*</span></label>
+                    <select asp-for="CreateInput.Estado" class="form-select">
+                        <option value="">Seleccione...</option>
+                        @foreach (var estado in Catalogos.EstadosVenezuela)
+                        {
+                            <option value="@estado.Key">@estado.Value</option>
+                        }
+                    </select>
+                    <span asp-validation-for="CreateInput.Estado" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="CreateInput.Ciudad" class="form-label">Ciudad <span class="text-danger">*</span></label>
+                    <select asp-for="CreateInput.Ciudad" class="form-select">
+                        <option value="">Seleccione...</option>
+                        @foreach (var ciudad in Catalogos.CiudadesVenezuela)
+                        {
+                            <option value="@ciudad.Key">@ciudad.Value</option>
+                        }
+                    </select>
+                    <span asp-validation-for="CreateInput.Ciudad" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="CreateInput.CanalConocio" class="form-label">¿Cómo conoció la plataforma? <span class="text-danger">*</span></label>
+                    <select asp-for="CreateInput.CanalConocio" class="form-select">
+                        <option value="">Seleccione...</option>
+                        @foreach (var canal in Catalogos.CanalesConocio)
+                        {
+                            <option value="@canal.Key">@canal.Value</option>
+                        }
+                    </select>
+                    <span asp-validation-for="CreateInput.CanalConocio" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="CreateInput.Telefono" class="form-label">Teléfono</label>
+                    <input asp-for="CreateInput.Telefono" class="form-control" />
+                    <span asp-validation-for="CreateInput.Telefono" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="CreateInput.InitialRole" class="form-label">Rol inicial <span class="text-danger">*</span></label>
+                    <select asp-for="CreateInput.InitialRole" class="form-select">
+                        <option value="Beneficiario">Beneficiario</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                    <small class="text-muted">Crear Admin aquí funciona, pero igual puedes usar “Hacer Admin” en la tabla.</small>
+                    <span asp-validation-for="CreateInput.InitialRole" class="text-danger"></span>
+                </div>
+
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Crear usuario</button>
+                </div>
+            </form>
+        </div>
+    </details>
 
     <form method="get" class="row g-2 align-items-end">
         <div class="col-md-5">
@@ -54,9 +185,13 @@
             </tr>
             </thead>
             <tbody>
+            @{
+                // Only SuperAdmin can promote/revoke admins (avoid privilege escalation)
+                var canManageAdmins = User.IsInRole("SuperAdmin");
+                var canManageSuperAdmins = User.IsInRole("SuperAdmin");
+            }
             @foreach (var u in Model.Rows)
             {
-    var canManageAdmins = User.IsInRole("SuperAdmin");
                 <tr>
                     <td>
                         <div class="fw-semibold">@u.FullName</div>
@@ -77,6 +212,11 @@
                     </td>
                     <td class="text-center">
                         <div class="admin-actions">
+                            <a asp-page="/Admin/Usuarios/Edit" asp-route-id="@u.UserId"
+                               class="btn btn-sm btn-outline-primary w-100 w-md-auto">
+                                Editar
+                            </a>
+
                             <form method="post" asp-page-handler="ToggleActive" asp-route-id="@u.UserId" class="m-0">
                                 <button type="submit"
                                         class="btn btn-sm @(u.IsActive ? "btn-outline-secondary" : "btn-outline-success") w-100 w-md-auto"
@@ -85,7 +225,24 @@
                                 </button>
                             </form>
 
-                            @if (canManageAdmins && !u.IsAdmin)
+                            @if (u.Roles.Contains("SuperAdmin"))
+                            {
+                                @if (!canManageSuperAdmins)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-primary w-100 w-md-auto" disabled
+                                            title="Solo SuperAdmin puede gestionar SuperAdmins">
+                                        SuperAdmin
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-primary w-100 w-md-auto" disabled
+                                            title="Los SuperAdmins siempre conservan Admin">
+                                        SuperAdmin
+                                    </button>
+                                }
+                            }
+                            else if (canManageAdmins && !u.IsAdmin)
                             {
                                 <form method="post" asp-page-handler="MakeAdmin" asp-route-id="@u.UserId" class="m-0">
                                     <button type="submit" class="btn btn-sm btn-outline-primary w-100 w-md-auto"

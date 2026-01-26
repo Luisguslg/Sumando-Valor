@@ -8,15 +8,20 @@ public class SurveyQuestion
     public string Text { get; set; } = string.Empty;
     public int Order { get; set; }
     public bool IsRequired { get; set; } = true;
-    public string OptionsJson { get; set; } = string.Empty; // for SingleChoice: JSON array of options
+    // Options/config, depending on Type:
+    // - SingleChoice: JSON array of string options
+    // - ScoreNumber:  JSON object { "min": 1, "max": 10, "step": 1 }
+    public string OptionsJson { get; set; } = string.Empty;
 
     public SurveyTemplate Template { get; set; } = null!;
 }
 
 public enum SurveyQuestionType
 {
-    Rating1To5 = 1,
-    Text = 2,
-    SingleChoice = 3
+    Rating1To5 = 1,   // radio 1..5
+    Text = 2,         // short/medium text
+    SingleChoice = 3, // radio options
+    ScoreNumber = 4,  // numeric score (min/max/step in OptionsJson)
+    Description = 5   // long text/description
 }
 

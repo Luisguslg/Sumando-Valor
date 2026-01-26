@@ -1,0 +1,87 @@
+@page "{id}"
+@model SumandoValor.Web.Pages.Admin.Usuarios.EditModel
+@using SumandoValor.Domain.Helpers
+@{
+    ViewData["Title"] = "Editar usuario";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-card">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+            <h1 class="h4 mb-1">Editar usuario</h1>
+            <div class="text-muted">@Model.Email</div>
+        </div>
+        <a asp-page="/Admin/Usuarios" class="btn btn-outline-secondary">Volver</a>
+    </div>
+</div>
+
+<div class="admin-card">
+    @if (Model.UserNotFound)
+    {
+        <div class="alert alert-warning mb-0">Usuario no encontrado.</div>
+    }
+    else
+    {
+        <form method="post" class="row g-3">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input class="form-control" value="@Model.Email" disabled />
+                <div class="form-text">El email no se edita aquí.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Input.Cedula" class="form-label">Cédula</label>
+                <input asp-for="Input.Cedula" class="form-control" />
+                <span asp-validation-for="Input.Cedula" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Input.Nombres" class="form-label">Nombres</label>
+                <input asp-for="Input.Nombres" class="form-control" />
+                <span asp-validation-for="Input.Nombres" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Input.Apellidos" class="form-label">Apellidos</label>
+                <input asp-for="Input.Apellidos" class="form-control" />
+                <span asp-validation-for="Input.Apellidos" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="Input.Sexo" class="form-label">Sexo</label>
+                <select asp-for="Input.Sexo" class="form-select">
+                    <option value="">Seleccione...</option>
+                    @foreach (var sexo in Catalogos.Sexos)
+                    {
+                        <option value="@sexo.Key">@sexo.Value</option>
+                    }
+                </select>
+                <span asp-validation-for="Input.Sexo" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Input.Telefono" class="form-label">Teléfono</label>
+                <input asp-for="Input.Telefono" class="form-control" />
+                <span asp-validation-for="Input.Telefono" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Estado</label>
+                <select asp-for="Input.IsActive" class="form-select">
+                    <option value="true">Activo</option>
+                    <option value="false">Inactivo</option>
+                </select>
+            </div>
+
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                <a asp-page="/Admin/Usuarios" class="btn btn-outline-secondary">Cancelar</a>
+            </div>
+        </form>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

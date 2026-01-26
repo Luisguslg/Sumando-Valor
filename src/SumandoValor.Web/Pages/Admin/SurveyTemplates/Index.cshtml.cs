@@ -27,27 +27,17 @@ public class IndexModel : PageModel
                 t.Id,
                 t.Name,
                 t.IsActive,
-                t.CursoId,
-                t.TallerId,
+                t.Description,
                 QuestionCount = t.Questions.Count
             })
             .ToListAsync();
-
-        var cursoIds = templates.Where(t => t.CursoId.HasValue).Select(t => t.CursoId!.Value).Distinct().ToList();
-        var tallerIds = templates.Where(t => t.TallerId.HasValue).Select(t => t.TallerId!.Value).Distinct().ToList();
-
-        var cursos = await _context.Cursos.Where(c => cursoIds.Contains(c.Id)).ToDictionaryAsync(c => c.Id, c => c.Titulo);
-        var talleres = await _context.Talleres.Where(t => tallerIds.Contains(t.Id)).ToDictionaryAsync(t => t.Id, t => t.Titulo);
 
         Rows = templates.Select(t => new Row
         {
             Id = t.Id,
             Name = t.Name,
             IsActive = t.IsActive,
-            CursoId = t.CursoId,
-            TallerId = t.TallerId,
-            CursoTitulo = t.CursoId.HasValue && cursos.TryGetValue(t.CursoId.Value, out var ct) ? ct : null,
-            TallerTitulo = t.TallerId.HasValue && talleres.TryGetValue(t.TallerId.Value, out var tt) ? tt : null,
+            Description = t.Description,
             QuestionCount = t.QuestionCount
         }).ToList();
     }
@@ -57,16 +47,8 @@ public class IndexModel : PageModel
         public int Id { get; set; }
         public string Name { get; set; } = "";
         public bool IsActive { get; set; }
-        public int? CursoId { get; set; }
-        public int? TallerId { get; set; }
-        public string? CursoTitulo { get; set; }
-        public string? TallerTitulo { get; set; }
+        public string? Description { get; set; }
         public int QuestionCount { get; set; }
-
-        public string ScopeText =>
-            TallerId.HasValue ? $"Taller: {TallerTitulo ?? TallerId!.Value.ToString()}" :
-            CursoId.HasValue ? $"Programa formativo: {CursoTitulo ?? CursoId!.Value.ToString()}" :
-            "Sin alcance";
     }
 }
 

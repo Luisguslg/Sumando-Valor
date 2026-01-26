@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SumandoValor.Domain.Entities.Surveys;
 using SumandoValor.Infrastructure.Data;
@@ -21,40 +20,35 @@ public class CreateModel : PageModel
     [BindProperty]
     public InputModel Input { get; set; } = new();
 
-    public SelectList Cursos { get; set; } = null!;
-    public SelectList Talleres { get; set; } = null!;
-
-    public async Task OnGetAsync()
+    public void OnGet()
     {
-        await LoadLookupsAsync();
         Input.IsActive = true;
     }
 
     public async Task<IActionResult> OnPostAsync()
     {
-        await LoadLookupsAsync();
-
         Input.Name = (Input.Name ?? string.Empty).Trim();
         if (string.IsNullOrWhiteSpace(Input.Name))
         {
             ModelState.AddModelError("Input.Name", "El nombre es obligatorio.");
         }
-
-        var hasCurso = Input.CursoId.HasValue;
-        var hasTaller = Input.TallerId.HasValue;
-        if (hasCurso == hasTaller) // both true or both false
-        {
-            ModelState.AddModelError(string.Empty, "Debes elegir exactamente un alcance: Curso o Taller.");
-        }
+        
+        Input.Description = (Input.Description ?? string.Empty).Trim();
 
         if (!ModelState.IsValid)
             return Page();
 
+        // If creating as active, deactivate any other active survey (keep UX simple: one global survey).
+        if (Input.IsActive)
+        {
+            var actives = _context.SurveyTemplates.Where(t => t.IsActive);
+            await actives.ExecuteUpdateAsync(s => s.SetProperty(x => x.IsActive, false));
+        }
+
         var template = new SurveyTemplate
         {
             Name = Input.Name!,
-            CursoId = Input.CursoId,
-            TallerId = Input.TallerId,
+            Description = Input.Description ?? string.Empty,
             IsActive = Input.IsActive,
             CreatedAt = DateTime.UtcNow
         };
@@ -66,21 +60,11 @@ public class CreateModel : PageModel
         return RedirectToPage("/Admin/SurveyTemplates/Edit", new { id = template.Id });
     }
 
-    private async Task LoadLookupsAsync()
-    {
-        var cursos = await _context.Cursos.OrderBy(c => c.Orden).ThenBy(c => c.Titulo).ToListAsync();
-        Cursos = new SelectList(cursos, "Id", "Titulo");
-
-        var talleres = await _context.Talleres.OrderByDescending(t => t.FechaInicio).ThenBy(t => t.Titulo).Take(300).ToListAsync();
-        Talleres = new SelectList(talleres, "Id", "Titulo");
-    }
-
     public sealed class InputModel
     {
         public string? Name { get; set; }
+        public string? Description { get; set; }
         public bool IsActive { get; set; } = true;
-        public int? CursoId { get; set; }
-        public int? TallerId { get; set; }
     }
 }
 
