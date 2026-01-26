@@ -120,8 +120,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddSingleton<CertificatePdfGenerator>();
 builder.Services.AddScoped<UploadCleanupService>();
 
-// Rate limiting para endpoints públicos
-builder.Services.AddScoped<SumandoValor.Web.Middleware.RateLimitingMiddleware>();
+// Rate limiting para endpoints públicos (no necesita registro en DI, se usa directamente)
 
 // En producción: persistir claves de DataProtection en disco para que las cookies de autenticación
 // permanezcan válidas después de reinicios de la aplicación

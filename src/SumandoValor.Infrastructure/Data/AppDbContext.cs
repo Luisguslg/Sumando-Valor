@@ -43,9 +43,12 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.DiscapacidadDescripcion).HasMaxLength(120);
             entity.Property(e => e.NivelEducativo).IsRequired();
             entity.Property(e => e.SituacionLaboral).IsRequired();
+            entity.Property(e => e.Sector).IsRequired().HasMaxLength(50);
             entity.Property(e => e.CanalConocio).IsRequired();
-            entity.Property(e => e.Estado).IsRequired();
-            entity.Property(e => e.Ciudad).IsRequired();
+            entity.Property(e => e.Pais).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Estado).HasMaxLength(100);
+            entity.Property(e => e.Municipio).HasMaxLength(100);
+            entity.Property(e => e.Ciudad).HasMaxLength(100);
             entity.Property(e => e.Telefono).HasMaxLength(25);
         });
 

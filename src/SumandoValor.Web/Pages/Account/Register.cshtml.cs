@@ -72,6 +72,40 @@ public class RegisterModel : PageModel
             ModelState.AddModelError(nameof(Input.DiscapacidadDescripcion), "La descripción de la discapacidad es requerida cuando se indica tener una discapacidad.");
         }
 
+        if (Input.Pais == "Venezuela")
+        {
+            if (string.IsNullOrWhiteSpace(Input.Estado))
+            {
+                ModelState.AddModelError(nameof(Input.Estado), "El estado es requerido cuando el país es Venezuela.");
+            }
+            if (string.IsNullOrWhiteSpace(Input.Municipio))
+            {
+                ModelState.AddModelError(nameof(Input.Municipio), "El municipio es requerido cuando el país es Venezuela.");
+            }
+        }
+
+        var cedulaValue = Input.Cedula.Trim();
+        if (cedulaValue.StartsWith("V-") || cedulaValue.StartsWith("E-"))
+        {
+            var tipo = cedulaValue.Substring(0, 1);
+            var numeros = cedulaValue.Substring(2).Replace("-", "");
+            if (tipo == "V" && numeros.Length > 8)
+            {
+                ModelState.AddModelError(nameof(Input.Cedula), "La cédula venezolana no puede exceder 8 dígitos.");
+            }
+            Input.Cedula = tipo + "-" + numeros;
+        }
+        else if (cedulaValue.StartsWith("V") || cedulaValue.StartsWith("E"))
+        {
+            var tipo = cedulaValue.Substring(0, 1);
+            var numeros = cedulaValue.Substring(1).Replace("-", "");
+            if (tipo == "V" && numeros.Length > 8)
+            {
+                ModelState.AddModelError(nameof(Input.Cedula), "La cédula venezolana no puede exceder 8 dígitos.");
+            }
+            Input.Cedula = tipo + "-" + numeros;
+        }
+
         if (!ModelState.IsValid)
         {
             return Page();
@@ -126,10 +160,13 @@ public class RegisterModel : PageModel
             DiscapacidadDescripcion = Input.TieneDiscapacidad ? Input.DiscapacidadDescripcion : null,
             NivelEducativo = Input.NivelEducativo,
             SituacionLaboral = Input.SituacionLaboral,
+            Sector = Input.Sector,
             CanalConocio = Input.CanalConocio,
-            Estado = Input.Estado,
-            Ciudad = Input.Ciudad,
-            Telefono = Input.Telefono,
+            Pais = Input.Pais,
+            Estado = Input.Pais == "Venezuela" ? Input.Estado : null,
+            Municipio = Input.Pais == "Venezuela" ? Input.Municipio : null,
+            Ciudad = null,
+            Telefono = Input.Telefono?.Replace("-", "").Replace(" ", "").Replace("(", "").Replace(")", ""),
             CreatedAt = DateTime.UtcNow
         };
 
@@ -186,7 +223,6 @@ public class RegisterModel : PageModel
 
         [Required(ErrorMessage = "La cédula es requerida")]
         [StringLength(20, ErrorMessage = "La cédula no puede exceder 20 caracteres")]
-        [RegularExpression(@"^[VE]?\d{6,9}$", ErrorMessage = "Formato de cédula inválido")]
         [Display(Name = "Cédula")]
         public string Cedula { get; set; } = string.Empty;
 
@@ -243,13 +279,19 @@ public class RegisterModel : PageModel
         [Display(Name = "Canal por el cual conoció")]
         public string CanalConocio { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "El estado es requerido")]
-        [Display(Name = "Estado")]
-        public string Estado { get; set; } = string.Empty;
+        [Required(ErrorMessage = "El país es requerido")]
+        [Display(Name = "País")]
+        public string Pais { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "La ciudad es requerida")]
-        [Display(Name = "Ciudad")]
-        public string Ciudad { get; set; } = string.Empty;
+        [Display(Name = "Estado")]
+        public string? Estado { get; set; }
+
+        [Display(Name = "Municipio")]
+        public string? Municipio { get; set; }
+
+        [Required(ErrorMessage = "El sector es requerido")]
+        [Display(Name = "Sector")]
+        public string Sector { get; set; } = string.Empty;
 
         [Display(Name = "Token de Captcha")]
         public string? CaptchaToken { get; set; }

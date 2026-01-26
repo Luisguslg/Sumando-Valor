@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Identity
 @inject UserManager<SumandoValor.Infrastructure.Data.ApplicationUser> UserManager
 <!DOCTYPE html>
 <html lang="es">
@@ -29,10 +29,10 @@
     <nav class="navbar navbar-expand-lg navbar-kpmg sticky-top" role="navigation" aria-label="Navegación principal">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" asp-area="" asp-page="/Index" aria-label="Sumando Valor - Inicio">
-                <i class="bi bi-award-fill text-primary me-2" style="font-size: 2rem;"></i>
+                <img src="~/images/logo-fundacion-azul.png" alt="Fundación KPMG Venezuela" style="height: 50px; margin-right: 12px;" onerror="this.style.display='none';" />
                 <div>
                     <div style="font-weight: 700; font-size: 1.25rem; line-height: 1;">Sumando Valor</div>
-                    <small style="font-size: 0.75rem; color: var(--text-secondary);">Fundación KPMG</small>
+                    <small style="font-size: 0.75rem; color: var(--text-secondary);">Fundación KPMG Venezuela</small>
                 </div>
             </a>
             
@@ -54,9 +54,9 @@
                     <li class="nav-item">
                         <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Cursos") ? "active" : "")" 
                            asp-area="" asp-page="/Cursos" 
-                           aria-label="Talleres disponibles"
+                           aria-label="Programa formativo"
                            aria-current="@(Context.Request.Path.StartsWithSegments("/Cursos") ? "page" : "false")">
-                            <i class="bi bi-calendar-check me-1"></i>Talleres
+                            <i class="bi bi-calendar-check me-1"></i>Programa formativo
                         </a>
                     </li>
                     <li class="nav-item">
@@ -170,7 +170,7 @@
                     {
                         <li class="nav-item ms-lg-2">
                             <a asp-area="" asp-page="/Account/Login" class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar Sesión
+                                Accede para inscribirte a nuestros talleres.
                             </a>
                         </li>
                         <li class="nav-item ms-2">
@@ -211,7 +211,7 @@
                     <h6 class="fw-bold mb-3 text-white">Enlaces</h6>
                     <ul class="list-unstyled">
                         <li><a asp-area="" asp-page="/Index" class="text-white-50 text-decoration-none d-block mb-2 hover-white">Inicio</a></li>
-                        <li><a asp-area="" asp-page="/Cursos" class="text-white-50 text-decoration-none d-block mb-2 hover-white">Talleres</a></li>
+                        <li><a asp-area="" asp-page="/Cursos" class="text-white-50 text-decoration-none d-block mb-2 hover-white">Programa formativo</a></li>
                         <li><a asp-area="" asp-page="/About" class="text-white-50 text-decoration-none d-block mb-2 hover-white">Conócenos</a></li>
                         <li><a asp-area="" asp-page="/Contact" class="text-white-50 text-decoration-none d-block hover-white">Contacto</a></li>
                     </ul>
@@ -283,16 +283,17 @@
             
             <hr class="border-white-50 my-4" />
             
-            <div class="row">
-                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                    <small class="text-white-50">
-                        &copy; @DateTime.Now.Year Fundación KPMG Venezuela. Todos los derechos reservados.
-                    </small>
+            <div class="row align-items-center">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <img src="~/images/logo-fundacion-blanco.png" alt="Fundación KPMG Venezuela" style="height: 60px;" onerror="this.style.display='none';" />
                 </div>
-                <div class="col-md-6 text-center text-md-end">
+                <div class="col-md-8 text-center text-md-end">
+                    <small class="text-white-50 d-block mb-2">
+                        © 2026 Fundación KPMG Venezuela, Fundación sin fines de lucro, creada por Ostos Velázquez & Asociados y sus firmas relacionadas. Ostos Velázquez & Asociados, una sociedad venezolana y firma miembro de la organización global de KPMG de firmas miembro independientes afiliadas a KPMG International Ltd., una entidad privada.
+                    </small>
                     <small class="text-white-50">
-                        <a href="#" class="text-white-50 text-decoration-none me-3 hover-white">Términos de Uso</a>
-                        <a href="#" class="text-white-50 text-decoration-none hover-white">Política de Privacidad</a>
+                        <a href="https://home.kpmg/ve/es/home/legal/terms-of-use.html" class="text-white-50 text-decoration-none me-3 hover-white" target="_blank" rel="noopener noreferrer">Términos de Uso</a>
+                        <a href="https://home.kpmg/ve/es/home/legal/privacy-statement.html" class="text-white-50 text-decoration-none hover-white" target="_blank" rel="noopener noreferrer">Política de Privacidad</a>
                     </small>
                 </div>
             </div>

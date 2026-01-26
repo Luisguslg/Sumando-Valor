@@ -35,14 +35,25 @@ public class ApplicationUser : IdentityUser
     [Required(ErrorMessage = "La situación laboral es requerida")]
     public string SituacionLaboral { get; set; } = string.Empty;
 
+    [Required(ErrorMessage = "El sector es requerido")]
+    [StringLength(50, ErrorMessage = "El sector no puede exceder 50 caracteres")]
+    public string Sector { get; set; } = string.Empty;
+
     [Required(ErrorMessage = "El canal por el cual conoció es requerido")]
     public string CanalConocio { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "El estado es requerido")]
-    public string Estado { get; set; } = string.Empty;
+    [Required(ErrorMessage = "El país es requerido")]
+    [StringLength(100, ErrorMessage = "El país no puede exceder 100 caracteres")]
+    public string Pais { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "La ciudad es requerida")]
-    public string Ciudad { get; set; } = string.Empty;
+    [StringLength(100, ErrorMessage = "El estado no puede exceder 100 caracteres")]
+    public string? Estado { get; set; }
+
+    [StringLength(100, ErrorMessage = "El municipio no puede exceder 100 caracteres")]
+    public string? Municipio { get; set; }
+
+    [StringLength(100, ErrorMessage = "La ciudad no puede exceder 100 caracteres")]
+    public string? Ciudad { get; set; }
 
     [StringLength(25, ErrorMessage = "El teléfono no puede exceder 25 caracteres")]
     public string? Telefono { get; set; }

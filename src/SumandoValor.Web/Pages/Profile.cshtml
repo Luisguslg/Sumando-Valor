@@ -69,7 +69,7 @@
                         </div>
                         <div class="col-md-4">
                             <label asp-for="Input.Telefono" class="form-label">Teléfono</label>
-                            <input asp-for="Input.Telefono" class="form-control" />
+                            <input asp-for="Input.Telefono" class="form-control" type="tel" pattern="[0-9]*" inputmode="numeric" />
                             <span asp-validation-for="Input.Telefono" class="text-danger"></span>
                         </div>
                     </div>
@@ -98,11 +98,42 @@
                             </select>
                             <span asp-validation-for="Input.SituacionLaboral" class="text-danger"></span>
                         </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Input.Sector" class="form-label">Sector <span class="text-danger">*</span></label>
+                            <select asp-for="Input.Sector" class="form-select">
+                                <option value="">Seleccione...</option>
+                                <option value="TercerSector" selected="@(Model.CurrentUser?.Sector == "TercerSector")">Tercer sector</option>
+                                <option value="SectorPrivado" selected="@(Model.CurrentUser?.Sector == "SectorPrivado")">Sector privado</option>
+                                <option value="SectorPublico" selected="@(Model.CurrentUser?.Sector == "SectorPublico")">Sector público</option>
+                                <option value="Academia" selected="@(Model.CurrentUser?.Sector == "Academia")">Academia</option>
+                            </select>
+                            <span asp-validation-for="Input.Sector" class="text-danger"></span>
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="Input.Estado" class="form-label">Estado</label>
-                            <select asp-for="Input.Estado" class="form-select">
+                            <label asp-for="Input.Pais" class="form-label">País <span class="text-danger">*</span></label>
+                            <select asp-for="Input.Pais" class="form-select" id="paisSelectProfile">
+                                <option value="">Seleccione...</option>
+                                <option value="Venezuela" selected="@(Model.CurrentUser?.Pais == "Venezuela")">Venezuela</option>
+                                <option value="Colombia" selected="@(Model.CurrentUser?.Pais == "Colombia")">Colombia</option>
+                                <option value="Ecuador" selected="@(Model.CurrentUser?.Pais == "Ecuador")">Ecuador</option>
+                                <option value="Peru" selected="@(Model.CurrentUser?.Pais == "Peru")">Perú</option>
+                                <option value="Chile" selected="@(Model.CurrentUser?.Pais == "Chile")">Chile</option>
+                                <option value="Argentina" selected="@(Model.CurrentUser?.Pais == "Argentina")">Argentina</option>
+                                <option value="Brasil" selected="@(Model.CurrentUser?.Pais == "Brasil")">Brasil</option>
+                                <option value="Panama" selected="@(Model.CurrentUser?.Pais == "Panama")">Panamá</option>
+                                <option value="CostaRica" selected="@(Model.CurrentUser?.Pais == "CostaRica")">Costa Rica</option>
+                                <option value="Mexico" selected="@(Model.CurrentUser?.Pais == "Mexico")">México</option>
+                                <option value="Espana" selected="@(Model.CurrentUser?.Pais == "Espana")">España</option>
+                                <option value="EstadosUnidos" selected="@(Model.CurrentUser?.Pais == "EstadosUnidos")">Estados Unidos</option>
+                                <option value="Otro" selected="@(Model.CurrentUser?.Pais == "Otro")">Otro</option>
+                            </select>
+                            <span asp-validation-for="Input.Pais" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3" id="estadoGroupProfile" style="display: @(Model.CurrentUser?.Pais == "Venezuela" ? "block" : "none");">
+                            <label asp-for="Input.Estado" class="form-label">Estado <span class="text-danger">*</span></label>
+                            <select asp-for="Input.Estado" class="form-select" id="estadoSelectProfile">
                                 <option value="">Seleccione...</option>
                                 @foreach (var estado in Catalogos.EstadosVenezuela)
                                 {
@@ -111,16 +142,10 @@
                             </select>
                             <span asp-validation-for="Input.Estado" class="text-danger"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Input.Ciudad" class="form-label">Ciudad</label>
-                            <select asp-for="Input.Ciudad" class="form-select">
-                                <option value="">Seleccione...</option>
-                                @foreach (var ciudad in Catalogos.CiudadesVenezuela)
-                                {
-                                    <option value="@ciudad.Key" selected="@(Model.CurrentUser?.Ciudad == ciudad.Key)">@ciudad.Value</option>
-                                }
-                            </select>
-                            <span asp-validation-for="Input.Ciudad" class="text-danger"></span>
+                        <div class="col-md-6 mb-3" id="municipioGroupProfile" style="display: @(Model.CurrentUser?.Pais == "Venezuela" ? "block" : "none");">
+                            <label asp-for="Input.Municipio" class="form-label">Municipio <span class="text-danger">*</span></label>
+                            <input asp-for="Input.Municipio" class="form-control" />
+                            <span asp-validation-for="Input.Municipio" class="text-danger"></span>
                         </div>
                     </div>
 
@@ -163,5 +188,23 @@
                 document.getElementById('Input_DiscapacidadDescripcion').value = '';
             }
         });
+
+        const paisSelectProfile = document.getElementById('paisSelectProfile');
+        const estadoGroupProfile = document.getElementById('estadoGroupProfile');
+        const municipioGroupProfile = document.getElementById('municipioGroupProfile');
+        const estadoSelectProfile = document.getElementById('estadoSelectProfile');
+
+        if (paisSelectProfile) {
+            paisSelectProfile.addEventListener('change', function() {
+                const isVenezuela = this.value === 'Venezuela';
+                estadoGroupProfile.style.display = isVenezuela ? 'block' : 'none';
+                municipioGroupProfile.style.display = isVenezuela ? 'block' : 'none';
+                
+                if (!isVenezuela) {
+                    estadoSelectProfile.value = '';
+                    document.getElementById('Input_Municipio').value = '';
+                }
+            });
+        }
     </script>
 }

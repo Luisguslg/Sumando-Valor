@@ -32,8 +32,10 @@ public class ProfileModel : PageModel
             Input.Telefono = CurrentUser.Telefono;
             Input.NivelEducativo = CurrentUser.NivelEducativo;
             Input.SituacionLaboral = CurrentUser.SituacionLaboral;
+            Input.Sector = CurrentUser.Sector;
+            Input.Pais = CurrentUser.Pais;
             Input.Estado = CurrentUser.Estado;
-            Input.Ciudad = CurrentUser.Ciudad;
+            Input.Municipio = CurrentUser.Municipio;
             Input.TieneDiscapacidad = CurrentUser.TieneDiscapacidad;
             Input.DiscapacidadDescripcion = CurrentUser.DiscapacidadDescripcion;
         }
@@ -60,11 +62,13 @@ public class ProfileModel : PageModel
             return NotFound();
         }
 
-        user.Telefono = Input.Telefono;
+        user.Telefono = Input.Telefono?.Replace("-", "").Replace(" ", "").Replace("(", "").Replace(")", "");
         user.NivelEducativo = Input.NivelEducativo;
         user.SituacionLaboral = Input.SituacionLaboral;
-        user.Estado = Input.Estado;
-        user.Ciudad = Input.Ciudad;
+        user.Sector = Input.Sector;
+        user.Pais = Input.Pais;
+        user.Estado = Input.Pais == "Venezuela" ? Input.Estado : null;
+        user.Municipio = Input.Pais == "Venezuela" ? Input.Municipio : null;
         user.TieneDiscapacidad = Input.TieneDiscapacidad;
         user.DiscapacidadDescripcion = Input.TieneDiscapacidad ? Input.DiscapacidadDescripcion : null;
 
@@ -99,13 +103,19 @@ public class ProfileModel : PageModel
         [Display(Name = "Situación Laboral")]
         public string SituacionLaboral { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "El estado es requerido")]
-        [Display(Name = "Estado")]
-        public string Estado { get; set; } = string.Empty;
+        [Required(ErrorMessage = "El sector es requerido")]
+        [Display(Name = "Sector")]
+        public string Sector { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "La ciudad es requerida")]
-        [Display(Name = "Ciudad")]
-        public string Ciudad { get; set; } = string.Empty;
+        [Required(ErrorMessage = "El país es requerido")]
+        [Display(Name = "País")]
+        public string Pais { get; set; } = string.Empty;
+
+        [Display(Name = "Estado")]
+        public string? Estado { get; set; }
+
+        [Display(Name = "Municipio")]
+        public string? Municipio { get; set; }
 
         [Display(Name = "Tiene Discapacidad")]
         public bool TieneDiscapacidad { get; set; }

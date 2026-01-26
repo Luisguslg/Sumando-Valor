@@ -17,12 +17,8 @@
         <div class="col-lg-10">
             <div class="card card-kpmg form-card">
                 <div class="card-body p-4 p-lg-5">
-                    <div class="d-flex flex-wrap justify-content-between gap-2 align-items-end mb-4">
-                        <div>
-                            <h2 class="h4 fw-bold mb-1">Cuenta de beneficiario</h2>
-                            <div class="text-muted">Completa tus datos para registrarte.</div>
-                        </div>
-                        <a asp-page="./Login" class="btn btn-outline-secondary btn-sm">Ya tengo cuenta</a>
+                    <div class="mb-4">
+                        <h2 class="h4 fw-bold mb-1">Completa tus datos para registrarte</h2>
                     </div>
 
                     <form method="post" id="registerForm">
@@ -39,7 +35,13 @@
                         </div>
                         <div class="col-md-6">
                             <label asp-for="Input.Cedula" class="form-label">Cédula <span class="text-danger">*</span></label>
-                            <input asp-for="Input.Cedula" class="form-control" />
+                            <div class="input-group">
+                                <select class="form-select" style="max-width: 80px;" id="cedulaTipo">
+                                    <option value="V">V</option>
+                                    <option value="E">E</option>
+                                </select>
+                                <input asp-for="Input.Cedula" class="form-control" placeholder="V-12345678 / E-12345678" id="cedulaInput" />
+                            </div>
                             <span asp-validation-for="Input.Cedula" class="text-danger"></span>
                         </div>
                     </div>
@@ -76,10 +78,8 @@
                             <label asp-for="Input.Sexo" class="form-label">Sexo <span class="text-danger">*</span></label>
                             <select asp-for="Input.Sexo" class="form-select">
                                 <option value="">Seleccione...</option>
-                                @foreach (var sexo in Catalogos.Sexos)
-                                {
-                                    <option value="@sexo.Key">@sexo.Value</option>
-                                }
+                                <option value="M">Hombre</option>
+                                <option value="F">Mujer</option>
                             </select>
                             <span asp-validation-for="Input.Sexo" class="text-danger"></span>
                         </div>
@@ -90,7 +90,7 @@
                         </div>
                         <div class="col-md-4">
                             <label asp-for="Input.Telefono" class="form-label">Teléfono</label>
-                            <input asp-for="Input.Telefono" class="form-control" />
+                            <input asp-for="Input.Telefono" class="form-control" type="tel" pattern="[0-9]*" inputmode="numeric" />
                             <span asp-validation-for="Input.Telefono" class="text-danger"></span>
                         </div>
                     </div>
@@ -124,6 +124,39 @@
                     </div>
                     <div class="row g-3 mt-0">
                         <div class="col-md-6">
+                            <label asp-for="Input.Sector" class="form-label">Sector <span class="text-danger">*</span></label>
+                            <select asp-for="Input.Sector" class="form-select">
+                                <option value="">Seleccione...</option>
+                                <option value="TercerSector">Tercer sector</option>
+                                <option value="SectorPrivado">Sector privado</option>
+                                <option value="SectorPublico">Sector público</option>
+                                <option value="Academia">Academia</option>
+                            </select>
+                            <span asp-validation-for="Input.Sector" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-0">
+                        <div class="col-md-6">
+                            <label asp-for="Input.Pais" class="form-label">País <span class="text-danger">*</span></label>
+                            <select asp-for="Input.Pais" class="form-select" id="paisSelect">
+                                <option value="">Seleccione...</option>
+                                <option value="Venezuela">Venezuela</option>
+                                <option value="Colombia">Colombia</option>
+                                <option value="Ecuador">Ecuador</option>
+                                <option value="Peru">Perú</option>
+                                <option value="Chile">Chile</option>
+                                <option value="Argentina">Argentina</option>
+                                <option value="Brasil">Brasil</option>
+                                <option value="Panama">Panamá</option>
+                                <option value="CostaRica">Costa Rica</option>
+                                <option value="Mexico">México</option>
+                                <option value="Espana">España</option>
+                                <option value="EstadosUnidos">Estados Unidos</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                            <span asp-validation-for="Input.Pais" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6" id="estadoGroup" style="display: none;">
                             <label asp-for="Input.Estado" class="form-label">Estado <span class="text-danger">*</span></label>
                             <select asp-for="Input.Estado" class="form-select" id="estadoSelect">
                                 <option value="">Seleccione...</option>
@@ -134,16 +167,10 @@
                             </select>
                             <span asp-validation-for="Input.Estado" class="text-danger"></span>
                         </div>
-                        <div class="col-md-6">
-                            <label asp-for="Input.Ciudad" class="form-label">Ciudad <span class="text-danger">*</span></label>
-                            <select asp-for="Input.Ciudad" class="form-select">
-                                <option value="">Seleccione...</option>
-                                @foreach (var ciudad in Catalogos.CiudadesVenezuela)
-                                {
-                                    <option value="@ciudad.Key">@ciudad.Value</option>
-                                }
-                            </select>
-                            <span asp-validation-for="Input.Ciudad" class="text-danger"></span>
+                        <div class="col-md-6" id="municipioGroup" style="display: none;">
+                            <label asp-for="Input.Municipio" class="form-label">Municipio <span class="text-danger">*</span></label>
+                            <input asp-for="Input.Municipio" class="form-control" />
+                            <span asp-validation-for="Input.Municipio" class="text-danger"></span>
                         </div>
                     </div>
                     <div class="mt-3">
@@ -188,9 +215,6 @@
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-person-plus me-1"></i>Registrarse
                         </button>
-                        <a asp-page="./Login" class="btn btn-outline-primary">
-                            <i class="bi bi-box-arrow-in-right me-1"></i>Ya tengo cuenta
-                        </a>
                     </div>
                 </form>
                 </div>
@@ -209,6 +233,46 @@
             } else {
                 descGroup.style.display = 'none';
                 document.getElementById('Input_DiscapacidadDescripcion').value = '';
+            }
+        });
+
+        // Manejo de cédula con selector V/E
+        const cedulaTipo = document.getElementById('cedulaTipo');
+        const cedulaInput = document.getElementById('cedulaInput');
+        
+        cedulaTipo.addEventListener('change', function() {
+            const tipo = this.value;
+            const currentValue = cedulaInput.value.replace(/^[VE]-?/, '');
+            cedulaInput.value = tipo + (currentValue ? '-' + currentValue : '');
+        });
+
+        cedulaInput.addEventListener('input', function() {
+            let value = this.value.replace(/[^0-9VE-]/g, '');
+            if (value.startsWith('V') || value.startsWith('E')) {
+                cedulaTipo.value = value[0];
+                value = value.substring(1).replace(/^-?/, '');
+            }
+            const tipo = cedulaTipo.value;
+            if (tipo === 'V' && value.length > 8) {
+                value = value.substring(0, 8);
+            }
+            this.value = tipo + (value ? '-' + value : '');
+        });
+
+        // Manejo de País/Estado/Municipio
+        const paisSelect = document.getElementById('paisSelect');
+        const estadoGroup = document.getElementById('estadoGroup');
+        const municipioGroup = document.getElementById('municipioGroup');
+        const estadoSelect = document.getElementById('estadoSelect');
+
+        paisSelect.addEventListener('change', function() {
+            const isVenezuela = this.value === 'Venezuela';
+            estadoGroup.style.display = isVenezuela ? 'block' : 'none';
+            municipioGroup.style.display = isVenezuela ? 'block' : 'none';
+            
+            if (!isVenezuela) {
+                estadoSelect.value = '';
+                document.getElementById('Input_Municipio').value = '';
             }
         });
 
