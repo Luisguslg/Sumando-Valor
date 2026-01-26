@@ -209,6 +209,21 @@ using (var scope = app.Services.CreateScope())
         var configuration = services.GetRequiredService<IConfiguration>();
 
         await DbInitializer.InitializeAsync(context, userManager, roleManager, configuration, app.Environment.IsDevelopment());
+
+        // Limpieza opcional de uploads huérfanos (solo en Development por seguridad)
+        try
+        {
+            var env = services.GetRequiredService<IWebHostEnvironment>();
+            var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+            var dbInitLogger = loggerFactory.CreateLogger("DbInitializer");
+            await DbInitializer.CleanOrphanUploadsAsync(context, env, dbInitLogger, app.Environment.IsDevelopment());
+        }
+        catch (Exception ex)
+        {
+            var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+            var dbInitLogger = loggerFactory.CreateLogger("DbInitializer");
+            dbInitLogger.LogWarning(ex, "Error running CleanOrphanUploadsAsync");
+        }
     }
     catch (Exception ex)
     {
