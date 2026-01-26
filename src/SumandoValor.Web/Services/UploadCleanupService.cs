@@ -20,9 +20,13 @@ public class UploadCleanupService
     {
         try
         {
-            // For safety, only auto-clean in development by default.
+            // Limpieza automática solo en desarrollo por seguridad.
+            // En producción, se puede habilitar manualmente o mediante configuración.
             if (!isDevelopment)
+            {
+                _logger.LogDebug("Limpieza de uploads huérfanos omitida (solo en desarrollo por defecto).");
                 return;
+            }
 
             var uploadsRoot = Path.Combine(_env.WebRootPath, "uploads");
             var carouselDir = Path.Combine(uploadsRoot, "carousel");

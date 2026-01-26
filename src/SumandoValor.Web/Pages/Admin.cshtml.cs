@@ -35,18 +35,27 @@ public class AdminModel : PageModel
         InscripcionesMes = await _context.Inscripciones
             .CountAsync(i => i.CreatedAt >= inicioMes && i.Estado == EstadoInscripcion.Activa);
 
-        // Sólo contar inscripciones activas que pertenezcan a talleres que están abiertos.
-        var cuposMaximos = await _context.Talleres
+        // Calcular porcentaje de cupos ocupados solo para talleres abiertos
+        var talleresAbiertos = await _context.Talleres
             .Where(t => t.Estatus == EstatusTaller.Abierto)
-            .SumAsync(t => (int?)t.CuposMaximos) ?? 0;
+            .ToListAsync();
 
-        var inscripcionesActivas = await (
-            from i in _context.Inscripciones
-            join t in _context.Talleres on i.TallerId equals t.Id
-            where i.Estado == EstadoInscripcion.Activa && t.Estatus == EstatusTaller.Abierto
-            select i
-        ).CountAsync();
-        // Usar división en punto flotante y redondear para mostrar porcentaje razonable
-        CuposOcupados = cuposMaximos > 0 ? (int)Math.Round((double)inscripcionesActivas * 100.0 / cuposMaximos) : 0;
+        var totalCuposMaximos = talleresAbiertos.Sum(t => t.CuposMaximos);
+        
+        if (totalCuposMaximos > 0)
+        {
+            var inscripcionesActivas = await _context.Inscripciones
+                .Where(i => i.Estado == EstadoInscripcion.Activa 
+                    && talleresAbiertos.Select(t => t.Id).Contains(i.TallerId))
+                .CountAsync();
+            
+            // Calcular porcentaje con precisión decimal y redondear
+            var porcentaje = (double)inscripcionesActivas * 100.0 / totalCuposMaximos;
+            CuposOcupados = (int)Math.Round(porcentaje, 0);
+        }
+        else
+        {
+            CuposOcupados = 0;
+        }
     }
 }
