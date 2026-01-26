@@ -35,11 +35,18 @@ public class AdminModel : PageModel
         InscripcionesMes = await _context.Inscripciones
             .CountAsync(i => i.CreatedAt >= inicioMes && i.Estado == EstadoInscripcion.Activa);
 
-        var inscripcionesActivas = await _context.Inscripciones
-            .CountAsync(i => i.Estado == EstadoInscripcion.Activa);
+        // Sólo contar inscripciones activas que pertenezcan a talleres que están abiertos.
         var cuposMaximos = await _context.Talleres
             .Where(t => t.Estatus == EstatusTaller.Abierto)
             .SumAsync(t => (int?)t.CuposMaximos) ?? 0;
-        CuposOcupados = cuposMaximos > 0 ? (inscripcionesActivas * 100 / cuposMaximos) : 0;
+
+        var inscripcionesActivas = await (
+            from i in _context.Inscripciones
+            join t in _context.Talleres on i.TallerId equals t.Id
+            where i.Estado == EstadoInscripcion.Activa && t.Estatus == EstatusTaller.Abierto
+            select i
+        ).CountAsync();
+        // Usar división en punto flotante y redondear para mostrar porcentaje razonable
+        CuposOcupados = cuposMaximos > 0 ? (int)Math.Round((double)inscripcionesActivas * 100.0 / cuposMaximos) : 0;
     }
 }
