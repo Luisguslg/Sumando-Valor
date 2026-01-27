@@ -11,4 +11,13 @@ setearlo como no público, es decir, interno, se nos cree una clave que vea el a
 y posteriormente personalmente ellos se lo van a enviar a los usuarios que ellos quieran, o no sé
 si el programa permita que se lo envíes por correo al usuario seleccionando el programa formativo
 y escribiendo el correo del usuario o seleccionándolo, así como pasa con el email diagnostics, no sé,
-dame alternativas, dime cómo se hace ahora en el mundo real.
+dame alternativas, dime cómo se hace ahora en el mundo real. Lo otro sería con un link que se le de,
+los cursos no públicos no deben ser vistos por todo público, no sé como lo ves tú, con un enlace único 
+que se le mande a personas que incluso no están registradas, eso lo hacen personal ellos o no sé si por
+la plataforma se podrá, y también la opción de agregar personas a ese curso.
+5) Retomando también lo anterior, de por si debería poder un administrador inscribir a un usuario en un 
+curso
+6) Cuando hagas todas estas cosas actualiza lo que haya que actualizar si hay que hacerlo como el
+readme, la carpeta diseño si es el caso, tú sabes, y que no se comprometa ni se rompa la seguridad del programa,
+hazle una auditoría de seguridad a todo el programa y simula flujos como ya lo haces, debe haber robustez
+desde la base de datos hasta arriba en todo.
