@@ -1,0 +1,14 @@
+1) Aparece programa formativo 2 veces. Sería mucho mejor si, apareciera una sola vez centrado,
+que se vea bien la tarjeta.
+2) Todas las partes en donde diga "Programa formativo", que sean "Programa Formativo"
+3) Cuando una persona se va a registrar, y le pregunte cómo conoció la plataforma, las opciones
+serán Redes sociales, Amigos o familiares, Medios de comunicación tradicionales
+,Organización en la que haces parte, Feria (emprendimiento o laboral), 
+Correo enviado por Fundación KPMG
+4) Mira lo que tengo en mente, cuando hay un programa formativo el cual no es público
+no sé cómo lo estamos manejando, una de las alternativas que tengo en mente es que al crearlo o 
+setearlo como no público, es decir, interno, se nos cree una clave que vea el administrador
+y posteriormente personalmente ellos se lo van a enviar a los usuarios que ellos quieran, o no sé
+si el programa permita que se lo envíes por correo al usuario seleccionando el programa formativo
+y escribiendo el correo del usuario o seleccionándolo, así como pasa con el email diagnostics, no sé,
+dame alternativas, dime cómo se hace ahora en el mundo real.
