@@ -164,7 +164,7 @@ public class DetailsModel : PageModel
         }
 
         // Verificar acceso a curso interno si el curso no es público
-        if (!Taller.Curso.EsPublico)
+        if (Taller.Curso != null && !Taller.Curso.EsPublico)
         {
             var hasAccess = HttpContext.Session.GetString($"curso_access_{Taller.CursoId}") == "granted";
             
@@ -173,6 +173,7 @@ public class DetailsModel : PageModel
             {
                 var cookieToken = Request.Cookies[$"curso_token_{Taller.CursoId}"];
                 if (!string.IsNullOrEmpty(cookieToken) &&
+                    Taller.Curso != null &&
                     !string.IsNullOrEmpty(Taller.Curso.TokenAccesoUnico) &&
                     Taller.Curso.TokenAccesoUnico.Equals(cookieToken, StringComparison.Ordinal) &&
                     (Taller.Curso.TokenExpiracion == null || Taller.Curso.TokenExpiracion > DateTime.UtcNow))

@@ -53,9 +53,11 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var role in Model.Roles)
+                            @if (Model.Roles != null)
                             {
-                                var usersInRole = Model.Users.Count(u => u.Roles.Contains(role.Name));
+                                @foreach (var role in Model.Roles)
+                                {
+                                    var usersInRole = Model.Users?.Count(u => u.Roles.Contains(role.Name ?? "")) ?? 0;
                                 var isSystemRole = new[] { "Admin", "Moderador", "Beneficiario" }.Contains(role.Name);
                                 
                                 <tr>
@@ -131,24 +133,27 @@
                                     <td>
                                         <form method="post" asp-page-handler="UpdateUserRoles" asp-route-userId="@user.UserId">
                                             <div class="d-flex flex-wrap gap-2">
-                                                @foreach (var role in Model.Roles)
+                                                @if (Model.Roles != null)
                                                 {
-                                                    var isChecked = user.Roles.Contains(role.Name);
-                                                    var isSystemRole = new[] { "Admin", "Moderador", "Beneficiario" }.Contains(role.Name);
-                                                    var canModifyAdmin = User.IsInRole("Admin") || role.Name != "Admin";
-                                                    
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" 
-                                                               type="checkbox" 
-                                                               name="selectedRoles" 
-                                                               value="@role.Name" 
-                                                               id="role_@(user.UserId)_@role.Name"
-                                                               @(isChecked ? "checked" : "")
-                                                               @(!canModifyAdmin ? "disabled" : "") />
-                                                        <label class="form-check-label" for="role_@(user.UserId)_@role.Name">
-                                                            @role.Name
-                                                        </label>
-                                                    </div>
+                                                    @foreach (var role in Model.Roles)
+                                                    {
+                                                        var isChecked = user.Roles.Contains(role.Name);
+                                                        var isSystemRole = new[] { "Admin", "Moderador", "Beneficiario" }.Contains(role.Name);
+                                                        var canModifyAdmin = User.IsInRole("Admin") || role.Name != "Admin";
+                                                        
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" 
+                                                                   type="checkbox" 
+                                                                   name="selectedRoles" 
+                                                                   value="@role.Name" 
+                                                                   id="role_@(user.UserId)_@role.Name"
+                                                                   @(isChecked ? "checked" : "")
+                                                                   @(!canModifyAdmin ? "disabled" : "") />
+                                                            <label class="form-check-label" for="role_@(user.UserId)_@role.Name">
+                                                                @role.Name
+                                                            </label>
+                                                        </div>
+                                                    }
                                                 }
                                             </div>
                                             <button type="submit" class="btn btn-sm btn-primary mt-2">Guardar Cambios</button>

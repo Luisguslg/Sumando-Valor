@@ -1,6 +1,7 @@
 @page "/Admin/Auditoria"
 @model SumandoValor.Web.Pages.Admin.AuditoriaModel
 @using System.Text.Json
+@using System.Text.Json.Serialization
 @{
     ViewData["Title"] = "Auditoría del Sistema";
     Layout = "~/Pages/Shared/_AdminLayout.cshtml";
@@ -130,17 +131,17 @@
                                                             @if (evt.OldValues != null)
                                                             {
                                                                 <h6>Valores Anteriores:</h6>
-                                                                <pre class="bg-light p-3 rounded"><code>@Json.Serialize(evt.OldValues, new JsonSerializerOptions { WriteIndented = true })</code></pre>
+                                                                <pre class="bg-light p-3 rounded"><code>@System.Text.Json.JsonSerializer.Serialize(evt.OldValues, new JsonSerializerOptions { WriteIndented = true })</code></pre>
                                                             }
                                                             @if (evt.NewValues != null)
                                                             {
                                                                 <h6>Valores Nuevos:</h6>
-                                                                <pre class="bg-light p-3 rounded"><code>@Json.Serialize(evt.NewValues, new JsonSerializerOptions { WriteIndented = true })</code></pre>
+                                                                <pre class="bg-light p-3 rounded"><code>@System.Text.Json.JsonSerializer.Serialize(evt.NewValues, new JsonSerializerOptions { WriteIndented = true })</code></pre>
                                                             }
                                                             @if (evt.Details != null)
                                                             {
                                                                 <h6>Información Adicional:</h6>
-                                                                <pre class="bg-light p-3 rounded"><code>@Json.Serialize(evt.Details, new JsonSerializerOptions { WriteIndented = true })</code></pre>
+                                                                <pre class="bg-light p-3 rounded"><code>@System.Text.Json.JsonSerializer.Serialize(evt.Details, new JsonSerializerOptions { WriteIndented = true })</code></pre>
                                                             }
                                                         </div>
                                                         <div class="modal-footer">
