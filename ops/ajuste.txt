@@ -1,0 +1,7 @@
+  SumandoValor.Domain net8.0 succeeded (0,1s) → C:\Users\luisperdomo\Desktop\Sumando Valor\Sumando-Valor\src\SumandoValor.Domain\bin\Debug\net8.0\SumandoValor.Domain.dll
+  SumandoValor.Infrastructure net8.0 failed with 2 error(s) (0,3s)
+    C:\Users\luisperdomo\Desktop\Sumando Valor\Sumando-Valor\src\SumandoValor.Infrastructure\Services\AuditService.cs(11,22): error CS0246: The type or namespace name 'ILogger<>' could not be found (are you missing a using directive or an assembly reference?)
+    C:\Users\luisperdomo\Desktop\Sumando Valor\Sumando-Valor\src\SumandoValor.Infrastructure\Services\AuditService.cs(13,47): error CS0246: The type or namespace name 'ILogger<>' could not be found (are you missing a using directive or an assembly reference?)
+  SumandoValor.Application net8.0 succeeded (0,3s) → C:\Users\luisperdomo\Desktop\Sumando Valor\Sumando-Valor\src\SumandoValor.Application\bin\Debug\net8.0\SumandoValor.Application.dll
+
+Build failed with 2 error(s) in 1,8s
