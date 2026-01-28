@@ -14,6 +14,8 @@ Esta carpeta contiene la documentación técnica completa de la aplicación **Su
 6. **[06-Integraciones-Externas.md](06-Integraciones-Externas.md)** - Sistemas externos integrados
 7. **[07-Validaciones-BD.md](07-Validaciones-BD.md)** - Reglas de validación a nivel de base de datos
 8. **[08-Evaluacion-Seguridad.md](08-Evaluacion-Seguridad.md)** - Análisis de seguridad y recomendaciones
+9. **[09-Manual-Usuario.md](09-Manual-Usuario.md)** - Manual completo de usuario con todos los flujos
+10. **[10-Manual-Administrador.md](10-Manual-Administrador.md)** - Manual completo de administrador con todos los flujos
 
 ### Notas
 

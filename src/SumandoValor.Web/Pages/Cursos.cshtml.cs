@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SumandoValor.Domain.Entities;
@@ -20,24 +21,27 @@ public class CursosModel : PageModel
 
     public async Task OnGetAsync()
     {
-        // Mostrar TODOS los cursos activos (públicos e internos)
-        // Los internos aparecen para que el usuario pueda acceder con clave si la tiene
-        Cursos = await _context.Cursos
+        // Obtener todos los cursos activos
+        var todosCursos = await _context.Cursos
             .Where(c => c.Estado == EstatusCurso.Activo)
             .OrderBy(c => c.Orden)
             .ThenBy(c => c.Titulo)
             .ToListAsync();
 
-        // Verificar acceso para cada curso interno
-        foreach (var curso in Cursos)
+        // Filtrar: solo mostrar públicos + internos con acceso
+        var cursosVisibles = new List<Curso>();
+
+        foreach (var curso in todosCursos)
         {
             if (curso.EsPublico)
             {
-                CursosConAcceso[curso.Id] = true; // Públicos siempre tienen acceso
+                // Curso público: siempre visible
+                cursosVisibles.Add(curso);
+                CursosConAcceso[curso.Id] = true;
             }
             else
             {
-                // Verificar acceso en sesión
+                // Curso interno: verificar acceso
                 var hasAccess = HttpContext.Session.GetString($"curso_access_{curso.Id}") == "granted";
                 
                 // Si no hay acceso en sesión, verificar cookie
@@ -55,8 +59,55 @@ public class CursosModel : PageModel
                     }
                 }
                 
-                CursosConAcceso[curso.Id] = hasAccess;
+                // Solo agregar si tiene acceso
+                if (hasAccess)
+                {
+                    cursosVisibles.Add(curso);
+                    CursosConAcceso[curso.Id] = true;
+                }
             }
         }
+
+        Cursos = cursosVisibles;
+    }
+
+    public async Task<IActionResult> OnPostValidateCodeAsync(string codigoAcceso)
+    {
+        if (string.IsNullOrWhiteSpace(codigoAcceso))
+        {
+            TempData["FlashError"] = "Por favor ingresa un código de acceso.";
+            return RedirectToPage();
+        }
+
+        // Buscar curso por ClaveAcceso
+        var curso = await _context.Cursos
+            .FirstOrDefaultAsync(c => c.Estado == EstatusCurso.Activo && 
+                                     !c.EsPublico && 
+                                     !string.IsNullOrEmpty(c.ClaveAcceso) &&
+                                     c.ClaveAcceso.Equals(codigoAcceso.Trim(), StringComparison.OrdinalIgnoreCase));
+
+        if (curso == null)
+        {
+            TempData["FlashError"] = "El código de acceso ingresado no es válido o no corresponde a ningún programa formativo activo.";
+            return RedirectToPage();
+        }
+
+        // Otorgar acceso
+        HttpContext.Session.SetString($"curso_access_{curso.Id}", "granted");
+        
+        // Si tiene TokenAccesoUnico, guardarlo en cookie también
+        if (!string.IsNullOrEmpty(curso.TokenAccesoUnico))
+        {
+            HttpContext.Response.Cookies.Append($"curso_token_{curso.Id}", curso.TokenAccesoUnico, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = !Request.IsHttps ? false : true,
+                SameSite = SameSiteMode.Lax,
+                Expires = curso.TokenExpiracion ?? DateTimeOffset.UtcNow.AddYears(1)
+            });
+        }
+
+        TempData["FlashSuccess"] = $"Acceso otorgado al programa formativo: {curso.Titulo}";
+        return RedirectToPage();
     }
 }

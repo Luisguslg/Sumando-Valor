@@ -79,6 +79,35 @@ public class DetailsModel : PageModel
             var user = await _userManager.GetUserAsync(User);
             var esBeneficiario = user != null && await _userManager.IsInRoleAsync(user, "Beneficiario");
 
+            // Verificar acceso a curso interno si el curso no es público
+            if (!Taller.Curso.EsPublico)
+            {
+                var hasAccess = HttpContext.Session.GetString($"curso_access_{Taller.CursoId}") == "granted";
+                
+                // Si no hay acceso en sesión, verificar cookie
+                if (!hasAccess)
+                {
+                    var cookieToken = Request.Cookies[$"curso_token_{Taller.CursoId}"];
+                    if (!string.IsNullOrEmpty(cookieToken) &&
+                        !string.IsNullOrEmpty(Taller.Curso.TokenAccesoUnico) &&
+                        Taller.Curso.TokenAccesoUnico.Equals(cookieToken, StringComparison.Ordinal) &&
+                        (Taller.Curso.TokenExpiracion == null || Taller.Curso.TokenExpiracion > DateTime.UtcNow))
+                    {
+                        // Restaurar acceso en sesión desde cookie
+                        HttpContext.Session.SetString($"curso_access_{Taller.CursoId}", "granted");
+                        hasAccess = true;
+                    }
+                }
+                
+                if (!hasAccess)
+                {
+                    UiState = InscripcionUiState.NotBeneficiario;
+                    UiBannerText = "No tienes acceso a este programa formativo interno. Necesitas un código de acceso o enlace válido.";
+                    UiBannerClass = "alert-warning";
+                    return Page();
+                }
+            }
+
             if (!esBeneficiario)
             {
                 UiState = InscripcionUiState.NotBeneficiario;
@@ -132,6 +161,33 @@ public class DetailsModel : PageModel
         {
             TempData["FlashError"] = "Solo los beneficiarios pueden inscribirse en talleres.";
             return RedirectToPage(new { id });
+        }
+
+        // Verificar acceso a curso interno si el curso no es público
+        if (!Taller.Curso.EsPublico)
+        {
+            var hasAccess = HttpContext.Session.GetString($"curso_access_{Taller.CursoId}") == "granted";
+            
+            // Si no hay acceso en sesión, verificar cookie
+            if (!hasAccess)
+            {
+                var cookieToken = Request.Cookies[$"curso_token_{Taller.CursoId}"];
+                if (!string.IsNullOrEmpty(cookieToken) &&
+                    !string.IsNullOrEmpty(Taller.Curso.TokenAccesoUnico) &&
+                    Taller.Curso.TokenAccesoUnico.Equals(cookieToken, StringComparison.Ordinal) &&
+                    (Taller.Curso.TokenExpiracion == null || Taller.Curso.TokenExpiracion > DateTime.UtcNow))
+                {
+                    // Restaurar acceso en sesión desde cookie
+                    HttpContext.Session.SetString($"curso_access_{Taller.CursoId}", "granted");
+                    hasAccess = true;
+                }
+            }
+            
+            if (!hasAccess)
+            {
+                TempData["FlashError"] = "No tienes acceso a este programa formativo interno. Necesitas un código de acceso o enlace válido.";
+                return RedirectToPage("/Cursos");
+            }
         }
 
         Taller = await _context.Talleres

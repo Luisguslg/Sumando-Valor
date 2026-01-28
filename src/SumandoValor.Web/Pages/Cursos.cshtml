@@ -14,6 +14,30 @@
 })
 
 <div class="container my-5">
+    <!-- Campo de código de acceso -->
+    <div class="row mb-4">
+        <div class="col-md-6 col-lg-4 mx-auto">
+            <div class="card card-kpmg">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-key me-2"></i>Código de Acceso
+                    </h5>
+                    <p class="text-muted small mb-3">Si tienes un código de acceso para un programa formativo interno, ingrésalo aquí:</p>
+                    <form method="post" asp-page-handler="ValidateCode" class="d-flex gap-2">
+                        <input type="text" 
+                               name="codigoAcceso" 
+                               class="form-control" 
+                               placeholder="Ingresa tu código"
+                               maxlength="20"
+                               required />
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>Validar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     @if (Model.Cursos == null || !Model.Cursos.Any())
     {

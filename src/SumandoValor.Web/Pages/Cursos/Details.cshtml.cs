@@ -5,6 +5,7 @@ using SumandoValor.Domain.Entities;
 using SumandoValor.Infrastructure.Data;
 using Microsoft.AspNetCore.Session;
 using Microsoft.AspNetCore.Http;
+using System;
 
 namespace SumandoValor.Web.Pages.Cursos;
 
