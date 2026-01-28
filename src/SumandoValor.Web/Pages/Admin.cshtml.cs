@@ -6,7 +6,7 @@ using SumandoValor.Infrastructure.Data;
 
 namespace SumandoValor.Web.Pages;
 
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Moderador,Admin")]
 public class AdminModel : PageModel
 {
     private readonly AppDbContext _context;

@@ -10,7 +10,7 @@ using Microsoft.Data.SqlClient;
 
 namespace SumandoValor.Web.Pages.Admin;
 
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Moderador,Admin")]
 public class InscripcionesModel : PageModel
 {
     private readonly AppDbContext _context;

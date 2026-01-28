@@ -10,7 +10,7 @@ using SumandoValor.Infrastructure.Services;
 
 namespace SumandoValor.Web.Pages.Admin.Cursos;
 
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Moderador,Admin")]
 public class SendAccessModel : PageModel
 {
     private readonly AppDbContext _context;

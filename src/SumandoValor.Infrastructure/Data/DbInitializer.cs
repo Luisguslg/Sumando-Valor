@@ -24,7 +24,23 @@ public static class DbInitializer
 
     private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
     {
-        var roles = new[] { "SuperAdmin", "Admin", "Beneficiario" };
+        // Migrar roles antiguos si existen
+        var oldSuperAdminRole = await roleManager.FindByNameAsync("SuperAdmin");
+        if (oldSuperAdminRole != null)
+        {
+            oldSuperAdminRole.Name = "Admin";
+            await roleManager.UpdateAsync(oldSuperAdminRole);
+        }
+
+        var oldAdminRole = await roleManager.FindByNameAsync("Admin");
+        if (oldAdminRole != null && oldSuperAdminRole == null) // Solo si no se renombró SuperAdmin
+        {
+            oldAdminRole.Name = "Moderador";
+            await roleManager.UpdateAsync(oldAdminRole);
+        }
+
+        // Crear nuevos roles si no existen
+        var roles = new[] { "Admin", "Moderador", "Beneficiario" };
 
         foreach (var roleName in roles)
         {
@@ -58,6 +74,19 @@ public static class DbInitializer
         var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
         if (existingAdmin != null)
         {
+            // Migrar roles si es necesario
+            var roles = await userManager.GetRolesAsync(existingAdmin);
+            if (roles.Contains("SuperAdmin"))
+            {
+                await userManager.RemoveFromRoleAsync(existingAdmin, "SuperAdmin");
+                if (!roles.Contains("Admin"))
+                    await userManager.AddToRoleAsync(existingAdmin, "Admin");
+            }
+            else if (roles.Contains("Admin") && !roles.Contains("Moderador"))
+            {
+                await userManager.RemoveFromRoleAsync(existingAdmin, "Admin");
+                await userManager.AddToRoleAsync(existingAdmin, "Moderador");
+            }
             return;
         }
 
@@ -76,7 +105,7 @@ public static class DbInitializer
         var result = await userManager.CreateAsync(admin, adminPassword);
         if (result.Succeeded)
         {
-            await userManager.AddToRoleAsync(admin, "Admin");
+            await userManager.AddToRoleAsync(admin, "Moderador");
         }
     }
 
@@ -85,10 +114,11 @@ public static class DbInitializer
         IConfiguration configuration,
         bool isDevelopment)
     {
+        // Ahora este método crea el nuevo "Admin" (antes SuperAdmin)
         var create = bool.TryParse(configuration["Seed:CreateSuperAdmin"], out var b) && b;
         if (!isDevelopment && !create)
         {
-            // Production safety: do not create a SuperAdmin unless explicitly enabled.
+            // Production safety: do not create an admin unless explicitly enabled.
             return;
         }
 
@@ -120,8 +150,8 @@ public static class DbInitializer
                 UserName = email,
                 Email = email,
                 EmailConfirmed = true,
-                Nombres = "Super",
-                Apellidos = "Admin",
+                Nombres = "Administrador",
+                Apellidos = "Sistema",
                 Cedula = "00000001",
                 CreatedAt = DateTime.UtcNow,
                 EmailVerifiedAt = DateTime.UtcNow
@@ -131,15 +161,25 @@ public static class DbInitializer
             if (!createRes.Succeeded)
             {
                 var msg = string.Join("; ", createRes.Errors.Select(e => e.Description));
-                throw new InvalidOperationException($"No se pudo crear SuperAdmin: {msg}");
+                throw new InvalidOperationException($"No se pudo crear Admin: {msg}");
             }
         }
 
-        // Ensure roles
+        // Migrar roles antiguos si existen
+        var roles = await userManager.GetRolesAsync(user);
+        if (roles.Contains("SuperAdmin"))
+        {
+            await userManager.RemoveFromRoleAsync(user, "SuperAdmin");
+        }
+        if (roles.Contains("Admin") && !roles.Contains("Moderador"))
+        {
+            // Si tenía Admin antiguo, mantenerlo como Moderador temporalmente
+            await userManager.RemoveFromRoleAsync(user, "Admin");
+            await userManager.AddToRoleAsync(user, "Moderador");
+        }
+
+        // Asegurar rol Admin (nuevo, antes SuperAdmin)
         if (!await userManager.IsInRoleAsync(user, "Admin"))
             await userManager.AddToRoleAsync(user, "Admin");
-
-        if (!await userManager.IsInRoleAsync(user, "SuperAdmin"))
-            await userManager.AddToRoleAsync(user, "SuperAdmin");
     }
 }

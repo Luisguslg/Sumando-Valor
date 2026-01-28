@@ -1,7 +1,0 @@
-La gente de seguridad me dijo que le cambiara el nombre del admin a moderador, y que haga lo 
-que ya está, y para el super admin que era el que da admin, va a seguir dando admin, ahora se va
-a llamar admin y necesitamos que tenga tanto una parte donde vea roles y usuarios en la base de datos
-y pueda modificar, tú sabes, un CRUD de roles y permisos, lo visualizo así bien bonito con unos checks
-como se hace normalmente, y también tener algún tipo de auditoría sobre todo lo que se hace en la
-base de datos, que vean los cambios que se hicieron, con fecha y hora, quien los hizo, ya sabes
-auditoría sobre las tablas, porque así lo requiere el NITSO

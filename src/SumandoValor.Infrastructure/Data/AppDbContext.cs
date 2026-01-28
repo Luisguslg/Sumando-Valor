@@ -151,8 +151,16 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             entity.HasIndex(e => e.CreatedAt);
             entity.HasIndex(e => e.ActorUserId);
             entity.HasIndex(e => e.TargetUserId);
+            entity.HasIndex(e => e.EntityType);
+            entity.HasIndex(e => e.EntityId);
             entity.Property(e => e.Action).IsRequired().HasMaxLength(80);
+            entity.Property(e => e.EntityType).HasMaxLength(100);
+            entity.Property(e => e.EntityId).HasMaxLength(100);
+            entity.Property(e => e.ActorEmail).HasMaxLength(256);
             entity.Property(e => e.DetailsJson).HasMaxLength(4000);
+            entity.Property(e => e.OldValuesJson).HasMaxLength(4000);
+            entity.Property(e => e.NewValuesJson).HasMaxLength(4000);
+            entity.Property(e => e.IpAddress).HasMaxLength(45);
         });
 
         builder.Entity<CarouselItem>(entity =>

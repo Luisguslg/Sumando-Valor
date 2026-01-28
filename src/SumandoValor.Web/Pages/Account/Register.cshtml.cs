@@ -253,9 +253,9 @@ public class RegisterModel : PageModel
         public string Cedula { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "La contraseña es requerida")]
-        [StringLength(100, ErrorMessage = "La contraseña debe tener al menos 12 caracteres e incluir mayúsculas, minúsculas, números y caracteres especiales.", MinimumLength = 12)]
-        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$", 
-            ErrorMessage = "La contraseña debe tener al menos 12 caracteres e incluir mayúsculas, minúsculas, números y caracteres especiales (@$!%*?&).")]
+        [StringLength(100, ErrorMessage = "La contraseña debe tener al menos 14 caracteres e incluir mayúsculas, minúsculas, números y caracteres especiales.", MinimumLength = 14)]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{14,}$",
+            ErrorMessage = "La contraseña debe tener al menos 14 caracteres e incluir mayúsculas, minúsculas, números y caracteres especiales (@$!%*?&).")]
         [DataType(DataType.Password)]
         [Display(Name = "Contraseña")]
         public string Password { get; set; } = string.Empty;

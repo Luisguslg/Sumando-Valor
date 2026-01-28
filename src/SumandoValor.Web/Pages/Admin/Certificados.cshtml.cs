@@ -10,7 +10,7 @@ using SumandoValor.Web.Services.Certificates;
 
 namespace SumandoValor.Web.Pages.Admin;
 
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Moderador,Admin")]
 public class CertificadosModel : PageModel
 {
     private const int PageSize = 20;

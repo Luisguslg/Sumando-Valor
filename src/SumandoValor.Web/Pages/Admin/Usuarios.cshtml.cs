@@ -10,7 +10,7 @@ using SumandoValor.Infrastructure.Data;
 
 namespace SumandoValor.Web.Pages.Admin;
 
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Moderador,Admin")]
 public class UsuariosModel : PageModel
 {
     private const int PageSize = 20;
@@ -32,7 +32,7 @@ public class UsuariosModel : PageModel
     public string? Status { get; set; } // active | inactive
 
     [BindProperty(SupportsGet = true)]
-    public string? Role { get; set; } // Admin | Beneficiario
+    public string? Role { get; set; } // Moderador | Beneficiario
 
     [BindProperty(SupportsGet = true, Name = "page")]
     public int PageNumber { get; set; } = 1;
@@ -108,14 +108,14 @@ public class UsuariosModel : PageModel
                 Cedula = u.Cedula ?? "",
                 IsActive = u.LockoutEnd == null || u.LockoutEnd <= DateTimeOffset.UtcNow,
                 Roles = roles.ToList(),
-                IsAdmin = roles.Contains("Admin")
+                IsModerador = roles.Contains("Moderador") || roles.Contains("Admin")
             });
         }
     }
 
     public async Task<IActionResult> OnPostToggleActiveAsync(string id)
     {
-        var actorIsSuperAdmin = User.IsInRole("SuperAdmin");
+        var actorIsAdmin = User.IsInRole("Admin");
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
         {
@@ -127,25 +127,25 @@ public class UsuariosModel : PageModel
         if (isActive)
         {
             var roles = await _userManager.GetRolesAsync(user);
-            if (roles.Contains("Admin") || roles.Contains("SuperAdmin"))
+            if (roles.Contains("Moderador") || roles.Contains("Admin"))
             {
-                if (!actorIsSuperAdmin)
+                if (!actorIsAdmin)
                 {
-                    TempData["FlashError"] = "Solo SuperAdmin puede desactivar administradores.";
+                    TempData["FlashError"] = "Solo Admin puede desactivar moderadores.";
+                    return RedirectToPage(new { Search, Status, Role, page = PageNumber });
+                }
+
+                var moderadores = await _userManager.GetUsersInRoleAsync("Moderador");
+                if (moderadores.Count <= 1)
+                {
+                    TempData["FlashError"] = "No puedes desactivar al último moderador.";
                     return RedirectToPage(new { Search, Status, Role, page = PageNumber });
                 }
 
                 var admins = await _userManager.GetUsersInRoleAsync("Admin");
-                if (admins.Count <= 1)
+                if (roles.Contains("Admin") && admins.Count <= 1)
                 {
-                    TempData["FlashError"] = "No puedes desactivar al último administrador.";
-                    return RedirectToPage(new { Search, Status, Role, page = PageNumber });
-                }
-
-                var superAdmins = await _userManager.GetUsersInRoleAsync("SuperAdmin");
-                if (roles.Contains("SuperAdmin") && superAdmins.Count <= 1)
-                {
-                    TempData["FlashError"] = "No puedes desactivar al último SuperAdmin.";
+                    TempData["FlashError"] = "No puedes desactivar al último Admin.";
                     return RedirectToPage(new { Search, Status, Role, page = PageNumber });
                 }
             }
@@ -224,7 +224,7 @@ public class UsuariosModel : PageModel
         }
 
         // Default role
-        var initialRole = CreateInput.InitialRole == "Admin" ? "Admin" : "Beneficiario";
+        var initialRole = CreateInput.InitialRole == "Moderador" ? "Moderador" : "Beneficiario";
         await _userManager.AddToRoleAsync(user, initialRole);
 
         await LogAuditAsync("CreateUser", user.Id, new { role = initialRole, email = user.Email });
@@ -232,11 +232,11 @@ public class UsuariosModel : PageModel
         return RedirectToPage(new { Search = search, Status = status, Role = role, page });
     }
 
-    public async Task<IActionResult> OnPostMakeAdminAsync(string id)
+    public async Task<IActionResult> OnPostMakeModeradorAsync(string id)
     {
-        if (!User.IsInRole("SuperAdmin"))
+        if (!User.IsInRole("Admin"))
         {
-            TempData["FlashError"] = "Solo SuperAdmin puede asignar el rol Admin.";
+            TempData["FlashError"] = "Solo Admin puede asignar el rol Moderador.";
             return RedirectToPage(new { Search, Status, Role, page = PageNumber });
         }
 
@@ -247,33 +247,33 @@ public class UsuariosModel : PageModel
             return RedirectToPage();
         }
 
-        // SuperAdmins always have Admin; no action needed
-        if ((await _userManager.GetRolesAsync(user)).Contains("SuperAdmin"))
+        // Admins siempre tienen Moderador; no acción necesaria
+        if ((await _userManager.GetRolesAsync(user)).Contains("Admin"))
         {
-            TempData["FlashInfo"] = "Los SuperAdmins ya son Admin por defecto.";
+            TempData["FlashInfo"] = "Los Admins ya son Moderador por defecto.";
             return RedirectToPage(new { Search, Status, Role, page = PageNumber });
         }
 
-        var res = await _userManager.AddToRoleAsync(user, "Admin");
+        var res = await _userManager.AddToRoleAsync(user, "Moderador");
         if (!res.Succeeded)
         {
-            TempData["FlashError"] = "No se pudo asignar rol Admin.";
-            _logger.LogWarning("MakeAdmin failed: {Errors}", string.Join("; ", res.Errors.Select(e => e.Description)));
+            TempData["FlashError"] = "No se pudo asignar rol Moderador.";
+            _logger.LogWarning("MakeModerador failed: {Errors}", string.Join("; ", res.Errors.Select(e => e.Description)));
         }
         else
         {
-            await LogAuditAsync("MakeAdmin", user.Id, new { role = "Admin" });
-            TempData["FlashSuccess"] = "Rol Admin asignado.";
+            await LogAuditAsync("MakeModerador", user.Id, new { role = "Moderador" });
+            TempData["FlashSuccess"] = "Rol Moderador asignado.";
         }
 
         return RedirectToPage(new { Search, Status, Role, page = PageNumber });
     }
 
-    public async Task<IActionResult> OnPostRemoveAdminAsync(string id)
+    public async Task<IActionResult> OnPostRemoveModeradorAsync(string id)
     {
-        if (!User.IsInRole("SuperAdmin"))
+        if (!User.IsInRole("Admin"))
         {
-            TempData["FlashError"] = "Solo SuperAdmin puede quitar el rol Admin.";
+            TempData["FlashError"] = "Solo Admin puede quitar el rol Moderador.";
             return RedirectToPage(new { Search, Status, Role, page = PageNumber });
         }
 
@@ -285,30 +285,30 @@ public class UsuariosModel : PageModel
         }
 
         var targetRoles = await _userManager.GetRolesAsync(user);
-        if (targetRoles.Contains("SuperAdmin"))
+        if (targetRoles.Contains("Admin"))
         {
-            // Rule: SuperAdmins always keep Admin
-            TempData["FlashError"] = "No puedes quitar el rol Admin a un SuperAdmin.";
+            // Rule: Admins always keep Moderador
+            TempData["FlashError"] = "No puedes quitar el rol Moderador a un Admin.";
             return RedirectToPage(new { Search, Status, Role, page = PageNumber });
         }
 
-        var admins = await _userManager.GetUsersInRoleAsync("Admin");
-        if (admins.Count <= 1)
+        var moderadores = await _userManager.GetUsersInRoleAsync("Moderador");
+        if (moderadores.Count <= 1)
         {
-            TempData["FlashError"] = "No puedes quitar el rol al último administrador.";
+            TempData["FlashError"] = "No puedes quitar el rol al último moderador.";
             return RedirectToPage(new { Search, Status, Role, page = PageNumber });
         }
 
-        var res = await _userManager.RemoveFromRoleAsync(user, "Admin");
+        var res = await _userManager.RemoveFromRoleAsync(user, "Moderador");
         if (!res.Succeeded)
         {
-            TempData["FlashError"] = "No se pudo quitar rol Admin.";
-            _logger.LogWarning("RemoveAdmin failed: {Errors}", string.Join("; ", res.Errors.Select(e => e.Description)));
+            TempData["FlashError"] = "No se pudo quitar rol Moderador.";
+            _logger.LogWarning("RemoveModerador failed: {Errors}", string.Join("; ", res.Errors.Select(e => e.Description)));
         }
         else
         {
-            await LogAuditAsync("RemoveAdmin", user.Id, new { role = "Admin" });
-            TempData["FlashSuccess"] = "Rol Admin removido.";
+            await LogAuditAsync("RemoveModerador", user.Id, new { role = "Moderador" });
+            TempData["FlashSuccess"] = "Rol Moderador removido.";
         }
 
         return RedirectToPage(new { Search, Status, Role, page = PageNumber });
@@ -360,7 +360,7 @@ public class UsuariosModel : PageModel
         public string Cedula { get; set; } = "";
         public bool IsActive { get; set; }
         public List<string> Roles { get; set; } = new();
-        public bool IsAdmin { get; set; }
+        public bool IsModerador { get; set; }
     }
 
     public sealed class CreateUserInputModel
@@ -370,7 +370,7 @@ public class UsuariosModel : PageModel
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "La contraseña es requerida")]
-        [StringLength(100, ErrorMessage = "La contraseña debe tener al menos {2} caracteres.", MinimumLength = 8)]
+        [StringLength(100, ErrorMessage = "La contraseña debe tener al menos 14 caracteres.", MinimumLength = 14)]
         [DataType(DataType.Password)]
         public string Password { get; set; } = string.Empty;
 
@@ -412,7 +412,7 @@ public class UsuariosModel : PageModel
         public string? Telefono { get; set; }
 
         [Required]
-        public string InitialRole { get; set; } = "Beneficiario";
+        public string InitialRole { get; set; } = "Beneficiario"; // Beneficiario | Moderador
     }
 }
 

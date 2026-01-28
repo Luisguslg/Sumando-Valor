@@ -10,7 +10,7 @@ using SumandoValor.Infrastructure.Data;
 
 namespace SumandoValor.Web.Pages.Admin.Usuarios;
 
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Moderador,Admin")]
 public class EditModel : PageModel
 {
     private readonly AppDbContext _context;
@@ -66,11 +66,11 @@ public class EditModel : PageModel
             return Page();
         }
 
-        // Only SuperAdmin can modify SuperAdmins
+        // Only Admin can modify Admins
         var roles = await _userManager.GetRolesAsync(user);
-        if (roles.Contains("SuperAdmin") && !User.IsInRole("SuperAdmin"))
+        if (roles.Contains("Admin") && !User.IsInRole("Admin"))
         {
-            TempData["FlashError"] = "Solo SuperAdmin puede editar un SuperAdmin.";
+            TempData["FlashError"] = "Solo Admin puede editar un Admin.";
             return RedirectToPage("/Admin/Usuarios");
         }
 
@@ -86,11 +86,11 @@ public class EditModel : PageModel
         {
             if (!wantActive)
             {
-                // Prevent deactivating the last Admin/SuperAdmin unless SuperAdmin (same rule as list page)
-                var actorIsSuperAdmin = User.IsInRole("SuperAdmin");
-                if ((await _userManager.GetRolesAsync(user)).Any(r => r is "Admin" or "SuperAdmin") && !actorIsSuperAdmin)
+                // Prevent deactivating the last Admin/Moderador unless Admin (same rule as list page)
+                var actorIsAdmin = User.IsInRole("Admin");
+                if ((await _userManager.GetRolesAsync(user)).Any(r => r is "Admin" or "Moderador") && !actorIsAdmin)
                 {
-                    ModelState.AddModelError(string.Empty, "Solo SuperAdmin puede desactivar administradores.");
+                    ModelState.AddModelError(string.Empty, "Solo Admin puede desactivar moderadores.");
                     Email = user.Email ?? user.UserName ?? "";
                     return Page();
                 }

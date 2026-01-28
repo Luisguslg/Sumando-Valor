@@ -8,11 +8,13 @@
 4. [Gestión de Talleres](#gestión-de-talleres)
 5. [Gestión de Inscripciones](#gestión-de-inscripciones)
 6. [Gestión de Usuarios](#gestión-de-usuarios)
-7. [Programas Internos y Control de Acceso](#programas-internos-y-control-de-acceso)
-8. [Certificados](#certificados)
-9. [Encuestas](#encuestas)
-10. [Estadísticas y Reportes](#estadísticas-y-reportes)
-11. [Configuración del Sistema](#configuración-del-sistema)
+7. [Gestión de Roles y Permisos](#gestión-de-roles-y-permisos)
+8. [Auditoría del Sistema](#auditoría-del-sistema)
+9. [Programas Internos y Control de Acceso](#programas-internos-y-control-de-acceso)
+10. [Certificados](#certificados)
+11. [Encuestas](#encuestas)
+12. [Estadísticas y Reportes](#estadísticas-y-reportes)
+13. [Configuración del Sistema](#configuración-del-sistema)
 
 ---
 
@@ -22,8 +24,8 @@ Este manual está dirigido a los administradores de la plataforma **Sumando Valo
 
 ### Roles de Administración
 
-- **Administrador**: Acceso completo al panel de administración
-- **Super Administrador**: Acceso completo + configuración del sistema
+- **Admin**: Acceso completo al panel de administración, incluyendo gestión de roles y permisos, y auditoría completa del sistema
+- **Moderador**: Acceso al panel de administración para gestión de contenido (cursos, talleres, inscripciones, certificados, usuarios). No puede gestionar roles ni ver auditoría completa
 
 ---
 
@@ -31,7 +33,7 @@ Este manual está dirigido a los administradores de la plataforma **Sumando Valo
 
 ### Requisitos
 
-- Tener el rol de **Administrador** o **Super Administrador**
+- Tener el rol de **Moderador** o **Admin**
 - Estar autenticado en el sistema
 
 ### Acceso
@@ -195,6 +197,95 @@ Puedes buscar por:
 
 ---
 
+## Gestión de Roles y Permisos
+
+**Nota**: Esta sección solo está disponible para usuarios con rol **Admin**.
+
+### Ver Roles del Sistema
+
+1. Ve a **"Roles y Permisos"** en el panel de administración
+2. Verás una lista de todos los roles del sistema con:
+   - Nombre del rol
+   - Número de usuarios asignados
+   - Acciones disponibles
+
+### Crear un Nuevo Rol
+
+1. En la sección **"Crear Nuevo Rol"**, ingresa el nombre del rol
+2. Haz clic en **"Crear Rol"**
+3. El nuevo rol aparecerá en la lista
+
+**Importante**: Los roles del sistema (Admin, Moderador, Beneficiario) no se pueden eliminar.
+
+### Eliminar un Rol
+
+1. En la lista de roles, haz clic en **"Eliminar"** en el rol que deseas eliminar
+2. Confirma la eliminación
+3. **Nota**: No puedes eliminar un rol si tiene usuarios asignados
+
+### Asignar Roles a Usuarios
+
+1. En la sección **"Asignar Roles a Usuarios"**, encontrarás una tabla con todos los usuarios
+2. Para cada usuario, verás checkboxes con todos los roles disponibles
+3. Marca los roles que deseas asignar al usuario
+4. Haz clic en **"Guardar Cambios"**
+
+### Reglas de Asignación
+
+- **Solo Admin puede asignar/quitar el rol Admin**: Si intentas asignar o quitar el rol Admin y no eres Admin, verás un error
+- **No se puede quitar Admin al último Admin**: El sistema previene dejar el sistema sin administradores
+- **Los Admins siempre conservan Moderador**: Si un usuario tiene el rol Admin, automáticamente tiene acceso a todas las funciones de Moderador
+
+---
+
+## Auditoría del Sistema
+
+**Nota**: Esta sección solo está disponible para usuarios con rol **Admin**.
+
+### Ver Eventos de Auditoría
+
+1. Ve a **"Auditoría"** en el panel de administración
+2. Verás una lista completa de todos los cambios realizados en el sistema
+
+### Filtrar Eventos
+
+Puedes filtrar los eventos por:
+- **Tipo de Entidad**: Curso, Taller, Usuario, Rol, Inscripción, Certificado
+- **Acción**: Create, Update, Delete, ToggleActive, MakeModerador, RemoveModerador, etc.
+- **Buscar**: Por email del usuario, tipo de entidad, acción o ID de entidad
+
+### Información de Cada Evento
+
+Cada evento muestra:
+- **Fecha y Hora**: Cuándo ocurrió el cambio
+- **Usuario**: Quién realizó el cambio (nombre y email)
+- **Entidad**: Tipo de entidad afectada y su ID
+- **Acción**: Qué acción se realizó
+- **Detalles**: Botón para ver valores anteriores y nuevos (si aplica)
+- **IP**: Dirección IP desde donde se realizó el cambio
+
+### Ver Detalles de Cambios
+
+1. Haz clic en **"Ver Cambios"** en cualquier evento
+2. Se abrirá un modal mostrando:
+   - **Valores Anteriores**: Estado antes del cambio (para Updates)
+   - **Valores Nuevos**: Estado después del cambio
+   - **Información Adicional**: Detalles adicionales del evento
+
+### Paginación
+
+Los eventos se muestran en páginas de 50 eventos. Usa la paginación en la parte inferior para navegar entre páginas.
+
+### Importancia de la Auditoría
+
+La auditoría es requerida por **NITSO** y permite:
+- Rastrear todos los cambios en la base de datos
+- Identificar quién hizo cada cambio y cuándo
+- Investigar problemas o cambios no autorizados
+- Cumplir con requisitos de seguridad y compliance
+
+---
+
 ## Programas Internos y Control de Acceso
 
 ### Crear un Programa Interno
@@ -311,7 +402,7 @@ Puedes exportar:
 
 ### Configuración de Email
 
-1. Ve a **"Configuración"** (solo Super Administrador)
+1. Ve a **"Configuración"** (solo Admin)
 2. Configura:
    - Servidor SMTP
    - Puerto

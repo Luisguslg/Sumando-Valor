@@ -6,7 +6,7 @@ using SumandoValor.Infrastructure.Services;
 
 namespace SumandoValor.Web.Pages.Admin;
 
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Moderador,Admin")]
 public class EmailDiagnosticsModel : PageModel
 {
     private readonly IEmailService _emailService;

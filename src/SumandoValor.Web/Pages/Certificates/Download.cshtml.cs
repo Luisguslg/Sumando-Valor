@@ -41,7 +41,7 @@ public class DownloadModel : PageModel
         if (user == null)
             return Challenge();
 
-        var isAdmin = User.IsInRole("Admin");
+        var isAdmin = User.IsInRole("Moderador") || User.IsInRole("Admin");
         if (!isAdmin && cert.UserId != user.Id)
             return Forbid();
 

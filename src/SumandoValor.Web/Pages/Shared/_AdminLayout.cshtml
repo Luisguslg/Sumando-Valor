@@ -205,6 +205,17 @@
                asp-page="/Admin/Usuarios">
                 <i class="bi bi-person-gear"></i> Usuarios
             </a>
+            @if (User.IsInRole("Admin"))
+            {
+                <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Roles") ? "active" : "")"
+                   asp-page="/Admin/Roles">
+                    <i class="bi bi-shield-check"></i> Roles y Permisos
+                </a>
+                <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Auditoria") ? "active" : "")"
+                   asp-page="/Admin/Auditoria">
+                    <i class="bi bi-journal-text"></i> Auditoría
+                </a>
+            }
             <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/EmailDiagnostics") ? "active" : "")"
                asp-page="/Admin/EmailDiagnostics">
                 <i class="bi bi-envelope-check"></i> Email Diagnostics

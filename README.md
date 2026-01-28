@@ -15,7 +15,8 @@ Sumando Valor centraliza y digitaliza el proceso de formación ofrecido por la F
 
 ### Roles del sistema
 
-- **Administrador (Admin)**: gestiona cursos, talleres, inscripciones, encuestas, certificados, usuarios y diagnósticos de correo. Puede inscribir usuarios directamente en talleres y gestionar acceso a cursos internos mediante claves o enlaces únicos.
+- **Admin**: rol de máximo privilegio. Puede gestionar cursos, talleres, inscripciones, encuestas, certificados, usuarios, roles y permisos, y ver auditoría completa del sistema. Puede asignar/quitar el rol Moderador a otros usuarios.
+- **Moderador**: gestiona cursos, talleres, inscripciones, encuestas, certificados, usuarios y diagnósticos de correo. Puede inscribir usuarios directamente en talleres y gestionar acceso a cursos internos mediante claves o enlaces únicos. No puede gestionar roles ni ver auditoría completa.
 - **Beneficiario**: se registra, confirma email, se inscribe en talleres, responde encuestas (cuando aplica) y descarga certificados aprobados.
 
 ### Rutas clave (referenciales; pueden variar según el estado actual del proyecto)

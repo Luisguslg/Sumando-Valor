@@ -131,9 +131,9 @@
                     <label asp-for="CreateInput.InitialRole" class="form-label">Rol inicial <span class="text-danger">*</span></label>
                     <select asp-for="CreateInput.InitialRole" class="form-select">
                         <option value="Beneficiario">Beneficiario</option>
-                        <option value="Admin">Admin</option>
+                        <option value="Moderador">Moderador</option>
                     </select>
-                    <small class="text-muted">Crear Admin aquí funciona, pero igual puedes usar “Hacer Admin” en la tabla.</small>
+                    <small class="text-muted">Crear Moderador aquí funciona, pero igual puedes usar “Hacer Moderador” en la tabla.</small>
                     <span asp-validation-for="CreateInput.InitialRole" class="text-danger"></span>
                 </div>
 
@@ -161,7 +161,8 @@
             <label class="form-label small">Rol</label>
             <select class="form-select" name="Role">
                 <option value="">Todos</option>
-                <option value="Admin" selected="@(Model.Role == "Admin")">Admin</option>
+                <option value="Moderador" selected="@(Model.Role == "Moderador")">Moderador</option>
+                <option value="Moderador" selected="@(Model.Role == "Admin")">Admin</option>
                 <option value="Beneficiario" selected="@(Model.Role == "Beneficiario")">Beneficiario</option>
             </select>
         </div>
@@ -186,9 +187,9 @@
             </thead>
             <tbody>
             @{
-                // Only SuperAdmin can promote/revoke admins (avoid privilege escalation)
-                var canManageAdmins = User.IsInRole("SuperAdmin");
-                var canManageSuperAdmins = User.IsInRole("SuperAdmin");
+                // Only Admin can promote/revoke moderadores (avoid privilege escalation)
+                var canManageModeradores = User.IsInRole("Admin");
+                var canManageAdmins = User.IsInRole("Admin");
             }
             @foreach (var u in Model.Rows)
             {
@@ -225,45 +226,45 @@
                                 </button>
                             </form>
 
-                            @if (u.Roles.Contains("SuperAdmin"))
+                            @if (u.Roles.Contains("Admin"))
                             {
-                                @if (!canManageSuperAdmins)
+                                @if (!canManageAdmins)
                                 {
                                     <button type="button" class="btn btn-sm btn-outline-primary w-100 w-md-auto" disabled
-                                            title="Solo SuperAdmin puede gestionar SuperAdmins">
-                                        SuperAdmin
+                                            title="Solo Admin puede gestionar Admins">
+                                        Admin
                                     </button>
                                 }
                                 else
                                 {
                                     <button type="button" class="btn btn-sm btn-outline-primary w-100 w-md-auto" disabled
-                                            title="Los SuperAdmins siempre conservan Admin">
-                                        SuperAdmin
+                                            title="Los Admins siempre conservan Moderador">
+                                        Admin
                                     </button>
                                 }
                             }
-                            else if (canManageAdmins && !u.IsAdmin)
+                            else if (canManageModeradores && !u.IsModerador)
                             {
-                                <form method="post" asp-page-handler="MakeAdmin" asp-route-id="@u.UserId" class="m-0">
+                                <form method="post" asp-page-handler="MakeModerador" asp-route-id="@u.UserId" class="m-0">
                                     <button type="submit" class="btn btn-sm btn-outline-primary w-100 w-md-auto"
-                                            onclick="return confirm('¿Convertir a Admin a este usuario?');">
-                                        Hacer Admin
+                                            onclick="return confirm('¿Convertir a Moderador a este usuario?');">
+                                        Hacer Moderador
                                     </button>
                                 </form>
                             }
-                            else if (canManageAdmins && u.IsAdmin)
+                            else if (canManageModeradores && u.IsModerador && !u.Roles.Contains("Admin"))
                             {
-                                <form method="post" asp-page-handler="RemoveAdmin" asp-route-id="@u.UserId" class="m-0">
+                                <form method="post" asp-page-handler="RemoveModerador" asp-route-id="@u.UserId" class="m-0">
                                     <button type="submit" class="btn btn-sm btn-outline-danger w-100 w-md-auto"
-                                            onclick="return confirm('¿Quitar rol Admin a este usuario?');">
-                                        Quitar Admin
+                                            onclick="return confirm('¿Quitar rol Moderador a este usuario?');">
+                                        Quitar Moderador
                                     </button>
                                 </form>
                             }
                             else
                             {
                                 <button type="button" class="btn btn-sm btn-outline-primary w-100 w-md-auto" disabled
-                                        title="Solo SuperAdmin puede gestionar Admins">
+                                        title="Solo Admin puede gestionar Moderadores">
                                     Admin
                                 </button>
                             }

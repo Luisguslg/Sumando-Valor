@@ -8,7 +8,7 @@ using SumandoValor.Infrastructure.Data;
 
 namespace SumandoValor.Web.Pages.Admin.SurveyTemplates;
 
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Moderador,Admin")]
 public class EditModel : PageModel
 {
     private readonly AppDbContext _context;

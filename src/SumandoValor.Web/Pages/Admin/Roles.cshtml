@@ -1,0 +1,165 @@
+@page "/Admin/Roles"
+@model SumandoValor.Web.Pages.Admin.RolesModel
+@{
+    ViewData["Title"] = "Gestión de Roles y Permisos";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+@await Html.PartialAsync("_PageHeader", new SumandoValor.Web.Pages.Shared.PageHeaderModel
+{
+    Title = "Gestión de Roles y Permisos",
+    Subtitle = "Administra roles del sistema y asigna permisos a usuarios.",
+    UseBrandBackground = false
+})
+
+<div class="container my-4">
+    <!-- Crear nuevo rol -->
+    <div class="admin-card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Crear Nuevo Rol</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" asp-page-handler="CreateRole" class="row g-2">
+                <div class="col-md-8">
+                    <input type="text" asp-for="NewRoleName" class="form-control" placeholder="Nombre del rol" maxlength="50" required />
+                    <span asp-validation-for="NewRoleName" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">Crear Rol</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de roles -->
+    <div class="admin-card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Roles del Sistema</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.Roles == null || !Model.Roles.Any())
+            {
+                <p class="text-muted">No hay roles registrados.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Usuarios</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var role in Model.Roles)
+                            {
+                                var usersInRole = Model.Users.Count(u => u.Roles.Contains(role.Name));
+                                var isSystemRole = new[] { "Admin", "Moderador", "Beneficiario" }.Contains(role.Name);
+                                
+                                <tr>
+                                    <td>
+                                        <strong>@role.Name</strong>
+                                        @if (isSystemRole)
+                                        {
+                                            <span class="badge bg-info ms-2">Sistema</span>
+                                        }
+                                    </td>
+                                    <td>@usersInRole usuario(s)</td>
+                                    <td>
+                                        @if (!isSystemRole)
+                                        {
+                                            <form method="post" asp-page-handler="DeleteRole" asp-route-roleId="@role.Id" class="d-inline" 
+                                                  onsubmit="return confirm('¿Estás seguro de eliminar el rol @role.Name?');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">No se puede eliminar</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Asignación de roles a usuarios -->
+    <div class="admin-card">
+        <div class="card-header">
+            <h5 class="mb-0">Asignar Roles a Usuarios</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.Users == null || !Model.Users.Any())
+            {
+                <p class="text-muted">No hay usuarios registrados.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Roles Actuales</th>
+                                <th>Asignar Roles</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model.Users)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold">@user.FullName</div>
+                                        <div class="text-muted small">@user.Email</div>
+                                    </td>
+                                    <td>
+                                        @foreach (var role in user.Roles)
+                                        {
+                                            <span class="badge bg-primary me-1">@role</span>
+                                        }
+                                        @if (!user.Roles.Any())
+                                        {
+                                            <span class="text-muted">Sin roles</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <form method="post" asp-page-handler="UpdateUserRoles" asp-route-userId="@user.UserId">
+                                            <div class="d-flex flex-wrap gap-2">
+                                                @foreach (var role in Model.Roles)
+                                                {
+                                                    var isChecked = user.Roles.Contains(role.Name);
+                                                    var isSystemRole = new[] { "Admin", "Moderador", "Beneficiario" }.Contains(role.Name);
+                                                    var canModifyAdmin = User.IsInRole("Admin") || role.Name != "Admin";
+                                                    
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" 
+                                                               type="checkbox" 
+                                                               name="selectedRoles" 
+                                                               value="@role.Name" 
+                                                               id="role_@(user.UserId)_@role.Name"
+                                                               @(isChecked ? "checked" : "")
+                                                               @(!canModifyAdmin ? "disabled" : "") />
+                                                        <label class="form-check-label" for="role_@(user.UserId)_@role.Name">
+                                                            @role.Name
+                                                        </label>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <button type="submit" class="btn btn-sm btn-primary mt-2">Guardar Cambios</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

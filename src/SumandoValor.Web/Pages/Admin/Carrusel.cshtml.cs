@@ -7,7 +7,7 @@ using SumandoValor.Infrastructure.Data;
 
 namespace SumandoValor.Web.Pages.Admin;
 
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Moderador,Admin")]
 public class CarruselModel : PageModel
 {
     private const long MaxBytes = 4 * 1024 * 1024; // 4MB

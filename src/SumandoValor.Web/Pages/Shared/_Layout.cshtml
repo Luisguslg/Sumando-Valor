@@ -131,13 +131,13 @@
                             displayName = User.Identity.Name;
                         }
                         
-                        @if (User.IsInRole("Admin"))
+                        @if (User.IsInRole("Moderador") || User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
                                 <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin") ? "active" : "")" 
                                    asp-area="" asp-page="/Admin" 
                                    aria-label="Panel de administración">
-                                    <i class="bi bi-gear-fill me-1"></i>Admin
+                                    <i class="bi bi-gear-fill me-1"></i>Administración
                                 </a>
                             </li>
                         }

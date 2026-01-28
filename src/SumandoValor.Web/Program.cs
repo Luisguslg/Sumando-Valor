@@ -36,7 +36,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = true; // Caracteres especiales requeridos
-    options.Password.RequiredLength = 12; // Longitud mínima aumentada
+    options.Password.RequiredLength = 14; // Longitud mínima aumentada según estándares NIST 2024
     options.Password.RequiredUniqueChars = 3; // Al menos 3 caracteres únicos
     options.SignIn.RequireConfirmedEmail = true;
     options.User.RequireUniqueEmail = true;
@@ -63,6 +63,9 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddHttpClient();
+
+// Servicio de auditoría
+builder.Services.AddScoped<SumandoValor.Infrastructure.Services.IAuditService, SumandoValor.Infrastructure.Services.AuditService>();
 
 // Almacenamiento de emails en desarrollo: persistir en disco para que sobrevivan reinicios
 var devEmailPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "DevEmails");
