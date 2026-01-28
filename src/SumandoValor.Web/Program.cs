@@ -120,6 +120,18 @@ builder.Services.AddRazorPages();
 builder.Services.AddSingleton<CertificatePdfGenerator>();
 builder.Services.AddScoped<UploadCleanupService>();
 
+// Configuración de sesión para acceso a cursos privados
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromHours(2);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+        ? CookieSecurePolicy.SameAsRequest
+        : CookieSecurePolicy.Always;
+});
+
 // Rate limiting para endpoints públicos (no necesita registro en DI, se usa directamente)
 
 // En producción: persistir claves de DataProtection en disco para que las cookies de autenticación
@@ -195,6 +207,7 @@ app.UseStaticFiles();
 // Rate limiting para endpoints públicos (antes de routing para mejor performance)
 app.UseMiddleware<SumandoValor.Web.Middleware.RateLimitingMiddleware>();
 
+app.UseSession();
 app.UseRouting();
 
 app.UseAuthentication();

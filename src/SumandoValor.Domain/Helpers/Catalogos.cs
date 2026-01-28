@@ -31,11 +31,12 @@ public static class Catalogos
 
     public static readonly Dictionary<string, string> CanalesConocio = new()
     {
-        { "REDES_SOCIALES", "Redes Sociales" },
-        { "AMIGO_FAMILIAR", "Amigo o Familiar" },
-        { "MEDIOS", "Medios de Comunicación" },
-        { "ORGANIZACION", "Organización" },
-        { "OTRO", "Otro" }
+        { "REDES_SOCIALES", "Redes sociales" },
+        { "AMIGO_FAMILIAR", "Amigos o familiares" },
+        { "MEDIOS", "Medios de comunicación tradicionales" },
+        { "ORGANIZACION", "Organización en la que haces parte" },
+        { "FERIA", "Feria (emprendimiento o laboral)" },
+        { "CORREO_KPMG", "Correo enviado por Fundación KPMG" }
     };
 
     public static readonly Dictionary<string, string> EstadosVenezuela = new()

@@ -1,0 +1,48 @@
+@page "/Cursos/Access/{id:int}"
+@model SumandoValor.Web.Pages.Cursos.AccessModel
+@{
+    ViewData["Title"] = "Acceso al Programa Formativo";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card card-kpmg">
+                <div class="card-body p-4">
+                    <h2 class="h4 fw-bold mb-3">Acceso al Programa Formativo</h2>
+                    
+                    @if (Model.Curso == null)
+                    {
+                        <div class="alert alert-warning">
+                            <p class="mb-0">Programa Formativo no encontrado.</p>
+                        </div>
+                        <a asp-page="/Cursos" class="btn btn-secondary">Volver</a>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-4">Este Programa Formativo requiere una clave de acceso para ver su contenido.</p>
+                        
+                        <form method="post">
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                            
+                            <div class="mb-3">
+                                <label asp-for="Input.ClaveAcceso" class="form-label">Clave de Acceso</label>
+                                <input asp-for="Input.ClaveAcceso" class="form-control" placeholder="Ingresa la clave" autofocus />
+                                <span asp-validation-for="Input.ClaveAcceso" class="text-danger"></span>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Acceder</button>
+                                <a asp-page="/Cursos" class="btn btn-outline-secondary">Cancelar</a>
+                            </div>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

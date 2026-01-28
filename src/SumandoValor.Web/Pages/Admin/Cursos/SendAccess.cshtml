@@ -1,0 +1,77 @@
+@page "/Admin/Cursos/SendAccess/{id:int}"
+@model SumandoValor.Web.Pages.Admin.Cursos.SendAccessModel
+@{
+    ViewData["Title"] = "Enviar Enlace de Acceso";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="mb-4">
+    <h1>Enviar Enlace de Acceso</h1>
+    <a asp-page="/Admin/Cursos" class="btn btn-link">← Volver a Programa Formativo</a>
+</div>
+
+@if (Model.Curso == null)
+{
+    <div class="alert alert-warning">
+        <p class="mb-0">Programa Formativo no encontrado.</p>
+    </div>
+    <a asp-page="/Admin/Cursos" class="btn btn-secondary">Volver</a>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card card-kpmg">
+                <div class="card-body p-4">
+                    <h3 class="h5 mb-3">@Model.Curso.Titulo</h3>
+                    
+                    <form method="post">
+                        <input type="hidden" asp-for="Input.CursoId" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Input.Email" class="form-label">Email del destinatario *</label>
+                            <input asp-for="Input.Email" class="form-control" type="email" placeholder="usuario@ejemplo.com" />
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                            <small class="text-muted">Se enviará un enlace único para acceder al Programa Formativo.</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">O seleccionar usuario registrado</label>
+                            <select id="userSelect" class="form-select">
+                                <option value="">Seleccionar usuario...</option>
+                                @foreach (var user in Model.Usuarios)
+                                {
+                                    <option value="@user.Email">@user.Nombres @user.Apellidos (@user.Email)</option>
+                                }
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Input.DiasExpiracion" class="form-label">Días de validez del enlace</label>
+                            <input asp-for="Input.DiasExpiracion" class="form-control" type="number" min="1" max="365" value="30" />
+                            <span asp-validation-for="Input.DiasExpiracion" class="text-danger"></span>
+                            <small class="text-muted">El enlace expirará después de este número de días.</small>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Generar y Enviar Enlace</button>
+                            <a asp-page="/Admin/Cursos" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.getElementById('userSelect').addEventListener('change', function() {
+            if (this.value) {
+                document.getElementById('Input_Email').value = this.value;
+            }
+        });
+    </script>
+}

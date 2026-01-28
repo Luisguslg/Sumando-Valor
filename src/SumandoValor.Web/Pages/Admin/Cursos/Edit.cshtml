@@ -2,19 +2,19 @@
 @model EditModel
 @using SumandoValor.Domain.Entities
 @{
-    ViewData["Title"] = "Editar programa formativo";
+    ViewData["Title"] = "Editar Programa Formativo";
     Layout = "~/Pages/Shared/_AdminLayout.cshtml";
 }
 
 <div class="mb-4">
-    <h1>Editar programa formativo</h1>
-    <a asp-page="/Admin/Cursos" class="btn btn-link">← Volver a Programa formativo</a>
+    <h1>Editar Programa Formativo</h1>
+    <a asp-page="/Admin/Cursos" class="btn btn-link">← Volver a Programa Formativo</a>
 </div>
 
 @if (Model.Curso == null)
 {
     <div class="alert alert-warning">
-        <p class="mb-0">Programa formativo no encontrado.</p>
+        <p class="mb-0">Programa Formativo no encontrado.</p>
     </div>
     <a asp-page="/Admin/Cursos" class="btn btn-secondary">Volver</a>
 }
@@ -46,10 +46,24 @@ else
 
                 <div class="mb-3">
                     <div class="form-check">
-                        <input asp-for="Input.EsPublico" class="form-check-input" />
+                        <input asp-for="Input.EsPublico" class="form-check-input" id="esPublicoCheck" />
                         <label asp-for="Input.EsPublico" class="form-check-label">Es Público</label>
                     </div>
                 </div>
+
+                @if (!Model.Curso!.EsPublico && !string.IsNullOrEmpty(Model.Curso.ClaveAcceso))
+                {
+                    <div class="mb-3">
+                        <label class="form-label">Clave de Acceso</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" value="@Model.Curso.ClaveAcceso" readonly id="claveAcceso" />
+                            <button type="button" class="btn btn-outline-secondary" onclick="copyToClipboard('claveAcceso')">
+                                <i class="bi bi-clipboard"></i> Copiar
+                            </button>
+                        </div>
+                        <small class="text-muted">Esta clave permite acceder al curso. Compártela solo con usuarios autorizados.</small>
+                    </div>
+                }
 
                 <div class="mb-3">
                     <label asp-for="Input.Orden" class="form-label">Orden (opcional)</label>
@@ -77,4 +91,24 @@ else
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            element.select();
+            element.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check"></i> Copiado';
+            btn.classList.add('btn-success');
+            btn.classList.remove('btn-outline-secondary');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-outline-secondary');
+            }, 2000);
+        }
+    </script>
 }

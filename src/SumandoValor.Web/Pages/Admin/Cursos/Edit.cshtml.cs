@@ -87,14 +87,50 @@ public class EditModel : PageModel
         curso.Titulo = Input.Titulo;
         curso.Descripcion = Input.Descripcion;
         curso.PublicoObjetivo = Input.PublicoObjetivo;
-        curso.EsPublico = Input.EsPublico;
         curso.Orden = Input.Orden;
         curso.Estado = Input.Estado;
+
+        // Manejar cambio de visibilidad
+        if (!Input.EsPublico && curso.EsPublico)
+        {
+            // Cambió de público a privado: generar clave si no existe
+            if (string.IsNullOrEmpty(curso.ClaveAcceso))
+            {
+                curso.ClaveAcceso = GenerateAccessKey();
+            }
+        }
+        else if (Input.EsPublico && !curso.EsPublico)
+        {
+            // Cambió de privado a público: limpiar claves y tokens
+            curso.ClaveAcceso = null;
+            curso.TokenAccesoUnico = null;
+            curso.TokenExpiracion = null;
+        }
+
+        curso.EsPublico = Input.EsPublico;
 
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Curso {CursoId} actualizado por admin", curso.Id);
-        TempData["FlashSuccess"] = "Curso actualizado exitosamente.";
+        
+        if (!Input.EsPublico && !string.IsNullOrEmpty(curso.ClaveAcceso))
+        {
+            TempData["FlashSuccess"] = $"Curso actualizado exitosamente. Clave de acceso: {curso.ClaveAcceso}";
+        }
+        else
+        {
+            TempData["FlashSuccess"] = "Curso actualizado exitosamente.";
+        }
+        
         return RedirectToPage("/Admin/Cursos");
+    }
+
+    private static string GenerateAccessKey()
+    {
+        // Genera una clave de 8 caracteres alfanuméricos
+        const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        var random = new Random();
+        return new string(Enumerable.Repeat(chars, 8)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
     }
 }

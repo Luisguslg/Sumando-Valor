@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SumandoValor.Domain.Entities;
 using SumandoValor.Infrastructure.Data;
+using System.Data;
 using System.Text;
 
 namespace SumandoValor.Web.Pages.Admin;
@@ -22,6 +23,7 @@ public class InscripcionesModel : PageModel
 
     public List<InscripcionViewModel> Inscripciones { get; set; } = new();
     public List<Taller> TalleresDisponibles { get; set; } = new();
+    public List<ApplicationUser> UsuariosDisponibles { get; set; } = new();
     public int? TallerIdFiltro { get; set; }
 
     public class InscripcionViewModel
@@ -62,6 +64,12 @@ public class InscripcionesModel : PageModel
         TalleresDisponibles = await _context.Talleres
             .Include(t => t.Curso)
             .OrderBy(t => t.Titulo)
+            .ToListAsync();
+
+        UsuariosDisponibles = await _context.Users
+            .Where(u => u.EmailConfirmed)
+            .OrderBy(u => u.Nombres)
+            .ThenBy(u => u.Apellidos)
             .ToListAsync();
     }
 
@@ -150,5 +158,129 @@ public class InscripcionesModel : PageModel
         }
 
         return value;
+    }
+
+    public async Task<IActionResult> OnPostInscribirUsuarioAsync(int tallerId, string userId)
+    {
+        // Validación de entrada
+        if (tallerId <= 0)
+        {
+            TempData["FlashError"] = "Taller inválido.";
+            return RedirectToPage();
+        }
+
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            TempData["FlashError"] = "Debe seleccionar un usuario.";
+            return RedirectToPage();
+        }
+
+        var taller = await _context.Talleres
+            .Include(t => t.Curso)
+            .FirstOrDefaultAsync(t => t.Id == tallerId);
+
+        if (taller == null)
+        {
+            TempData["FlashError"] = "Taller no encontrado.";
+            return RedirectToPage();
+        }
+
+        if (taller.Estatus != EstatusTaller.Abierto)
+        {
+            TempData["FlashError"] = "El taller no está abierto para inscripciones.";
+            return RedirectToPage();
+        }
+
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null)
+        {
+            TempData["FlashError"] = "Usuario no encontrado.";
+            return RedirectToPage();
+        }
+
+        // Usar transacción para evitar race conditions
+        await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+        try
+        {
+            // Releer taller dentro de la transacción
+            var tallerActualizado = await _context.Talleres
+                .FirstOrDefaultAsync(t => t.Id == tallerId);
+
+            if (tallerActualizado == null)
+            {
+                await transaction.RollbackAsync();
+                TempData["FlashError"] = "Taller no encontrado.";
+                return RedirectToPage();
+            }
+
+            if (tallerActualizado.Estatus != EstatusTaller.Abierto)
+            {
+                await transaction.RollbackAsync();
+                TempData["FlashError"] = "El taller no está abierto para inscripciones.";
+                return RedirectToPage();
+            }
+
+            // Verificar si ya está inscrito (dentro de la transacción)
+            var existeInscripcion = await _context.Inscripciones
+                .AnyAsync(i => i.TallerId == tallerId && i.UserId == userId && i.Estado == EstadoInscripcion.Activa);
+
+            if (existeInscripcion)
+            {
+                await transaction.RollbackAsync();
+                TempData["FlashError"] = "El usuario ya está inscrito en este taller.";
+                return RedirectToPage();
+            }
+
+            // Verificar si ya está inscrito (dentro de la transacción)
+            var existeInscripcionTrans = await _context.Inscripciones
+                .AnyAsync(i => i.TallerId == tallerId && i.UserId == userId && i.Estado == EstadoInscripcion.Activa);
+
+            if (existeInscripcionTrans)
+            {
+                await transaction.RollbackAsync();
+                TempData["FlashError"] = "El usuario ya está inscrito en este taller.";
+                return RedirectToPage();
+            }
+
+            // Verificar cupos disponibles (dentro de la transacción)
+            var inscripcionesActivas = await _context.Inscripciones
+                .CountAsync(i => i.TallerId == tallerId && i.Estado == EstadoInscripcion.Activa);
+
+            if (inscripcionesActivas >= tallerActualizado.CuposMaximos)
+            {
+                await transaction.RollbackAsync();
+                TempData["FlashError"] = "No hay cupos disponibles para este taller.";
+                return RedirectToPage();
+            }
+
+            // Crear inscripción
+            var inscripcion = new Inscripcion
+            {
+                TallerId = tallerId,
+                UserId = userId,
+                Estado = EstadoInscripcion.Activa,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Inscripciones.Add(inscripcion);
+            
+            // Actualizar cupos disponibles
+            tallerActualizado.CuposDisponibles = tallerActualizado.CuposMaximos - inscripcionesActivas - 1;
+            
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogError(ex, "Error al inscribir usuario {UserId} en taller {TallerId}", userId, tallerId);
+            TempData["FlashError"] = "Error al procesar la inscripción. Por favor intenta nuevamente.";
+            return RedirectToPage();
+        }
+
+        _logger.LogInformation("Usuario {UserId} inscrito en taller {TallerId} por admin", userId, tallerId);
+        TempData["FlashSuccess"] = $"Usuario {user.Nombres} {user.Apellidos} inscrito exitosamente en {taller.Titulo}.";
+        
+        return RedirectToPage(new { tallerId = TallerIdFiltro });
     }
 }

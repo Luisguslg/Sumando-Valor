@@ -55,7 +55,7 @@ else
 <div class="container my-5">
     <div class="d-flex flex-wrap gap-2 mb-5">
         <a asp-page="/Cursos" class="btn btn-light btn-home-outline">
-            <i class="bi bi-journal-bookmark me-1"></i>Ver programa formativo
+            <i class="bi bi-journal-bookmark me-1"></i>Ver Programa Formativo
         </a>
     </div>
 
@@ -99,7 +99,7 @@ else
         <div class="col-lg-6">
             <div class="d-flex justify-content-between align-items-end mb-3">
                 <div>
-                    <h2 class="h4 fw-bold mb-1">Programa formativo destacado</h2>
+                    <h2 class="h4 fw-bold mb-1">Programa Formativo destacado</h2>
                     <div class="text-muted">Explora la oferta disponible</div>
                 </div>
                 <a asp-page="/Cursos" class="btn btn-sm btn-outline-primary">Ver todos</a>
@@ -125,12 +125,12 @@ else
                                                         <i class="bi bi-journal-bookmark-fill"></i>
                                                     </span>
                                                     <div>
-                                                        <div class="course-media-kicker">Programa formativo</div>
+                                                        <div class="course-media-kicker">Programa Formativo</div>
                                                         <div class="fw-semibold">Programa destacado</div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="text-muted small mb-1">Programa formativo</div>
+                                            <div class="text-muted small mb-1">Programa Formativo</div>
                                             <h3 class="h5 fw-bold mb-2">@curso.Titulo</h3>
                                             <p class="text-muted mb-0">
                                                 @(curso.Descripcion.Length > 140 ? curso.Descripcion.Substring(0, 140) + "..." : curso.Descripcion)

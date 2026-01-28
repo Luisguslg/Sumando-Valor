@@ -7,6 +7,9 @@ public class Curso
     public string Descripcion { get; set; } = string.Empty;
     public string? PublicoObjetivo { get; set; }
     public bool EsPublico { get; set; }
+    public string? ClaveAcceso { get; set; }
+    public string? TokenAccesoUnico { get; set; }
+    public DateTime? TokenExpiracion { get; set; }
     public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
     public EstatusCurso Estado { get; set; } = EstatusCurso.Activo;
     public int? Orden { get; set; }

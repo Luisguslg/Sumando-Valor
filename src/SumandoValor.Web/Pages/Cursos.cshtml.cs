@@ -18,8 +18,9 @@ public class CursosModel : PageModel
 
     public async Task OnGetAsync()
     {
+        // Solo mostrar cursos públicos en la vista pública
         Cursos = await _context.Cursos
-            .Where(c => c.Estado == EstatusCurso.Activo)
+            .Where(c => c.Estado == EstatusCurso.Activo && c.EsPublico)
             .OrderBy(c => c.Orden)
             .ThenBy(c => c.Titulo)
             .ToListAsync();

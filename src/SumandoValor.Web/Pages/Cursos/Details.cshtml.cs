@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SumandoValor.Domain.Entities;
 using SumandoValor.Infrastructure.Data;
+using Microsoft.AspNetCore.Session;
 
 namespace SumandoValor.Web.Pages.Cursos;
 
@@ -18,7 +19,7 @@ public class DetailsModel : PageModel
     public Curso? Curso { get; set; }
     public List<Taller>? Talleres { get; set; }
 
-    public async Task<IActionResult> OnGetAsync(int id)
+    public async Task<IActionResult> OnGetAsync(int id, string? token = null)
     {
         Curso = await _context.Cursos
             .FirstOrDefaultAsync(c => c.Id == id && c.Estado == EstatusCurso.Activo);
@@ -26,6 +27,31 @@ public class DetailsModel : PageModel
         if (Curso == null)
         {
             return NotFound();
+        }
+
+        // Verificar acceso para cursos no públicos
+        if (!Curso.EsPublico)
+        {
+            // Verificar token único si se proporciona (comparación case-sensitive para seguridad)
+            if (!string.IsNullOrEmpty(token) && 
+                !string.IsNullOrEmpty(Curso.TokenAccesoUnico) &&
+                Curso.TokenAccesoUnico.Equals(token, StringComparison.Ordinal) &&
+                (Curso.TokenExpiracion == null || Curso.TokenExpiracion > DateTime.UtcNow))
+            {
+                // Token válido, guardar en sesión
+                HttpContext.Session.SetString($"curso_access_{id}", "granted");
+            }
+            else
+            {
+                // Verificar si tiene acceso en sesión
+                var hasAccess = HttpContext.Session.GetString($"curso_access_{id}") == "granted";
+                
+                if (!hasAccess)
+                {
+                    // Redirigir a página de acceso
+                    return RedirectToPage("/Cursos/Access", new { id });
+                }
+            }
         }
 
         Talleres = await _context.Talleres

@@ -36,17 +36,21 @@ public class IndexModel : PageModel
             .Take(10)
             .ToListAsync();
 
+        // Solo mostrar cursos públicos en el home
         CursosDestacados = await _context.Cursos
-            .Where(c => c.Estado == EstatusCurso.Activo)
+            .Where(c => c.Estado == EstatusCurso.Activo && c.EsPublico)
             .OrderBy(c => c.Orden)
             .ThenBy(c => c.Titulo)
             .Take(3)
             .ToListAsync();
 
         var today = DateTime.Today;
+        // Solo mostrar talleres de cursos públicos
         TalleresProximos = await _context.Talleres
             .Include(t => t.Curso)
-            .Where(t => t.Estatus == EstatusTaller.Abierto && t.FechaInicio.Date >= today)
+            .Where(t => t.Estatus == EstatusTaller.Abierto && 
+                       t.FechaInicio.Date >= today &&
+                       t.Curso.EsPublico)
             .OrderBy(t => t.FechaInicio)
             .ThenBy(t => t.HoraInicio)
             .Take(3)

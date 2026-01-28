@@ -60,6 +60,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.Titulo).IsRequired().HasMaxLength(150);
             entity.Property(e => e.Descripcion).IsRequired();
             entity.Property(e => e.PublicoObjetivo).HasMaxLength(500);
+            entity.Property(e => e.ClaveAcceso).HasMaxLength(20);
+            entity.Property(e => e.TokenAccesoUnico).HasMaxLength(100);
+            entity.HasIndex(e => e.TokenAccesoUnico).IsUnique().HasFilter("[TokenAccesoUnico] IS NOT NULL");
         });
 
         builder.Entity<Taller>(entity =>

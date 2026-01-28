@@ -15,7 +15,7 @@ Sumando Valor centraliza y digitaliza el proceso de formación ofrecido por la F
 
 ### Roles del sistema
 
-- **Administrador (Admin)**: gestiona cursos, talleres, inscripciones, encuestas, certificados, usuarios y diagnósticos de correo.
+- **Administrador (Admin)**: gestiona cursos, talleres, inscripciones, encuestas, certificados, usuarios y diagnósticos de correo. Puede inscribir usuarios directamente en talleres y gestionar acceso a cursos internos mediante claves o enlaces únicos.
 - **Beneficiario**: se registra, confirma email, se inscribe en talleres, responde encuestas (cuando aplica) y descarga certificados aprobados.
 
 ### Rutas clave (referenciales; pueden variar según el estado actual del proyecto)
@@ -23,8 +23,9 @@ Sumando Valor centraliza y digitaliza el proceso de formación ofrecido por la F
 **Públicas**
 
 - `/`
-- `/Cursos`
-- `/Cursos/{id}`
+- `/Cursos` (solo muestra cursos públicos)
+- `/Cursos/{id}` (requiere clave si el curso es interno)
+- `/Cursos/Access/{id}` (página para ingresar clave de acceso)
 - `/Talleres/{id}`
 - `/Contact`
 
@@ -249,7 +250,28 @@ Definir variables de entorno en IIS (recomendado) o en `web.config`.
 - Roles Admin/Beneficiario correctos.
 - Permisos NTFS validados.
 
-## 12. Por confirmar / Pendiente de definición
+## 12. Funcionalidades recientes
+
+### Cursos internos (no públicos)
+
+- **Clave de acceso**: Se genera automáticamente al crear/editar un curso como "no público"
+- **Enlaces únicos**: El admin puede generar y enviar enlaces únicos por email con expiración configurable
+- **Acceso controlado**: Los cursos internos no aparecen en listados públicos y requieren clave o token para acceder
+- **Gestión**: Desde `/Admin/Cursos` se puede ver la clave y enviar enlaces
+
+### Inscripción por administrador
+
+- **Funcionalidad**: El admin puede inscribir usuarios directamente en talleres desde `/Admin/Inscripciones`
+- **Validaciones**: Verifica cupos disponibles, estado del taller, y previene inscripciones duplicadas
+- **Transacciones**: Usa transacciones SERIALIZABLE para evitar race conditions
+
+### Actualizaciones de UI
+
+- **Capitalización**: "Programa formativo" → "Programa Formativo" en toda la aplicación
+- **Tarjetas**: "Programa Formativo" aparece una sola vez, centrado
+- **Opciones de registro**: Actualizadas según especificación (Redes sociales, Amigos o familiares, etc.)
+
+## 13. Por confirmar / Pendiente de definición
 
 - ¿El CRUD completo de Encuestas ya está habilitado en Admin o solo parcialmente?
 - ¿El flujo exacto de aprobación de certificados requiere:

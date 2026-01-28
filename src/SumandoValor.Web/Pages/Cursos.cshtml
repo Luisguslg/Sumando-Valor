@@ -2,12 +2,12 @@
 @model CursosModel
 @using SumandoValor.Domain.Entities
 @{
-    ViewData["Title"] = "Programa formativo";
+    ViewData["Title"] = "Programa Formativo";
 }
 
 @await Html.PartialAsync("_PageHeader", new SumandoValor.Web.Pages.Shared.PageHeaderModel
 {
-    Title = "Programa formativo",
+    Title = "Programa Formativo",
     Subtitle = "Explora nuestro programa formativo y talleres.",
     UseBrandBackground = false
 })
@@ -30,25 +30,20 @@
                     <div class="card card-kpmg h-100 hover-lift">
                         <div class="card-body p-4 d-flex flex-column">
                             <div class="course-media mb-3">
-                                <div class="d-flex align-items-center justify-content-between gap-3">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <span class="course-media-icon">
-                                            <i class="bi bi-journal-bookmark-fill"></i>
-                                        </span>
-                                        <div>
-                                            <div class="course-media-kicker">Programa formativo</div>
-                                            <div class="fw-semibold">Programa formativo</div>
-                                        </div>
+                                <div class="d-flex align-items-center justify-content-center gap-3 mb-2">
+                                    <span class="course-media-icon">
+                                        <i class="bi bi-journal-bookmark-fill"></i>
+                                    </span>
+                                    <div class="text-center">
+                                        <div class="fw-semibold">Programa Formativo</div>
                                     </div>
-                                    @if (!curso.EsPublico)
-                                    {
-                                        <span class="badge bg-secondary">Interno</span>
-                                    }
                                 </div>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-                                <span class="badge badge-kpmg">Programa formativo</span>
+                                @if (!curso.EsPublico)
+                                {
+                                    <div class="text-center">
+                                        <span class="badge bg-secondary">Interno</span>
+                                    </div>
+                                }
                             </div>
 
                             <h2 class="h5 card-title fw-bold mb-2">@curso.Titulo</h2>
@@ -66,9 +61,18 @@
                             }
 
                             <div class="mt-auto">
-                                <a asp-page="/Cursos/Details" asp-route-id="@curso.Id" class="btn btn-primary w-100">
-                                    <i class="bi bi-arrow-right-circle me-1"></i>Ver talleres
-                                </a>
+                                @if (!curso.EsPublico)
+                                {
+                                    <a asp-page="/Cursos/Access" asp-route-id="@curso.Id" class="btn btn-primary w-100">
+                                        <i class="bi bi-lock me-1"></i>Acceder con clave
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a asp-page="/Cursos/Details" asp-route-id="@curso.Id" class="btn btn-primary w-100">
+                                        <i class="bi bi-arrow-right-circle me-1"></i>Ver talleres
+                                    </a>
+                                }
                             </div>
                         </div>
                     </div>

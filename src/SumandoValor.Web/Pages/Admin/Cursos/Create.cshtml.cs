@@ -63,11 +63,35 @@ public class CreateModel : PageModel
             FechaCreacion = DateTime.UtcNow
         };
 
+        // Generar clave de acceso si el curso no es público
+        if (!Input.EsPublico)
+        {
+            curso.ClaveAcceso = GenerateAccessKey();
+        }
+
         _context.Cursos.Add(curso);
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Curso {CursoId} creado por admin", curso.Id);
-        TempData["FlashSuccess"] = "Curso creado exitosamente.";
+        
+        if (!Input.EsPublico && !string.IsNullOrEmpty(curso.ClaveAcceso))
+        {
+            TempData["FlashSuccess"] = $"Curso creado exitosamente. Clave de acceso: {curso.ClaveAcceso}";
+        }
+        else
+        {
+            TempData["FlashSuccess"] = "Curso creado exitosamente.";
+        }
+        
         return RedirectToPage("/Admin/Cursos");
+    }
+
+    private static string GenerateAccessKey()
+    {
+        // Genera una clave de 8 caracteres alfanuméricos
+        const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        var random = new Random();
+        return new string(Enumerable.Repeat(chars, 8)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
     }
 }

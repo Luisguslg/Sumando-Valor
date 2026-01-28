@@ -2,13 +2,13 @@
 @model CursosModel
 @using SumandoValor.Domain.Entities
 @{
-    ViewData["Title"] = "Gestión de Programa formativo";
+    ViewData["Title"] = "Gestión de Programa Formativo";
     Layout = "~/Pages/Shared/_AdminLayout.cshtml";
 }
 
 <div class="mb-4">
-    <h1>Gestión de Programa formativo</h1>
-    <a asp-page="/Admin/Cursos/Create" class="btn btn-primary">Crear nuevo programa formativo</a>
+    <h1>Gestión de Programa Formativo</h1>
+    <a asp-page="/Admin/Cursos/Create" class="btn btn-primary">Crear nuevo Programa Formativo</a>
 </div>
 
 <div class="table-responsive">
@@ -39,10 +39,27 @@
                             <span class="badge bg-secondary">Inactivo</span>
                         }
                     </td>
-                    <td>@(curso.EsPublico ? "Sí" : "No")</td>
+                    <td>
+                        @if (curso.EsPublico)
+                        {
+                            <span class="badge bg-success">Sí</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">No</span>
+                            @if (!string.IsNullOrEmpty(curso.ClaveAcceso))
+                            {
+                                <br /><small class="text-muted">Clave: @curso.ClaveAcceso</small>
+                            }
+                        }
+                    </td>
                     <td>@curso.Talleres.Count</td>
                     <td>
                         <a asp-page="/Admin/Cursos/Edit" asp-route-id="@curso.Id" class="btn btn-sm btn-outline-primary">Editar</a>
+                        @if (!curso.EsPublico)
+                        {
+                            <a asp-page="/Admin/Cursos/SendAccess" asp-route-id="@curso.Id" class="btn btn-sm btn-outline-info">Enviar enlace</a>
+                        }
                         @if (curso.Talleres.Count == 0)
                         {
                             <form method="post" asp-page-handler="ToggleEstado" asp-route-id="@curso.Id" class="d-inline">
