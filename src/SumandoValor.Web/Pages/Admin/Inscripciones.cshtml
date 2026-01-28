@@ -49,14 +49,11 @@
                     </div>
                     
                     <div class="mb-3">
-                        <label for="usuarioSelect" class="form-label">Usuario *</label>
-                        <select name="userId" id="usuarioSelect" class="form-select" required>
-                            <option value="">Seleccionar usuario...</option>
-                            @foreach (var user in Model.UsuariosDisponibles)
-                            {
-                                <option value="@user.Id">@user.Nombres @user.Apellidos (@user.Email)</option>
-                            }
-                        </select>
+                        <label for="usuarioSearch" class="form-label">Buscar Usuario *</label>
+                        <input type="text" id="usuarioSearch" class="form-control" placeholder="Buscar por nombre o email..." autocomplete="off" />
+                        <input type="hidden" name="userId" id="usuarioSelect" required />
+                        <div id="usuarioResults" class="list-group mt-2" style="max-height: 200px; overflow-y: auto; display: none;"></div>
+                        <small class="text-muted">Escribe para buscar usuarios por nombre o email</small>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -147,6 +144,59 @@
                 url.searchParams.delete('tallerId');
             }
             window.location.href = url.toString();
+        });
+
+        // Búsqueda de usuarios
+        const usuarioSearch = document.getElementById('usuarioSearch');
+        const usuarioSelect = document.getElementById('usuarioSelect');
+        const usuarioResults = document.getElementById('usuarioResults');
+        const usuarios = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.UsuariosDisponibles.Select(u => new { u.Id, u.Nombres, u.Apellidos, u.Email })));
+
+        let searchTimeout;
+        usuarioSearch.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.toLowerCase().trim();
+            
+            if (query.length < 2) {
+                usuarioResults.style.display = 'none';
+                usuarioSelect.value = '';
+                return;
+            }
+
+            searchTimeout = setTimeout(function() {
+                const filtered = usuarios.filter(function(u) {
+                    const nombreCompleto = (u.Nombres + ' ' + u.Apellidos).toLowerCase();
+                    const email = (u.Email || '').toLowerCase();
+                    return nombreCompleto.includes(query) || email.includes(query);
+                });
+
+                usuarioResults.innerHTML = '';
+                if (filtered.length === 0) {
+                    usuarioResults.innerHTML = '<div class="list-group-item text-muted">No se encontraron usuarios</div>';
+                } else {
+                    filtered.slice(0, 10).forEach(function(user) {
+                        const item = document.createElement('a');
+                        item.href = '#';
+                        item.className = 'list-group-item list-group-item-action';
+                        item.innerHTML = '<strong>' + user.Nombres + ' ' + user.Apellidos + '</strong><br><small class="text-muted">' + user.Email + '</small>';
+                        item.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            usuarioSelect.value = user.Id;
+                            usuarioSearch.value = user.Nombres + ' ' + user.Apellidos + ' (' + user.Email + ')';
+                            usuarioResults.style.display = 'none';
+                        });
+                        usuarioResults.appendChild(item);
+                    });
+                }
+                usuarioResults.style.display = 'block';
+            }, 300);
+        });
+
+        // Ocultar resultados al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!usuarioSearch.contains(e.target) && !usuarioResults.contains(e.target)) {
+                usuarioResults.style.display = 'none';
+            }
         });
     </script>
 }

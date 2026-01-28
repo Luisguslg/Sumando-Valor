@@ -1,6 +1,7 @@
 @page
 @model RegisterModel
 @using SumandoValor.Domain.Helpers
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     ViewData["Title"] = "Registrarse";
 }
@@ -50,6 +51,7 @@
                             <label asp-for="Input.Password" class="form-label">Contraseña <span class="text-danger">*</span></label>
                             <input asp-for="Input.Password" class="form-control" autocomplete="new-password" />
                             <span asp-validation-for="Input.Password" class="text-danger"></span>
+                            <small class="text-muted">Mínimo 12 caracteres: mayúsculas, minúsculas, números y caracteres especiales (@@<text>$</text>!%*?&amp;)</small>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="Input.ConfirmPassword" class="form-label">Confirmar Contraseña <span class="text-danger">*</span></label>
@@ -169,7 +171,9 @@
                         </div>
                         <div class="col-md-6" id="municipioGroup" style="display: none;">
                             <label asp-for="Input.Municipio" class="form-label">Municipio <span class="text-danger">*</span></label>
-                            <input asp-for="Input.Municipio" class="form-control" />
+                            <select asp-for="Input.Municipio" class="form-select" id="municipioSelect">
+                                <option value="">Seleccione un estado primero...</option>
+                            </select>
                             <span asp-validation-for="Input.Municipio" class="text-danger"></span>
                         </div>
                     </div>
@@ -264,6 +268,24 @@
         const estadoGroup = document.getElementById('estadoGroup');
         const municipioGroup = document.getElementById('municipioGroup');
         const estadoSelect = document.getElementById('estadoSelect');
+        const municipioSelect = document.getElementById('municipioSelect');
+
+        // Catálogo de municipios por estado
+        const municipiosPorEstado = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Catalogos.MunicipiosPorEstado));
+
+        function actualizarMunicipios() {
+            const estadoKey = estadoSelect.value;
+            municipioSelect.innerHTML = '<option value="">Seleccione...</option>';
+            
+            if (estadoKey && municipiosPorEstado[estadoKey]) {
+                municipiosPorEstado[estadoKey].forEach(function(municipio) {
+                    const option = document.createElement('option');
+                    option.value = municipio;
+                    option.textContent = municipio;
+                    municipioSelect.appendChild(option);
+                });
+            }
+        }
 
         paisSelect.addEventListener('change', function() {
             const isVenezuela = this.value === 'Venezuela';
@@ -272,8 +294,16 @@
             
             if (!isVenezuela) {
                 estadoSelect.value = '';
-                document.getElementById('Input_Municipio').value = '';
+                municipioSelect.innerHTML = '<option value="">Seleccione un estado primero...</option>';
+                municipioSelect.value = '';
+            } else {
+                actualizarMunicipios();
             }
+        });
+
+        estadoSelect.addEventListener('change', function() {
+            actualizarMunicipios();
+            municipioSelect.value = '';
         });
 
         // Validación de teléfono: solo números

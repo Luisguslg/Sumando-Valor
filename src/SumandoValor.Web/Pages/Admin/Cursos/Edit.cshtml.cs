@@ -49,7 +49,9 @@ public class EditModel : PageModel
 
     public async Task<IActionResult> OnGetAsync(int id)
     {
-        Curso = await _context.Cursos.FirstOrDefaultAsync(c => c.Id == id);
+        Curso = await _context.Cursos
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == id);
 
         if (Curso == null)
         {
@@ -74,7 +76,9 @@ public class EditModel : PageModel
     {
         if (!ModelState.IsValid)
         {
-            Curso = await _context.Cursos.FirstOrDefaultAsync(c => c.Id == Input.Id);
+            Curso = await _context.Cursos
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == Input.Id);
             return Page();
         }
 
@@ -84,6 +88,11 @@ public class EditModel : PageModel
             return NotFound();
         }
 
+        // Guardar valores originales antes de cambiar
+        var esPublicoOriginal = curso.EsPublico;
+        var estadoOriginal = curso.Estado;
+
+        // Actualizar campos
         curso.Titulo = Input.Titulo;
         curso.Descripcion = Input.Descripcion;
         curso.PublicoObjetivo = Input.PublicoObjetivo;
@@ -91,7 +100,7 @@ public class EditModel : PageModel
         curso.Estado = Input.Estado;
 
         // Manejar cambio de visibilidad
-        if (!Input.EsPublico && curso.EsPublico)
+        if (!Input.EsPublico && esPublicoOriginal)
         {
             // Cambió de público a privado: generar clave si no existe
             if (string.IsNullOrEmpty(curso.ClaveAcceso))
@@ -99,7 +108,7 @@ public class EditModel : PageModel
                 curso.ClaveAcceso = GenerateAccessKey();
             }
         }
-        else if (Input.EsPublico && !curso.EsPublico)
+        else if (Input.EsPublico && !esPublicoOriginal)
         {
             // Cambió de privado a público: limpiar claves y tokens
             curso.ClaveAcceso = null;
@@ -113,16 +122,37 @@ public class EditModel : PageModel
 
         _logger.LogInformation("Curso {CursoId} actualizado por admin", curso.Id);
         
-        if (!Input.EsPublico && !string.IsNullOrEmpty(curso.ClaveAcceso))
-        {
-            TempData["FlashSuccess"] = $"Curso actualizado exitosamente. Clave de acceso: {curso.ClaveAcceso}";
-        }
-        else
-        {
-            TempData["FlashSuccess"] = "Curso actualizado exitosamente.";
-        }
+        TempData["FlashSuccess"] = "Curso actualizado exitosamente.";
         
-        return RedirectToPage("/Admin/Cursos");
+        return RedirectToPage("/Admin/Cursos/Edit", new { id = curso.Id });
+    }
+
+    public async Task<IActionResult> OnPostGenerateLinkAsync(int id)
+    {
+        var curso = await _context.Cursos.FirstOrDefaultAsync(c => c.Id == id);
+        if (curso == null)
+        {
+            return NotFound();
+        }
+
+        if (curso.EsPublico)
+        {
+            TempData["FlashError"] = "No se puede generar un enlace para un curso público.";
+            return RedirectToPage("/Admin/Cursos/Edit", new { id });
+        }
+
+        // Solo actualizar el token, no tocar nada más
+        var token = GenerateUniqueToken();
+        curso.TokenAccesoUnico = token;
+        curso.TokenExpiracion = null; // Sin expiración para que funcione para múltiples personas
+
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Enlace de acceso generado para curso {CursoId} por admin", curso.Id);
+        
+        TempData["FlashSuccess"] = "Enlace generado exitosamente. Puedes copiarlo y enviarlo desde tu cliente de correo.";
+        
+        return RedirectToPage("/Admin/Cursos/Edit", new { id });
     }
 
     private static string GenerateAccessKey()
@@ -132,5 +162,15 @@ public class EditModel : PageModel
         var random = new Random();
         return new string(Enumerable.Repeat(chars, 8)
             .Select(s => s[random.Next(s.Length)]).ToArray());
+    }
+
+    private static string GenerateUniqueToken()
+    {
+        // Genera un token único de 32 caracteres usando Guid y Base64
+        return Convert.ToBase64String(Guid.NewGuid().ToByteArray())
+            .Replace("+", "-")
+            .Replace("/", "_")
+            .Replace("=", "")
+            .Substring(0, 32);
     }
 }

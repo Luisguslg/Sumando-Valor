@@ -4,36 +4,47 @@
     ViewData["Title"] = "Acceso al Programa Formativo";
 }
 
+@await Html.PartialAsync("_PageHeader", new SumandoValor.Web.Pages.Shared.PageHeaderModel
+{
+    Title = "Acceso al Programa Formativo",
+    Subtitle = Model.Curso != null ? Model.Curso.Titulo : "Programa Formativo",
+    UseBrandBackground = false
+})
+
 <div class="container my-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card card-kpmg">
                 <div class="card-body p-4">
-                    <h2 class="h4 fw-bold mb-3">Acceso al Programa Formativo</h2>
-                    
                     @if (Model.Curso == null)
                     {
                         <div class="alert alert-warning">
                             <p class="mb-0">Programa Formativo no encontrado.</p>
                         </div>
-                        <a asp-page="/Cursos" class="btn btn-secondary">Volver</a>
+                        <a asp-page="/Cursos" class="btn btn-secondary">Volver a Programas Formativos</a>
                     }
                     else
                     {
-                        <p class="text-muted mb-4">Este Programa Formativo requiere una clave de acceso para ver su contenido.</p>
+                        <div class="alert alert-info mb-4">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Este Programa Formativo es interno</strong> y requiere una clave de acceso para ver su contenido.
+                            <br />
+                            <small>Si recibiste un enlace por correo, haz clic en él directamente. Si recibiste una clave, ingrésala a continuación.</small>
+                        </div>
                         
                         <form method="post">
                             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                             
                             <div class="mb-3">
                                 <label asp-for="Input.ClaveAcceso" class="form-label">Clave de Acceso</label>
-                                <input asp-for="Input.ClaveAcceso" class="form-control" placeholder="Ingresa la clave" autofocus />
+                                <input asp-for="Input.ClaveAcceso" class="form-control form-control-lg" placeholder="Ej: ABC12345" autofocus />
                                 <span asp-validation-for="Input.ClaveAcceso" class="text-danger"></span>
+                                <small class="text-muted">Ingresa la clave que te proporcionó el administrador.</small>
                             </div>
                             
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary">Acceder</button>
-                                <a asp-page="/Cursos" class="btn btn-outline-secondary">Cancelar</a>
+                                <button type="submit" class="btn btn-primary btn-lg">Acceder al Programa</button>
+                                <a asp-page="/Cursos" class="btn btn-outline-secondary">Volver a Programas Formativos</a>
                             </div>
                         </form>
                     }

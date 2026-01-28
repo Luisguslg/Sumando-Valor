@@ -51,17 +51,55 @@ else
                     </div>
                 </div>
 
-                @if (!Model.Curso!.EsPublico && !string.IsNullOrEmpty(Model.Curso.ClaveAcceso))
+                @if (!Model.Curso!.EsPublico)
                 {
                     <div class="mb-3">
-                        <label class="form-label">Clave de Acceso</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" value="@Model.Curso.ClaveAcceso" readonly id="claveAcceso" />
-                            <button type="button" class="btn btn-outline-secondary" onclick="copyToClipboard('claveAcceso')">
-                                <i class="bi bi-clipboard"></i> Copiar
-                            </button>
+                        <h5>Acceso Interno</h5>
+                        
+                        @if (!string.IsNullOrEmpty(Model.Curso.ClaveAcceso))
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Clave de Acceso</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" value="@Model.Curso.ClaveAcceso" readonly id="claveAcceso" />
+                                    <button type="button" class="btn btn-outline-secondary" onclick="copyToClipboard('claveAcceso')">
+                                        <i class="bi bi-clipboard"></i> Copiar
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                        
+                        @if (!string.IsNullOrEmpty(Model.Curso.TokenAccesoUnico))
+                        {
+                            var accessLink = Url.Page("/Cursos/Details", pageHandler: null, values: new { id = Model.Curso.Id, token = Model.Curso.TokenAccesoUnico }, protocol: Request.Scheme);
+                            <div class="mb-3">
+                                <label class="form-label">Enlace de Acceso (para compartir por correo)</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" value="@accessLink" readonly id="accessLink" />
+                                    <button type="button" class="btn btn-outline-secondary" onclick="copyToClipboard('accessLink')">
+                                        <i class="bi bi-clipboard"></i> Copiar
+                                    </button>
+                                </div>
+                                <small class="text-muted">Copia este enlace y envíalo desde tu cliente de correo. Funciona para múltiples personas.</small>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Enlace de Acceso</label>
+                                <form method="post" asp-page-handler="GenerateLink" style="display: inline;">
+                                    <input type="hidden" name="id" value="@Model.Curso.Id" />
+                                    <button type="submit" class="btn btn-primary">Generar Enlace</button>
+                                </form>
+                                <small class="text-muted d-block mt-2">Genera un enlace que puedes compartir por correo a múltiples personas.</small>
+                            </div>
+                        }
+                        
+                        <div class="mt-3">
+                            <a asp-page="/Admin/Cursos/SendAccess" asp-route-id="@Model.Curso.Id" class="btn btn-outline-primary">
+                                <i class="bi bi-envelope"></i> Enviar enlace por correo
+                            </a>
                         </div>
-                        <small class="text-muted">Esta clave permite acceder al curso. Compártela solo con usuarios autorizados.</small>
                     </div>
                 }
 

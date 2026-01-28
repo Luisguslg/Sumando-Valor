@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
+using SumandoValor.Domain.Entities;
 using SumandoValor.Infrastructure.Data;
 using SumandoValor.Infrastructure.Services;
 
@@ -15,19 +18,22 @@ public class LoginModel : PageModel
     private readonly ICaptchaValidator _captchaValidator;
     private readonly IConfiguration _configuration;
     private readonly ILogger<LoginModel> _logger;
+    private readonly AppDbContext _context;
 
     public LoginModel(
         SignInManager<ApplicationUser> signInManager,
         UserManager<ApplicationUser> userManager,
         ICaptchaValidator captchaValidator,
         IConfiguration configuration,
-        ILogger<LoginModel> logger)
+        ILogger<LoginModel> logger,
+        AppDbContext context)
     {
         _signInManager = signInManager;
         _userManager = userManager;
         _captchaValidator = captchaValidator;
         _configuration = configuration;
         _logger = logger;
+        _context = context;
     }
 
     [BindProperty]
@@ -80,6 +86,10 @@ public class LoginModel : PageModel
             if (result.Succeeded)
             {
                 _logger.LogInformation("Usuario inició sesión exitosamente. UserId={UserId}", user?.Id);
+                
+                // Restaurar acceso a cursos internos desde cookies después del login
+                await RestoreCourseAccessFromCookiesAsync();
+                
                 return LocalRedirect(returnUrl);
             }
             if (result.RequiresTwoFactor)
@@ -117,6 +127,28 @@ public class LoginModel : PageModel
         }
 
         return Page();
+    }
+
+    private async Task RestoreCourseAccessFromCookiesAsync()
+    {
+        // Obtener todos los cursos internos activos
+        var cursosInternos = await _context.Cursos
+            .Where(c => c.Estado == EstatusCurso.Activo && !c.EsPublico && !string.IsNullOrEmpty(c.TokenAccesoUnico))
+            .ToListAsync();
+
+        foreach (var curso in cursosInternos)
+        {
+            // Verificar si hay una cookie con token válido para este curso
+            var cookieToken = Request.Cookies[$"curso_token_{curso.Id}"];
+            if (!string.IsNullOrEmpty(cookieToken) &&
+                !string.IsNullOrEmpty(curso.TokenAccesoUnico) &&
+                curso.TokenAccesoUnico.Equals(cookieToken, StringComparison.Ordinal) &&
+                (curso.TokenExpiracion == null || curso.TokenExpiracion > DateTime.UtcNow))
+            {
+                // Restaurar acceso en sesión desde cookie
+                HttpContext.Session.SetString($"curso_access_{curso.Id}", "granted");
+            }
+        }
     }
 
     public class InputModel

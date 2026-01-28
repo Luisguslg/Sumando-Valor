@@ -144,7 +144,9 @@
                         </div>
                         <div class="col-md-6 mb-3" id="municipioGroupProfile" style="display: @(Model.CurrentUser?.Pais == "Venezuela" ? "block" : "none");">
                             <label asp-for="Input.Municipio" class="form-label">Municipio <span class="text-danger">*</span></label>
-                            <input asp-for="Input.Municipio" class="form-control" />
+                            <select asp-for="Input.Municipio" class="form-select" id="municipioSelectProfile">
+                                <option value="">Seleccione un estado primero...</option>
+                            </select>
                             <span asp-validation-for="Input.Municipio" class="text-danger"></span>
                         </div>
                     </div>
@@ -193,6 +195,28 @@
         const estadoGroupProfile = document.getElementById('estadoGroupProfile');
         const municipioGroupProfile = document.getElementById('municipioGroupProfile');
         const estadoSelectProfile = document.getElementById('estadoSelectProfile');
+        const municipioSelectProfile = document.getElementById('municipioSelectProfile');
+
+        // Catálogo de municipios por estado
+        const municipiosPorEstado = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Catalogos.MunicipiosPorEstado));
+        const municipioActual = '@Model.CurrentUser?.Municipio';
+
+        function actualizarMunicipiosProfile() {
+            const estadoKey = estadoSelectProfile.value;
+            municipioSelectProfile.innerHTML = '<option value="">Seleccione...</option>';
+            
+            if (estadoKey && municipiosPorEstado[estadoKey]) {
+                municipiosPorEstado[estadoKey].forEach(function(municipio) {
+                    const option = document.createElement('option');
+                    option.value = municipio;
+                    option.textContent = municipio;
+                    if (municipio === municipioActual) {
+                        option.selected = true;
+                    }
+                    municipioSelectProfile.appendChild(option);
+                });
+            }
+        }
 
         if (paisSelectProfile) {
             paisSelectProfile.addEventListener('change', function() {
@@ -202,9 +226,21 @@
                 
                 if (!isVenezuela) {
                     estadoSelectProfile.value = '';
-                    document.getElementById('Input_Municipio').value = '';
+                    municipioSelectProfile.innerHTML = '<option value="">Seleccione un estado primero...</option>';
+                    municipioSelectProfile.value = '';
+                } else {
+                    actualizarMunicipiosProfile();
                 }
             });
+
+            estadoSelectProfile.addEventListener('change', function() {
+                actualizarMunicipiosProfile();
+            });
+
+            // Inicializar municipios si ya hay un estado seleccionado
+            if (estadoSelectProfile.value) {
+                actualizarMunicipiosProfile();
+            }
         }
 
         // Validación de teléfono: solo números

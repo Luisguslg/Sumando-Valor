@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
+using SumandoValor.Domain.Entities;
+using SumandoValor.Domain.Helpers;
 using SumandoValor.Infrastructure.Data;
 using SumandoValor.Infrastructure.Services;
 
@@ -17,13 +21,16 @@ public class RegisterModel : PageModel
     private readonly IConfiguration _configuration;
     private readonly ILogger<RegisterModel> _logger;
 
+    private readonly AppDbContext _context;
+
     public RegisterModel(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
         IEmailService emailService,
         ICaptchaValidator captchaValidator,
         IConfiguration configuration,
-        ILogger<RegisterModel> logger)
+        ILogger<RegisterModel> logger,
+        AppDbContext context)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -31,6 +38,7 @@ public class RegisterModel : PageModel
         _captchaValidator = captchaValidator;
         _configuration = configuration;
         _logger = logger;
+        _context = context;
     }
 
     [BindProperty]
@@ -81,6 +89,17 @@ public class RegisterModel : PageModel
             if (string.IsNullOrWhiteSpace(Input.Municipio))
             {
                 ModelState.AddModelError(nameof(Input.Municipio), "El municipio es requerido cuando el país es Venezuela.");
+            }
+            else if (!string.IsNullOrWhiteSpace(Input.Estado))
+            {
+                // Validar que el municipio pertenezca al estado seleccionado
+                if (Domain.Helpers.Catalogos.MunicipiosPorEstado.TryGetValue(Input.Estado, out var municipiosValidos))
+                {
+                    if (!municipiosValidos.Contains(Input.Municipio))
+                    {
+                        ModelState.AddModelError(nameof(Input.Municipio), "El municipio seleccionado no pertenece al estado seleccionado.");
+                    }
+                }
             }
         }
 
@@ -145,28 +164,31 @@ public class RegisterModel : PageModel
             }
         }
 
+        // Sanitización de datos de entrada para seguridad IPCR
+        // Nota: Razor Pages escapa HTML automáticamente al renderizar, no necesitamos HtmlEncode aquí
+        // Solo sanitizamos: Trim, normalización, y validación de formato
         var user = new ApplicationUser
         {
-            UserName = Input.Email,
-            Email = Input.Email,
-            Nombres = Input.Nombres,
-            Apellidos = Input.Apellidos,
-            Cedula = Input.Cedula,
-            Sexo = Input.Sexo,
+            UserName = Input.Email?.Trim().ToLowerInvariant() ?? string.Empty,
+            Email = Input.Email?.Trim().ToLowerInvariant() ?? string.Empty,
+            Nombres = Input.Nombres?.Trim() ?? string.Empty,
+            Apellidos = Input.Apellidos?.Trim() ?? string.Empty,
+            Cedula = Input.Cedula.Trim(),
+            Sexo = Input.Sexo?.Trim() ?? string.Empty,
             // UX: keep the form value nullable so the date input is empty on first load.
             // At this point ModelState is valid, so FechaNacimiento has a value.
             FechaNacimiento = Input.FechaNacimiento!.Value,
             TieneDiscapacidad = Input.TieneDiscapacidad,
-            DiscapacidadDescripcion = Input.TieneDiscapacidad ? Input.DiscapacidadDescripcion : null,
-            NivelEducativo = Input.NivelEducativo,
-            SituacionLaboral = Input.SituacionLaboral,
-            Sector = Input.Sector,
-            CanalConocio = Input.CanalConocio,
-            Pais = Input.Pais,
-            Estado = Input.Pais == "Venezuela" ? Input.Estado : null,
-            Municipio = Input.Pais == "Venezuela" ? Input.Municipio : null,
+            DiscapacidadDescripcion = Input.TieneDiscapacidad ? Input.DiscapacidadDescripcion?.Trim() : null,
+            NivelEducativo = Input.NivelEducativo?.Trim() ?? string.Empty,
+            SituacionLaboral = Input.SituacionLaboral?.Trim() ?? string.Empty,
+            Sector = Input.Sector?.Trim() ?? string.Empty,
+            CanalConocio = Input.CanalConocio?.Trim() ?? string.Empty,
+            Pais = Input.Pais?.Trim() ?? string.Empty,
+            Estado = Input.Pais == "Venezuela" ? (Input.Estado?.Trim() ?? null) : null,
+            Municipio = Input.Pais == "Venezuela" ? (Input.Municipio?.Trim() ?? null) : null,
             Ciudad = null,
-            Telefono = Input.Telefono?.Replace("-", "").Replace(" ", "").Replace("(", "").Replace(")", ""),
+            Telefono = Input.Telefono?.Replace("-", "").Replace(" ", "").Replace("(", "").Replace(")", "").Trim(),
             CreatedAt = DateTime.UtcNow
         };
 
@@ -186,6 +208,10 @@ public class RegisterModel : PageModel
             {
                 await _emailService.SendEmailConfirmationAsync(user.Email!, callbackUrl ?? string.Empty);
                 _logger.LogInformation("Nuevo usuario registrado. UserId={UserId}, Email confirmación enviado", user.Id);
+                
+                // Restaurar acceso a cursos internos desde cookies después del registro
+                await RestoreCourseAccessFromCookiesAsync();
+                
                 TempData["FlashInfo"] = "Registro exitoso. Te enviamos un correo para confirmar tu cuenta antes de iniciar sesión.";
             }
             catch (Exception ex)
@@ -227,7 +253,9 @@ public class RegisterModel : PageModel
         public string Cedula { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "La contraseña es requerida")]
-        [StringLength(100, ErrorMessage = "La contraseña debe tener al menos {2} caracteres.", MinimumLength = 8)]
+        [StringLength(100, ErrorMessage = "La contraseña debe tener al menos 12 caracteres e incluir mayúsculas, minúsculas, números y caracteres especiales.", MinimumLength = 12)]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$", 
+            ErrorMessage = "La contraseña debe tener al menos 12 caracteres e incluir mayúsculas, minúsculas, números y caracteres especiales (@$!%*?&).")]
         [DataType(DataType.Password)]
         [Display(Name = "Contraseña")]
         public string Password { get; set; } = string.Empty;
@@ -295,5 +323,27 @@ public class RegisterModel : PageModel
 
         [Display(Name = "Token de Captcha")]
         public string? CaptchaToken { get; set; }
+    }
+
+    private async Task RestoreCourseAccessFromCookiesAsync()
+    {
+        // Obtener todos los cursos internos activos
+        var cursosInternos = await _context.Cursos
+            .Where(c => c.Estado == EstatusCurso.Activo && !c.EsPublico && !string.IsNullOrEmpty(c.TokenAccesoUnico))
+            .ToListAsync();
+
+        foreach (var curso in cursosInternos)
+        {
+            // Verificar si hay una cookie con token válido para este curso
+            var cookieToken = Request.Cookies[$"curso_token_{curso.Id}"];
+            if (!string.IsNullOrEmpty(cookieToken) &&
+                !string.IsNullOrEmpty(curso.TokenAccesoUnico) &&
+                curso.TokenAccesoUnico.Equals(cookieToken, StringComparison.Ordinal) &&
+                (curso.TokenExpiracion == null || curso.TokenExpiracion > DateTime.UtcNow))
+            {
+                // Restaurar acceso en sesión desde cookie
+                HttpContext.Session.SetString($"curso_access_{curso.Id}", "granted");
+            }
+        }
     }
 }

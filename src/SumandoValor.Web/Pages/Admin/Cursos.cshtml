@@ -63,7 +63,7 @@
                         @if (curso.Talleres.Count == 0)
                         {
                             <form method="post" asp-page-handler="ToggleEstado" asp-route-id="@curso.Id" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-outline-warning">
+                                <button type="submit" class="btn btn-sm @(curso.Estado == EstatusCurso.Activo ? "btn-outline-secondary" : "btn-outline-success")">
                                     @(curso.Estado == EstatusCurso.Activo ? "Desactivar" : "Activar")
                                 </button>
                             </form>

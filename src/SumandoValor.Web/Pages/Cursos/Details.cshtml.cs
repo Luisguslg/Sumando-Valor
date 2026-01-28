@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SumandoValor.Domain.Entities;
 using SumandoValor.Infrastructure.Data;
 using Microsoft.AspNetCore.Session;
+using Microsoft.AspNetCore.Http;
 
 namespace SumandoValor.Web.Pages.Cursos;
 
@@ -38,13 +39,35 @@ public class DetailsModel : PageModel
                 Curso.TokenAccesoUnico.Equals(token, StringComparison.Ordinal) &&
                 (Curso.TokenExpiracion == null || Curso.TokenExpiracion > DateTime.UtcNow))
             {
-                // Token válido, guardar en sesión
+                // Token válido, guardar en sesión y cookie para persistir después de registro/login
                 HttpContext.Session.SetString($"curso_access_{id}", "granted");
+                HttpContext.Response.Cookies.Append($"curso_token_{id}", token, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = !Request.IsHttps ? false : true,
+                    SameSite = SameSiteMode.Lax,
+                    Expires = Curso.TokenExpiracion ?? DateTimeOffset.UtcNow.AddYears(1) // Persistir por 1 año si no expira
+                });
             }
             else
             {
                 // Verificar si tiene acceso en sesión
                 var hasAccess = HttpContext.Session.GetString($"curso_access_{id}") == "granted";
+                
+                // Si no hay acceso en sesión, verificar cookie (para usuarios que se registraron después de hacer clic en el link)
+                if (!hasAccess)
+                {
+                    var cookieToken = Request.Cookies[$"curso_token_{id}"];
+                    if (!string.IsNullOrEmpty(cookieToken) &&
+                        !string.IsNullOrEmpty(Curso.TokenAccesoUnico) &&
+                        Curso.TokenAccesoUnico.Equals(cookieToken, StringComparison.Ordinal) &&
+                        (Curso.TokenExpiracion == null || Curso.TokenExpiracion > DateTime.UtcNow))
+                    {
+                        // Token válido en cookie, restaurar acceso en sesión
+                        HttpContext.Session.SetString($"curso_access_{id}", "granted");
+                        hasAccess = true;
+                    }
+                }
                 
                 if (!hasAccess)
                 {

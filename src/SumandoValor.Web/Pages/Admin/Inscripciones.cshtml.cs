@@ -6,6 +6,7 @@ using SumandoValor.Domain.Entities;
 using SumandoValor.Infrastructure.Data;
 using System.Data;
 using System.Text;
+using Microsoft.Data.SqlClient;
 
 namespace SumandoValor.Web.Pages.Admin;
 
@@ -221,25 +222,24 @@ public class InscripcionesModel : PageModel
             }
 
             // Verificar si ya está inscrito (dentro de la transacción)
+            // Verificar tanto inscripciones activas como canceladas para evitar duplicados
             var existeInscripcion = await _context.Inscripciones
-                .AnyAsync(i => i.TallerId == tallerId && i.UserId == userId && i.Estado == EstadoInscripcion.Activa);
+                .AnyAsync(i => i.TallerId == tallerId && i.UserId == userId);
 
             if (existeInscripcion)
             {
-                await transaction.RollbackAsync();
-                TempData["FlashError"] = "El usuario ya está inscrito en este taller.";
-                return RedirectToPage();
-            }
+                // Verificar si es activa o cancelada
+                var inscripcionExistente = await _context.Inscripciones
+                    .FirstOrDefaultAsync(i => i.TallerId == tallerId && i.UserId == userId);
 
-            // Verificar si ya está inscrito (dentro de la transacción)
-            var existeInscripcionTrans = await _context.Inscripciones
-                .AnyAsync(i => i.TallerId == tallerId && i.UserId == userId && i.Estado == EstadoInscripcion.Activa);
-
-            if (existeInscripcionTrans)
-            {
-                await transaction.RollbackAsync();
-                TempData["FlashError"] = "El usuario ya está inscrito en este taller.";
-                return RedirectToPage();
+                if (inscripcionExistente != null && inscripcionExistente.Estado == EstadoInscripcion.Activa)
+                {
+                    await transaction.RollbackAsync();
+                    TempData["FlashError"] = "El usuario ya está inscrito en este taller.";
+                    return RedirectToPage();
+                }
+                // Si está cancelada, podemos reactivarla o crear una nueva según la lógica de negocio
+                // Por ahora, permitimos crear una nueva inscripción si la anterior estaba cancelada
             }
 
             // Verificar cupos disponibles (dentro de la transacción)
@@ -269,6 +269,13 @@ public class InscripcionesModel : PageModel
             
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
+        }
+        catch (Microsoft.EntityFrameworkCore.DbUpdateException dbEx) when (dbEx.InnerException is Microsoft.Data.SqlClient.SqlException sqlEx && sqlEx.Number == 2601)
+        {
+            await transaction.RollbackAsync();
+            _logger.LogWarning("Intento de inscripción duplicada: Usuario {UserId} en taller {TallerId}", userId, tallerId);
+            TempData["FlashError"] = "El usuario ya está inscrito en este taller.";
+            return RedirectToPage();
         }
         catch (Exception ex)
         {

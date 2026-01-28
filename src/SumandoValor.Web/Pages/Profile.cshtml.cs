@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SumandoValor.Domain.Helpers;
 using SumandoValor.Infrastructure.Data;
 
 namespace SumandoValor.Web.Pages;
@@ -56,21 +57,37 @@ public class ProfileModel : PageModel
             return Page();
         }
 
+        // Validar municipio pertenece al estado si es Venezuela
+        if (Input.Pais == "Venezuela" && !string.IsNullOrWhiteSpace(Input.Estado) && !string.IsNullOrWhiteSpace(Input.Municipio))
+        {
+            if (Domain.Helpers.Catalogos.MunicipiosPorEstado.TryGetValue(Input.Estado, out var municipiosValidos))
+            {
+                if (!municipiosValidos.Contains(Input.Municipio))
+                {
+                    ModelState.AddModelError(nameof(Input.Municipio), "El municipio seleccionado no pertenece al estado seleccionado.");
+                    CurrentUser = await _userManager.GetUserAsync(User);
+                    return Page();
+                }
+            }
+        }
+
         var user = await _userManager.GetUserAsync(User);
         if (user == null)
         {
             return NotFound();
         }
 
-        user.Telefono = Input.Telefono?.Replace("-", "").Replace(" ", "").Replace("(", "").Replace(")", "");
-        user.NivelEducativo = Input.NivelEducativo;
-        user.SituacionLaboral = Input.SituacionLaboral;
-        user.Sector = Input.Sector;
-        user.Pais = Input.Pais;
-        user.Estado = Input.Pais == "Venezuela" ? Input.Estado : null;
-        user.Municipio = Input.Pais == "Venezuela" ? Input.Municipio : null;
+        // Sanitización de datos de entrada para seguridad IPCR
+        // Nota: Razor Pages escapa HTML automáticamente al renderizar
+        user.Telefono = Input.Telefono?.Replace("-", "").Replace(" ", "").Replace("(", "").Replace(")", "").Trim();
+        user.NivelEducativo = Input.NivelEducativo?.Trim() ?? string.Empty;
+        user.SituacionLaboral = Input.SituacionLaboral?.Trim() ?? string.Empty;
+        user.Sector = Input.Sector?.Trim() ?? string.Empty;
+        user.Pais = Input.Pais?.Trim() ?? string.Empty;
+        user.Estado = Input.Pais == "Venezuela" ? (Input.Estado?.Trim() ?? null) : null;
+        user.Municipio = Input.Pais == "Venezuela" ? (Input.Municipio?.Trim() ?? null) : null;
         user.TieneDiscapacidad = Input.TieneDiscapacidad;
-        user.DiscapacidadDescripcion = Input.TieneDiscapacidad ? Input.DiscapacidadDescripcion : null;
+        user.DiscapacidadDescripcion = Input.TieneDiscapacidad ? Input.DiscapacidadDescripcion?.Trim() : null;
 
         var result = await _userManager.UpdateAsync(user);
         if (result.Succeeded)
