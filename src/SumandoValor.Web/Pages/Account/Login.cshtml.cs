@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using SumandoValor.Domain.Entities;
 using SumandoValor.Infrastructure.Data;
 using SumandoValor.Infrastructure.Services;
+using SumandoValor.Web.Services;
 
 namespace SumandoValor.Web.Pages.Account;
 
@@ -16,6 +17,7 @@ public class LoginModel : PageModel
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ICaptchaValidator _captchaValidator;
+    private readonly IMathCaptchaChallengeService _mathCaptcha;
     private readonly IConfiguration _configuration;
     private readonly ILogger<LoginModel> _logger;
     private readonly AppDbContext _context;
@@ -24,6 +26,7 @@ public class LoginModel : PageModel
         SignInManager<ApplicationUser> signInManager,
         UserManager<ApplicationUser> userManager,
         ICaptchaValidator captchaValidator,
+        IMathCaptchaChallengeService mathCaptcha,
         IConfiguration configuration,
         ILogger<LoginModel> logger,
         AppDbContext context)
@@ -31,6 +34,7 @@ public class LoginModel : PageModel
         _signInManager = signInManager;
         _userManager = userManager;
         _captchaValidator = captchaValidator;
+        _mathCaptcha = mathCaptcha;
         _configuration = configuration;
         _logger = logger;
         _context = context;
@@ -42,13 +46,16 @@ public class LoginModel : PageModel
     public string? ReturnUrl { get; set; }
     public bool ShowCaptcha { get; set; }
     public string? CaptchaSiteKey { get; set; }
+    public string? CaptchaQuestion { get; set; }
 
     public Task OnGetAsync(string? returnUrl = null)
     {
         ReturnUrl = returnUrl;
-        var captchaProvider = _configuration["Captcha:Provider"] ?? "None";
+        var captchaProvider = _configuration["Captcha:Provider"] ?? "Math";
         ShowCaptcha = captchaProvider != "None";
         CaptchaSiteKey = _configuration["Captcha:CloudflareTurnstile:SiteKey"];
+        if (captchaProvider == "Math")
+            CaptchaQuestion = _mathCaptcha.GetChallenge();
         return Task.CompletedTask;
     }
 
@@ -56,17 +63,26 @@ public class LoginModel : PageModel
     {
         returnUrl ??= Url.Content("~/");
 
-        var captchaProvider = _configuration["Captcha:Provider"] ?? "None";
+        var captchaProvider = _configuration["Captcha:Provider"] ?? "Math";
         ShowCaptcha = captchaProvider != "None";
         CaptchaSiteKey = _configuration["Captcha:CloudflareTurnstile:SiteKey"];
 
-        if (ShowCaptcha && !string.IsNullOrWhiteSpace(Input.CaptchaToken))
+        if (ShowCaptcha)
         {
+            if (string.IsNullOrWhiteSpace(Input.CaptchaToken))
+            {
+                ModelState.AddModelError(string.Empty, captchaProvider == "Math"
+                    ? "Responde la pregunta de verificación."
+                    : "Debes completar la verificación de seguridad (captcha).");
+                return Page();
+            }
             var remoteIp = HttpContext.Connection.RemoteIpAddress?.ToString();
             var captchaValid = await _captchaValidator.ValidateAsync(Input.CaptchaToken, remoteIp);
             if (!captchaValid)
             {
-                ModelState.AddModelError(string.Empty, "La validación del captcha falló. Por favor intenta nuevamente.");
+                ModelState.AddModelError(string.Empty, "La verificación falló. Por favor intenta de nuevo.");
+                if (captchaProvider == "Math")
+                    CaptchaQuestion = _mathCaptcha.GetChallenge();
                 return Page();
             }
         }
@@ -131,14 +147,12 @@ public class LoginModel : PageModel
 
     private async Task RestoreCourseAccessFromCookiesAsync()
     {
-        // Obtener todos los cursos internos activos
         var cursosInternos = await _context.Cursos
             .Where(c => c.Estado == EstatusCurso.Activo && !c.EsPublico && !string.IsNullOrEmpty(c.TokenAccesoUnico))
             .ToListAsync();
 
         foreach (var curso in cursosInternos)
         {
-            // Verificar si hay una cookie con token válido para este curso
             var cookieToken = Request.Cookies[$"curso_token_{curso.Id}"];
             if (!string.IsNullOrEmpty(cookieToken) &&
                 !string.IsNullOrEmpty(curso.TokenAccesoUnico) &&

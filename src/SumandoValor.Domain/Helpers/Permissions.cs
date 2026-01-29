@@ -49,7 +49,6 @@ public static class Permissions
     // Permisos para Auditoría
     public const string Auditoria_Ver = "Auditoria.Ver";
 
-    // Obtener todos los permisos agrupados por módulo
     public static Dictionary<string, List<string>> GetAllPermissions()
     {
         return new Dictionary<string, List<string>>
@@ -73,14 +72,12 @@ public static class Permissions
             "Admin" => GetAllPermissions().Values.SelectMany(p => p).ToList(),
             "Moderador" => new List<string>
             {
-                // Moderador puede hacer todo excepto Roles y Auditoría
                 Cursos_Listar, Cursos_Crear, Cursos_Editar, Cursos_Eliminar,
                 Talleres_Listar, Talleres_Crear, Talleres_Editar, Talleres_Eliminar,
                 Usuarios_Listar, Usuarios_Crear, Usuarios_Editar, Usuarios_Eliminar,
                 Inscripciones_Listar, Inscripciones_Crear, Inscripciones_Editar, Inscripciones_Eliminar,
                 Certificados_Listar, Certificados_Crear, Certificados_Editar, Certificados_Eliminar,
                 Encuestas_Listar, Encuestas_Crear, Encuestas_Editar, Encuestas_Eliminar
-                // NO incluye: Roles_*, Auditoria_Ver
             },
             "Beneficiario" => new List<string>
             {

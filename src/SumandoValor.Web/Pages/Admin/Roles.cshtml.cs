@@ -44,10 +44,8 @@ public class RolesModel : PageModel
 
     public async Task OnGetAsync(string? roleId = null)
     {
-        // Obtener todos los permisos disponibles
         AllPermissions = Permissions.GetAllPermissions();
 
-        // Obtener todos los roles (sin duplicados)
         var allRoles = await _roleManager.Roles.OrderBy(r => r.Name).ToListAsync();
         Roles = allRoles
             .GroupBy(r => r.Name)
@@ -76,7 +74,6 @@ public class RolesModel : PageModel
             }
         }
 
-        // Obtener todos los usuarios con sus roles
         var allUsers = await _userManager.Users
             .OrderBy(u => u.Nombres)
             .ThenBy(u => u.Apellidos)

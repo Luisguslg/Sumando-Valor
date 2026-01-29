@@ -9,6 +9,7 @@ using SumandoValor.Domain.Entities;
 using SumandoValor.Domain.Helpers;
 using SumandoValor.Infrastructure.Data;
 using SumandoValor.Infrastructure.Services;
+using SumandoValor.Web.Services;
 
 namespace SumandoValor.Web.Pages.Account;
 
@@ -18,6 +19,7 @@ public class RegisterModel : PageModel
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IEmailService _emailService;
     private readonly ICaptchaValidator _captchaValidator;
+    private readonly IMathCaptchaChallengeService _mathCaptcha;
     private readonly IConfiguration _configuration;
     private readonly ILogger<RegisterModel> _logger;
 
@@ -28,6 +30,7 @@ public class RegisterModel : PageModel
         SignInManager<ApplicationUser> signInManager,
         IEmailService emailService,
         ICaptchaValidator captchaValidator,
+        IMathCaptchaChallengeService mathCaptcha,
         IConfiguration configuration,
         ILogger<RegisterModel> logger,
         AppDbContext context)
@@ -36,6 +39,7 @@ public class RegisterModel : PageModel
         _signInManager = signInManager;
         _emailService = emailService;
         _captchaValidator = captchaValidator;
+        _mathCaptcha = mathCaptcha;
         _configuration = configuration;
         _logger = logger;
         _context = context;
@@ -47,30 +51,42 @@ public class RegisterModel : PageModel
     public string? ReturnUrl { get; set; }
     public bool ShowCaptcha { get; set; }
     public string? CaptchaSiteKey { get; set; }
+    public string? CaptchaQuestion { get; set; }
 
     public void OnGet(string? returnUrl = null)
     {
         ReturnUrl = returnUrl;
-        var captchaProvider = _configuration["Captcha:Provider"] ?? "None";
+        var captchaProvider = _configuration["Captcha:Provider"] ?? "Math";
         ShowCaptcha = captchaProvider != "None";
         CaptchaSiteKey = _configuration["Captcha:CloudflareTurnstile:SiteKey"];
+        if (captchaProvider == "Math")
+            CaptchaQuestion = _mathCaptcha.GetChallenge();
     }
 
     public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
     {
         returnUrl ??= Url.Content("~/");
 
-        var captchaProvider = _configuration["Captcha:Provider"] ?? "None";
+        var captchaProvider = _configuration["Captcha:Provider"] ?? "Math";
         ShowCaptcha = captchaProvider != "None";
         CaptchaSiteKey = _configuration["Captcha:CloudflareTurnstile:SiteKey"];
 
-        if (ShowCaptcha && !string.IsNullOrWhiteSpace(Input.CaptchaToken))
+        if (ShowCaptcha)
         {
+            if (string.IsNullOrWhiteSpace(Input.CaptchaToken))
+            {
+                ModelState.AddModelError(string.Empty, captchaProvider == "Math"
+                    ? "Responde la pregunta de verificación."
+                    : "Debes completar la verificación de seguridad (captcha).");
+                return Page();
+            }
             var remoteIp = HttpContext.Connection.RemoteIpAddress?.ToString();
             var captchaValid = await _captchaValidator.ValidateAsync(Input.CaptchaToken, remoteIp);
             if (!captchaValid)
             {
-                ModelState.AddModelError(string.Empty, "La validación del captcha falló. Por favor intenta nuevamente.");
+                ModelState.AddModelError(string.Empty, "La verificación falló. Por favor intenta de nuevo.");
+                if (captchaProvider == "Math")
+                    CaptchaQuestion = _mathCaptcha.GetChallenge();
                 return Page();
             }
         }
@@ -327,7 +343,6 @@ public class RegisterModel : PageModel
 
     private async Task RestoreCourseAccessFromCookiesAsync()
     {
-        // Obtener todos los cursos internos activos
         var cursosInternos = await _context.Cursos
             .Where(c => c.Estado == EstatusCurso.Activo && !c.EsPublico && !string.IsNullOrEmpty(c.TokenAccesoUnico))
             .ToListAsync();

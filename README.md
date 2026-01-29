@@ -44,6 +44,8 @@ Sumando Valor centraliza y digitaliza el proceso de formación ofrecido por la F
 - `/Admin/Talleres`
 - `/Admin/Inscripciones`
 - `/Admin/EmailDiagnostics`
+- `/Admin/Auditoria` (solo Admin)
+- `/Admin/Seguridad` (solo Admin: políticas de contraseña, bloqueo, CAPTCHA, conexión)
 - (Encuestas, Certificados y Usuarios según estado actual del proyecto)
 
 ## 2. Arquitectura
@@ -200,6 +202,16 @@ Dar **Modify** a la identidad del App Pool sobre `App_Data/Certificates`.
 - DataProtection keys persistidas en:
   - `App_Data/DataProtection-Keys`
 - No se almacenan secretos en el repositorio.
+
+### 9.1 CAPTCHA
+
+**Por defecto** la aplicación usa un **CAPTCHA matemático**: una pregunta tipo *"¿Cuánto es 5 + 3?"* que el usuario responde. No requiere cuentas ni claves; funciona sin configurar nada.
+
+- **Valor por defecto**: `Captcha:Provider` = **"Math"** en `appsettings.json`.
+- **Desactivar**: Pon `"Provider": "None"` si no quieres verificación.
+- **Alternativa (Cloudflare Turnstile)**: Si prefieres un CAPTCHA externo, pon `"Provider": "Turnstile"` y configura Site Key y Secret Key en `Captcha:CloudflareTurnstile`. Ver `diseño/11-CAPTCHA-Turnstile.md`.
+
+**Dónde se usa**: Login, Registro y formulario de contacto. El estado se revisa en **Admin → Seguridad** (solo rol Admin).
 
 ## 10. Deploy en IIS (paso a paso)
 

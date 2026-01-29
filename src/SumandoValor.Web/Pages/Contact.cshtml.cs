@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using SumandoValor.Domain.Entities;
 using SumandoValor.Infrastructure.Data;
 using SumandoValor.Infrastructure.Services;
+using SumandoValor.Web.Services;
 
 namespace SumandoValor.Web.Pages;
 
@@ -13,6 +14,7 @@ public class ContactModel : PageModel
     private readonly IEmailService _emailService;
     private readonly IConfiguration _configuration;
     private readonly ICaptchaValidator _captchaValidator;
+    private readonly IMathCaptchaChallengeService _mathCaptcha;
     private readonly ILogger<ContactModel> _logger;
 
     public ContactModel(
@@ -20,12 +22,14 @@ public class ContactModel : PageModel
         IEmailService emailService,
         IConfiguration configuration,
         ICaptchaValidator captchaValidator,
+        IMathCaptchaChallengeService mathCaptcha,
         ILogger<ContactModel> logger)
     {
         _context = context;
         _emailService = emailService;
         _configuration = configuration;
         _captchaValidator = captchaValidator;
+        _mathCaptcha = mathCaptcha;
         _logger = logger;
     }
 
@@ -34,32 +38,42 @@ public class ContactModel : PageModel
 
     public bool ShowCaptcha { get; set; }
     public string? CaptchaSiteKey { get; set; }
+    public string? CaptchaQuestion { get; set; }
 
     public void OnGet()
     {
-        var captchaProvider = _configuration["Captcha:Provider"] ?? "None";
+        var captchaProvider = _configuration["Captcha:Provider"] ?? "Math";
         ShowCaptcha = captchaProvider != "None";
         CaptchaSiteKey = _configuration["Captcha:CloudflareTurnstile:SiteKey"];
+        if (captchaProvider == "Math")
+            CaptchaQuestion = _mathCaptcha.GetChallenge();
     }
 
     public async Task<IActionResult> OnPostAsync()
     {
-        var captchaProvider = _configuration["Captcha:Provider"] ?? "None";
+        var captchaProvider = _configuration["Captcha:Provider"] ?? "Math";
         ShowCaptcha = captchaProvider != "None";
         CaptchaSiteKey = _configuration["Captcha:CloudflareTurnstile:SiteKey"];
 
-        if (ShowCaptcha && !string.IsNullOrWhiteSpace(Input.CaptchaToken))
+        if (ShowCaptcha)
         {
-            var remoteIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
-            var captchaValid = await _captchaValidator.ValidateAsync(Input.CaptchaToken, remoteIp);
-            if (!captchaValid)
+            if (string.IsNullOrWhiteSpace(Input.CaptchaToken))
             {
-                ModelState.AddModelError(string.Empty, "La validación del captcha falló. Por favor intenta nuevamente.");
+                ModelState.AddModelError(string.Empty, captchaProvider == "Math"
+                    ? "Responde la pregunta de verificación."
+                    : "Debes completar la verificación de seguridad (captcha).");
             }
-        }
-        else if (ShowCaptcha)
-        {
-            ModelState.AddModelError(string.Empty, "Debes completar la verificación de seguridad (captcha).");
+            else
+            {
+                var remoteIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
+                var captchaValid = await _captchaValidator.ValidateAsync(Input.CaptchaToken, remoteIp);
+                if (!captchaValid)
+                {
+                    ModelState.AddModelError(string.Empty, "La verificación falló. Por favor intenta de nuevo.");
+                    if (captchaProvider == "Math")
+                        CaptchaQuestion = _mathCaptcha.GetChallenge();
+                }
+            }
         }
 
         if (!ModelState.IsValid)

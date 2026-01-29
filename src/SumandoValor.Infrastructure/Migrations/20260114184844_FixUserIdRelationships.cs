@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -10,9 +10,6 @@ namespace SumandoValor.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Migración defensiva: la base puede venir con o sin ApplicationUserId.
-            // Eliminamos todo rastro de ApplicationUserId (si existe) y garantizamos FKs por UserId.
-
             migrationBuilder.Sql(@"
 -- Inscripciones: limpiar ApplicationUserId si existe
 IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = N'FK_Inscripciones_AspNetUsers_ApplicationUserId')

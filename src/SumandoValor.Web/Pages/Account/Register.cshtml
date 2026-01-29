@@ -209,8 +209,16 @@
                     @if (Model.ShowCaptcha)
                     {
                         <div class="mb-3">
-                            <div id="captcha-widget"></div>
-                            <input type="hidden" asp-for="Input.CaptchaToken" />
+                            @if (!string.IsNullOrEmpty(Model.CaptchaQuestion))
+                            {
+                                <label class="form-label">@Model.CaptchaQuestion</label>
+                                <input type="text" asp-for="Input.CaptchaToken" class="form-control" autocomplete="off" inputmode="numeric" maxlength="3" placeholder="Respuesta" />
+                            }
+                            else if (!string.IsNullOrEmpty(Model.CaptchaSiteKey))
+                            {
+                                <div id="captcha-widget"></div>
+                                <input type="hidden" asp-for="Input.CaptchaToken" />
+                            }
                             <span asp-validation-for="Input.CaptchaToken" class="text-danger"></span>
                         </div>
                     }
@@ -321,11 +329,24 @@
             });
         }
 
-        @if (Model.ShowCaptcha && !string.IsNullOrEmpty(Model.CaptchaSiteKey))
+        @if (Model.ShowCaptcha && !string.IsNullOrEmpty(Model.CaptchaSiteKey) && string.IsNullOrEmpty(Model.CaptchaQuestion))
         {
             <text>
-            // Inicializar captcha si está configurado
-            // Esto se implementará cuando se configure el proveedor real
+            (function() {
+                var s = document.createElement('script');
+                s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+                s.async = true;
+                s.defer = true;
+                s.onload = function() {
+                    if (typeof turnstile !== 'undefined') {
+                        turnstile.render('#captcha-widget', {
+                            sitekey: '@Model.CaptchaSiteKey',
+                            callback: function(token) { document.getElementById('Input_CaptchaToken').value = token; }
+                        });
+                    }
+                };
+                document.head.appendChild(s);
+            })();
             </text>
         }
     </script>

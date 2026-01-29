@@ -21,7 +21,6 @@ public class CursosModel : PageModel
 
     public async Task OnGetAsync()
     {
-        // Obtener todos los cursos activos
         var todosCursos = await _context.Cursos
             .Where(c => c.Estado == EstatusCurso.Activo)
             .OrderBy(c => c.Orden)

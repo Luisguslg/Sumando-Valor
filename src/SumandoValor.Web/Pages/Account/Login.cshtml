@@ -43,8 +43,16 @@
                     @if (Model.ShowCaptcha)
                     {
                         <div class="mb-3">
-                            <div id="captcha-widget"></div>
-                            <input type="hidden" asp-for="Input.CaptchaToken" />
+                            @if (!string.IsNullOrEmpty(Model.CaptchaQuestion))
+                            {
+                                <label class="form-label">@Model.CaptchaQuestion</label>
+                                <input type="text" asp-for="Input.CaptchaToken" class="form-control" autocomplete="off" inputmode="numeric" maxlength="3" placeholder="Respuesta" />
+                            }
+                            else if (!string.IsNullOrEmpty(Model.CaptchaSiteKey))
+                            {
+                                <div id="captcha-widget"></div>
+                                <input type="hidden" asp-for="Input.CaptchaToken" />
+                            }
                             <span asp-validation-for="Input.CaptchaToken" class="text-danger"></span>
                         </div>
                     }
@@ -70,7 +78,7 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    @if (Model.ShowCaptcha && !string.IsNullOrEmpty(Model.CaptchaSiteKey))
+    @if (Model.ShowCaptcha && !string.IsNullOrEmpty(Model.CaptchaSiteKey) && string.IsNullOrEmpty(Model.CaptchaQuestion))
     {
         <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
         <script>

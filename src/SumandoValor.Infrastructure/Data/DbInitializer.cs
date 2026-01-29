@@ -114,7 +114,6 @@ public static class DbInitializer
         IConfiguration configuration,
         bool isDevelopment)
     {
-        // Ahora este método crea el nuevo "Admin" (antes SuperAdmin)
         var create = bool.TryParse(configuration["Seed:CreateSuperAdmin"], out var b) && b;
         if (!isDevelopment && !create)
         {

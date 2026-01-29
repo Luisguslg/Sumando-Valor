@@ -44,7 +44,7 @@ public class SeguridadModel : PageModel
             AllowedForNewUsers = l.AllowedForNewUsers
         };
 
-        var captchaProvider = _configuration["Captcha:Provider"] ?? "None";
+        var captchaProvider = _configuration["Captcha:Provider"] ?? "Math";
         var siteKey = _configuration["Captcha:CloudflareTurnstile:SiteKey"] ?? "";
         var secretKey = _configuration["Captcha:CloudflareTurnstile:SecretKey"] ?? "";
         CaptchaPolicy = new CaptchaPolicyViewModel

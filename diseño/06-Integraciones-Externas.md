@@ -94,8 +94,21 @@ Servidor SMTP para envío de correos electrónicos (confirmación de email, recu
 
 ## 3. Cloudflare Turnstile (CAPTCHA)
 
-### Descripción
-Servicio de CAPTCHA para prevenir bots en formularios públicos (registro, login, contacto).
+### Opción por defecto: CAPTCHA matemático (Math)
+
+**No requiere configuración.** Por defecto la aplicación usa un CAPTCHA matemático: una pregunta tipo *"¿Cuánto es 5 + 3?"* que el usuario responde. Se valida en el servidor con la sesión; no hay servicios externos ni claves. Se usa en **Login**, **Registro** y **formulario de Contacto**.
+
+### Opción alternativa: Cloudflare Turnstile
+
+**Turnstile** es un servicio de **Cloudflare** que sustituye los CAPTCHA clásicos. Suele mostrar una verificación casi invisible o muy rápida para usuarios reales y bloquea bots. Es gratuito. Para usarlo hay que poner `Provider: "Turnstile"` y configurar Site Key y Secret Key en Cloudflare. Si el CAPTCHA está desactivado (`Provider: "None"`), no se muestra ninguna verificación.
+
+### Cómo activar / cambiar CAPTCHA
+
+- **Math (por defecto)**: No hace falta configurar nada; ya está activo.
+- **Turnstile (Cloudflare)**: 1) En [dash.cloudflare.com](https://dash.cloudflare.com) → Turnstile → crear widget y obtener Site Key y Secret Key. 2) En `appsettings.json`: `"Provider": "Turnstile"` y rellenar `Captcha:CloudflareTurnstile:SiteKey` y `SecretKey`. 3) Ver [11-CAPTCHA-Turnstile.md](11-CAPTCHA-Turnstile.md) para claves de prueba en desarrollo.
+- **Desactivar**: Poner `"Provider": "None"` en la sección `Captcha`.
+
+Guía detallada: **[11-CAPTCHA-Turnstile.md](11-CAPTCHA-Turnstile.md)**.
 
 ### Tipo de Integración
 - **Protocolo**: HTTPS REST API
@@ -142,13 +155,13 @@ secret=SECRET_KEY&response=TOKEN&remoteip=CLIENT_IP
 ### Implementaciones
 
 #### MockCaptchaValidator
-- **Entorno**: Development o cuando `Provider = "None"`
+- **Cuándo se usa**: Cuando `Captcha:Provider = "None"`
 - **Comportamiento**: Siempre retorna `true` (no valida realmente)
-- **Propósito**: Desarrollo sin necesidad de credenciales de Cloudflare
+- **Propósito**: No mostrar widget ni depender de Cloudflare
 
 #### CloudflareTurnstileCaptchaValidator
-- **Entorno**: Production
-- **Comportamiento**: Valida token real con API de Cloudflare
+- **Cuándo se usa**: Cuando `Captcha:Provider = "Turnstile"` (en cualquier entorno)
+- **Comportamiento**: Valida el token con la API de Cloudflare (`siteverify`)
 - **Timeout**: Por defecto de HttpClient
 
 ### Seguridad

@@ -13,7 +13,6 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-// Registrar información de conexión a BD (sin credenciales) para diagnóstico
 try
 {
     var csb = new SqlConnectionStringBuilder(connectionString);
@@ -21,29 +20,24 @@ try
     builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Information);
     builder.Services.AddSingleton(new DbConnectionInfo(csb.DataSource, csb.InitialCatalog, csb.IntegratedSecurity));
 }
-    catch
-    {
-        // No bloquear inicio si la cadena de conexión no es parseable
-    }
+catch { }
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
-    // Políticas de contraseña reforzadas para IPCR
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
-    options.Password.RequireNonAlphanumeric = true; // Caracteres especiales requeridos
-    options.Password.RequiredLength = 14; // Longitud mínima aumentada según estándares NIST 2024
-    options.Password.RequiredUniqueChars = 3; // Al menos 3 caracteres únicos
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequiredLength = 14;
+    options.Password.RequiredUniqueChars = 3;
     options.SignIn.RequireConfirmedEmail = true;
     options.User.RequireUniqueEmail = true;
     options.Lockout.MaxFailedAccessAttempts = 5;
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15); // Bloqueo más largo
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
     options.Lockout.AllowedForNewUsers = true;
-    // Protección adicional
     options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
 })
 .AddEntityFrameworkStores<AppDbContext>()
@@ -69,8 +63,6 @@ var devEmailPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data",
 builder.Services.AddSingleton<IDevEmailStore>(_ => new FileDevEmailStore(devEmailPath));
 
 builder.Services.Configure<SmtpEmailOptions>(builder.Configuration.GetSection("Email:Smtp"));
-// Compatibilidad: soporte para claves legacy de la aplicación anterior
-// Permite configurar SMTP mediante variables de entorno de IIS (ServidorCorreo, PuertoCorreo, etc.)
 builder.Services.PostConfigure<SmtpEmailOptions>(options =>
 {
     var cfg = builder.Configuration;
@@ -101,15 +93,14 @@ builder.Services.PostConfigure<SmtpEmailOptions>(options =>
         options.Password = cfg["CorreoPassword"] ?? options.Password;
 });
 
-var captchaProvider = builder.Configuration["Captcha:Provider"] ?? "None";
+var captchaProvider = builder.Configuration["Captcha:Provider"] ?? "Math";
+builder.Services.AddScoped<IMathCaptchaChallengeService, MathCaptchaChallengeService>();
 if (captchaProvider == "Turnstile")
-{
     builder.Services.AddScoped<ICaptchaValidator, CloudflareTurnstileCaptchaValidator>();
-}
+else if (captchaProvider == "Math")
+    builder.Services.AddScoped<ICaptchaValidator, MathCaptchaValidator>();
 else
-{
     builder.Services.AddScoped<ICaptchaValidator, MockCaptchaValidator>();
-}
 
 if (builder.Environment.IsDevelopment())
 {
@@ -124,7 +115,6 @@ builder.Services.AddRazorPages();
 builder.Services.AddSingleton<CertificatePdfGenerator>();
 builder.Services.AddScoped<UploadCleanupService>();
 
-// Configuración de sesión para acceso a cursos privados
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -136,10 +126,6 @@ builder.Services.AddSession(options =>
         : CookieSecurePolicy.Always;
 });
 
-// Rate limiting para endpoints públicos (no necesita registro en DI, se usa directamente)
-
-// En producción: persistir claves de DataProtection en disco para que las cookies de autenticación
-// permanezcan válidas después de reinicios de la aplicación
 if (!builder.Environment.IsDevelopment())
 {
     var keysPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "DataProtection-Keys");
@@ -156,7 +142,6 @@ builder.Services.AddAntiforgery(options =>
 
 var app = builder.Build();
 
-// Registrar información de BD al inicio (sin credenciales)
 using (var scope = app.Services.CreateScope())
 {
     var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("DbConnection");
@@ -173,10 +158,7 @@ using (var scope = app.Services.CreateScope())
             logger.LogInformation("Identidad del proceso (Windows): {Identity}", WindowsIdentity.GetCurrent().Name);
         }
     }
-    catch
-    {
-        // No bloquear inicio si no se puede obtener la identidad
-    }
+    catch { }
 }
 
 if (!app.Environment.IsDevelopment())
@@ -189,7 +171,6 @@ else
     app.UseDeveloperExceptionPage();
 }
 
-// Headers de seguridad (baseline OWASP). Mínimos para no afectar assets de CDN
 app.Use(async (context, next) =>
 {
     context.Response.Headers["X-Content-Type-Options"] = "nosniff";
@@ -208,10 +189,7 @@ app.Use(async (context, next) =>
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-// Establecer contexto de usuario para triggers de auditoría
 app.UseMiddleware<SumandoValor.Web.Middleware.AuditContextMiddleware>();
-
-// Rate limiting para endpoints públicos (antes de routing para mejor performance)
 app.UseMiddleware<SumandoValor.Web.Middleware.RateLimitingMiddleware>();
 
 app.UseSession();
@@ -234,7 +212,6 @@ using (var scope = app.Services.CreateScope())
 
         await DbInitializer.InitializeAsync(context, userManager, roleManager, configuration, app.Environment.IsDevelopment());
 
-        // Limpieza de uploads huérfanos (solo en desarrollo)
         try
         {
             var uploadCleanupService = services.GetRequiredService<UploadCleanupService>();
@@ -251,8 +228,6 @@ using (var scope = app.Services.CreateScope())
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "Error al inicializar la base de datos.");
-
-        // En producción fallar rápido: la conectividad/migraciones de BD deben estar correctas antes de servir tráfico
         if (!app.Environment.IsDevelopment())
         {
             throw;
