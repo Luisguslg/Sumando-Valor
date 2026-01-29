@@ -215,5 +215,19 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.UserId).HasMaxLength(450);
             entity.Property(e => e.UserEmail).HasMaxLength(256);
         });
+
+        // Tablas con triggers de auditoría: desactivar OUTPUT para que SQL Server permita INSERT/UPDATE
+        builder.Entity<Curso>().ToTable("Cursos", tb => tb.UseSqlOutputClause(false));
+        builder.Entity<Taller>().ToTable("Talleres", tb => tb.UseSqlOutputClause(false));
+        builder.Entity<Inscripcion>().ToTable("Inscripciones", tb => tb.UseSqlOutputClause(false));
+        builder.Entity<Certificado>().ToTable("Certificados", tb => tb.UseSqlOutputClause(false));
+        builder.Entity<EncuestaSatisfaccion>().ToTable("EncuestasSatisfaccion", tb => tb.UseSqlOutputClause(false));
+        builder.Entity<MensajeContacto>().ToTable("MensajesContacto", tb => tb.UseSqlOutputClause(false));
+        builder.Entity<CarouselItem>().ToTable("CarouselItems", tb => tb.UseSqlOutputClause(false));
+        builder.Entity<SiteImage>().ToTable("SiteImages", tb => tb.UseSqlOutputClause(false));
+        builder.Entity<SurveyTemplate>().ToTable("SurveyTemplates", tb => tb.UseSqlOutputClause(false));
+        builder.Entity<SurveyQuestion>().ToTable("SurveyQuestions", tb => tb.UseSqlOutputClause(false));
+        builder.Entity<SurveyResponse>().ToTable("SurveyResponses", tb => tb.UseSqlOutputClause(false));
+        builder.Entity<SurveyAnswer>().ToTable("SurveyAnswers", tb => tb.UseSqlOutputClause(false));
     }
 }
