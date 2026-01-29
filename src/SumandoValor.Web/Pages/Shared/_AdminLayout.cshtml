@@ -215,6 +215,10 @@
                    asp-page="/Admin/Auditoria">
                     <i class="bi bi-journal-text"></i> Auditoría
                 </a>
+                <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/Seguridad") ? "active" : "")"
+                   asp-page="/Admin/Seguridad">
+                    <i class="bi bi-shield-lock"></i> Seguridad
+                </a>
             }
             <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Admin/EmailDiagnostics") ? "active" : "")"
                asp-page="/Admin/EmailDiagnostics">

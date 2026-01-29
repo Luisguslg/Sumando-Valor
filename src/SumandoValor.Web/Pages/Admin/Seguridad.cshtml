@@ -1,0 +1,131 @@
+@page
+@model SumandoValor.Web.Pages.Admin.SeguridadModel
+@{
+    ViewData["Title"] = "Seguridad";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-card">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h1 class="h4 mb-1">Configuración de Seguridad</h1>
+            <div class="text-muted">Políticas de contraseña, bloqueo, CAPTCHA y conexión. Solo visible para Admin.</div>
+        </div>
+    </div>
+</div>
+
+<div class="admin-card">
+    <h5 class="mb-3"><i class="bi bi-key me-2"></i>Política de contraseña</h5>
+    <p class="text-muted small mb-3">Estas reglas se aplican al registrar usuarios, crear usuarios desde Admin y restablecer contraseña. Se validan en servidor (Identity).</p>
+    <div class="table-responsive">
+        <table class="table table-sm align-middle">
+            <tbody>
+                <tr>
+                    <td class="text-muted">Longitud mínima</td>
+                    <td><strong>@Model.PasswordPolicy.RequiredLength</strong> caracteres</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Requerir dígito</td>
+                    <td>@(Model.PasswordPolicy.RequireDigit ? "Sí" : "No")</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Requerir minúscula</td>
+                    <td>@(Model.PasswordPolicy.RequireLowercase ? "Sí" : "No")</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Requerir mayúscula</td>
+                    <td>@(Model.PasswordPolicy.RequireUppercase ? "Sí" : "No")</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Requerir carácter no alfanumérico</td>
+                    <td>@(Model.PasswordPolicy.RequireNonAlphanumeric ? "Sí" : "No")</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Caracteres únicos mínimos</td>
+                    <td><strong>@Model.PasswordPolicy.RequiredUniqueChars</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="small text-muted mb-0">Para cambiar estos valores edita la configuración de Identity en <code>Program.cs</code> y reinicia la aplicación.</p>
+</div>
+
+<div class="admin-card">
+    <h5 class="mb-3"><i class="bi bi-lock me-2"></i>Bloqueo por intentos fallidos</h5>
+    <div class="table-responsive">
+        <table class="table table-sm align-middle">
+            <tbody>
+                <tr>
+                    <td class="text-muted">Intentos máximos antes de bloquear</td>
+                    <td><strong>@Model.LockoutPolicy.MaxFailedAccessAttempts</strong></td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Duración del bloqueo</td>
+                    <td><strong>@Model.LockoutPolicy.DefaultLockoutTimeSpanMinutes</strong> minutos</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Bloqueo aplicado a usuarios nuevos</td>
+                    <td>@(Model.LockoutPolicy.AllowedForNewUsers ? "Sí" : "No")</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="admin-card">
+    <h5 class="mb-3"><i class="bi bi-shield-check me-2"></i>CAPTCHA</h5>
+    <div class="table-responsive">
+        <table class="table table-sm align-middle">
+            <tbody>
+                <tr>
+                    <td class="text-muted">Proveedor</td>
+                    <td><span class="badge @(Model.CaptchaPolicy.IsEnabled ? "bg-success" : "bg-secondary")">@Model.CaptchaPolicy.Provider</span></td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Site key configurada</td>
+                    <td>@(Model.CaptchaPolicy.SiteKeyConfigured ? "Sí" : "No")</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Secret key configurada</td>
+                    <td>@(Model.CaptchaPolicy.SecretKeyConfigured ? "Sí" : "No")</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Usado en Login</td>
+                    <td>@(Model.CaptchaPolicy.UsedOnLogin ? "Sí" : "No")</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Usado en Registro</td>
+                    <td>@(Model.CaptchaPolicy.UsedOnRegister ? "Sí" : "No")</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Usado en formulario de contacto</td>
+                    <td>@(Model.CaptchaPolicy.UsedOnContact ? "Sí" : "No")</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <p class="small text-muted mb-0">Configuración en <code>appsettings.json</code> → <code>Captcha:Provider</code> (None / Turnstile) y <code>Captcha:CloudflareTurnstile</code>.</p>
+</div>
+
+<div class="admin-card">
+    <h5 class="mb-3"><i class="bi bi-database me-2"></i>Conexión a base de datos</h5>
+    <p class="text-muted small mb-3">Solo se muestra servidor y base de datos. Nunca se exponen credenciales.</p>
+    <div class="table-responsive">
+        <table class="table table-sm align-middle">
+            <tbody>
+                <tr>
+                    <td class="text-muted">Servidor</td>
+                    <td><code>@Model.ConnectionInfo.DataSource</code></td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Base de datos</td>
+                    <td><code>@Model.ConnectionInfo.InitialCatalog</code></td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Autenticación Windows</td>
+                    <td>@(Model.ConnectionInfo.IntegratedSecurity ? "Sí" : "No (usuario/contraseña SQL)")</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

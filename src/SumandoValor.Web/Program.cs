@@ -102,13 +102,13 @@ builder.Services.PostConfigure<SmtpEmailOptions>(options =>
 });
 
 var captchaProvider = builder.Configuration["Captcha:Provider"] ?? "None";
-if (builder.Environment.IsDevelopment() || captchaProvider == "None")
-{
-    builder.Services.AddScoped<ICaptchaValidator, MockCaptchaValidator>();
-}
-else if (captchaProvider == "Turnstile")
+if (captchaProvider == "Turnstile")
 {
     builder.Services.AddScoped<ICaptchaValidator, CloudflareTurnstileCaptchaValidator>();
+}
+else
+{
+    builder.Services.AddScoped<ICaptchaValidator, MockCaptchaValidator>();
 }
 
 if (builder.Environment.IsDevelopment())

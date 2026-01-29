@@ -41,6 +41,15 @@
                                 <textarea asp-for="Input.Mensaje" class="form-control" rows="6"></textarea>
                                 <span asp-validation-for="Input.Mensaje" class="text-danger"></span>
                             </div>
+                            @if (Model.ShowCaptcha)
+                            {
+                                <div class="col-12">
+                                    <label class="form-label">Verificación de seguridad</label>
+                                    <div id="captcha-widget"></div>
+                                    <input type="hidden" asp-for="Input.CaptchaToken" />
+                                    <span asp-validation-for="Input.CaptchaToken" class="text-danger"></span>
+                                </div>
+                            }
                         </div>
 
                         <div class="d-flex gap-2 mt-4">
@@ -75,4 +84,20 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    @if (Model.ShowCaptcha && !string.IsNullOrEmpty(Model.CaptchaSiteKey))
+    {
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof turnstile !== 'undefined') {
+                    turnstile.render('#captcha-widget', {
+                        sitekey: '@Model.CaptchaSiteKey',
+                        callback: function(token) {
+                            document.getElementById('Input_CaptchaToken').value = token;
+                        }
+                    });
+                }
+            });
+        </script>
+    }
 }

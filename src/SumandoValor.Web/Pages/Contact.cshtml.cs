@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using SumandoValor.Domain.Entities;
 using SumandoValor.Infrastructure.Data;
 using SumandoValor.Infrastructure.Services;
@@ -13,29 +12,56 @@ public class ContactModel : PageModel
     private readonly AppDbContext _context;
     private readonly IEmailService _emailService;
     private readonly IConfiguration _configuration;
+    private readonly ICaptchaValidator _captchaValidator;
     private readonly ILogger<ContactModel> _logger;
 
     public ContactModel(
         AppDbContext context,
         IEmailService emailService,
         IConfiguration configuration,
+        ICaptchaValidator captchaValidator,
         ILogger<ContactModel> logger)
     {
         _context = context;
         _emailService = emailService;
         _configuration = configuration;
+        _captchaValidator = captchaValidator;
         _logger = logger;
     }
 
     [BindProperty]
     public InputModel Input { get; set; } = new();
 
+    public bool ShowCaptcha { get; set; }
+    public string? CaptchaSiteKey { get; set; }
+
     public void OnGet()
     {
+        var captchaProvider = _configuration["Captcha:Provider"] ?? "None";
+        ShowCaptcha = captchaProvider != "None";
+        CaptchaSiteKey = _configuration["Captcha:CloudflareTurnstile:SiteKey"];
     }
 
     public async Task<IActionResult> OnPostAsync()
     {
+        var captchaProvider = _configuration["Captcha:Provider"] ?? "None";
+        ShowCaptcha = captchaProvider != "None";
+        CaptchaSiteKey = _configuration["Captcha:CloudflareTurnstile:SiteKey"];
+
+        if (ShowCaptcha && !string.IsNullOrWhiteSpace(Input.CaptchaToken))
+        {
+            var remoteIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
+            var captchaValid = await _captchaValidator.ValidateAsync(Input.CaptchaToken, remoteIp);
+            if (!captchaValid)
+            {
+                ModelState.AddModelError(string.Empty, "La validación del captcha falló. Por favor intenta nuevamente.");
+            }
+        }
+        else if (ShowCaptcha)
+        {
+            ModelState.AddModelError(string.Empty, "Debes completar la verificación de seguridad (captcha).");
+        }
+
         if (!ModelState.IsValid)
         {
             return Page();
@@ -98,5 +124,8 @@ public class ContactModel : PageModel
         [Required(ErrorMessage = "El mensaje es requerido")]
         [StringLength(2000)]
         public string Mensaje { get; set; } = string.Empty;
+
+        [Display(Name = "Token de Captcha")]
+        public string? CaptchaToken { get; set; }
     }
 }
