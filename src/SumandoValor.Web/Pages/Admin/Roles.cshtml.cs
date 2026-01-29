@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using SumandoValor.Domain.Helpers;
 using SumandoValor.Infrastructure.Data;
-using SumandoValor.Infrastructure.Services;
 
 namespace SumandoValor.Web.Pages.Admin;
 
@@ -14,39 +14,67 @@ public class RolesModel : PageModel
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly AppDbContext _context;
-    private readonly IAuditService _auditService;
     private readonly ILogger<RolesModel> _logger;
 
     public RolesModel(
         RoleManager<IdentityRole> roleManager,
         UserManager<ApplicationUser> userManager,
         AppDbContext context,
-        IAuditService auditService,
         ILogger<RolesModel> logger)
     {
         _roleManager = roleManager;
         _userManager = userManager;
         _context = context;
-        _auditService = auditService;
         _logger = logger;
     }
 
     public List<RoleViewModel> Roles { get; set; } = new();
     public List<UserRoleViewModel> Users { get; set; } = new();
+    public Dictionary<string, List<string>> AllPermissions { get; set; } = new();
+    public Dictionary<string, List<string>> RolePermissions { get; set; } = new();
 
     [BindProperty]
     public string? NewRoleName { get; set; }
 
-    public async Task OnGetAsync()
+    [BindProperty]
+    public string? SelectedRoleId { get; set; }
+
+    [BindProperty]
+    public List<string> SelectedPermissions { get; set; } = new();
+
+    public async Task OnGetAsync(string? roleId = null)
     {
-        // Obtener todos los roles
+        // Obtener todos los permisos disponibles
+        AllPermissions = Permissions.GetAllPermissions();
+
+        // Obtener todos los roles (sin duplicados)
         var allRoles = await _roleManager.Roles.OrderBy(r => r.Name).ToListAsync();
-        Roles = allRoles.Select(r => new RoleViewModel
+        Roles = allRoles
+            .GroupBy(r => r.Name)
+            .Select(g => g.First())
+            .Select(r => new RoleViewModel
+            {
+                Id = r.Id,
+                Name = r.Name ?? "",
+                NormalizedName = r.NormalizedName ?? ""
+            })
+            .ToList();
+
+        // Obtener permisos de cada rol
+        RolePermissions = new Dictionary<string, List<string>>();
+        foreach (var role in Roles)
         {
-            Id = r.Id,
-            Name = r.Name ?? "",
-            NormalizedName = r.NormalizedName ?? ""
-        }).ToList();
+            var roleEntity = await _roleManager.FindByIdAsync(role.Id);
+            if (roleEntity != null)
+            {
+                var claims = await _roleManager.GetClaimsAsync(roleEntity);
+                var permissions = claims
+                    .Where(c => c.Type == Permissions.ClaimType)
+                    .Select(c => c.Value)
+                    .ToList();
+                RolePermissions[role.Id] = permissions;
+            }
+        }
 
         // Obtener todos los usuarios con sus roles
         var allUsers = await _userManager.Users
@@ -66,6 +94,8 @@ public class RolesModel : PageModel
                 Roles = userRoles.ToList()
             });
         }
+
+        SelectedRoleId = roleId;
     }
 
     public async Task<IActionResult> OnPostCreateRoleAsync()
@@ -90,13 +120,17 @@ public class RolesModel : PageModel
 
         if (result.Succeeded)
         {
+            // Asignar permisos por defecto según el nombre del rol
+            var defaultPermissions = Permissions.GetDefaultPermissionsForRole(roleName);
+            foreach (var permission in defaultPermissions)
+            {
+                var claim = new System.Security.Claims.Claim(Permissions.ClaimType, permission);
+                await _roleManager.AddClaimAsync(role, claim);
+            }
+
             var actorUserId = _userManager.GetUserId(User) ?? "";
-            var actorEmail = (await _userManager.GetUserAsync(User))?.Email;
-            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
             
-            await _auditService.LogChangeAsync(actorUserId, actorEmail, "Rol", role.Id, "Create", null, new { Name = roleName }, ipAddress);
-            
-            TempData["FlashSuccess"] = $"Rol '{roleName}' creado exitosamente.";
+            TempData["FlashSuccess"] = $"Rol '{roleName}' creado exitosamente con permisos por defecto.";
             _logger.LogInformation("Rol {RoleName} creado por {UserId}", roleName, actorUserId);
         }
         else
@@ -138,10 +172,6 @@ public class RolesModel : PageModel
         if (result.Succeeded)
         {
             var actorUserId = _userManager.GetUserId(User) ?? "";
-            var actorEmail = (await _userManager.GetUserAsync(User))?.Email;
-            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-            
-            await _auditService.LogChangeAsync(actorUserId, actorEmail, "Rol", roleId, "Delete", new { Name = roleName }, null, ipAddress);
             
             TempData["FlashSuccess"] = $"Rol '{roleName}' eliminado exitosamente.";
             _logger.LogInformation("Rol {RoleName} eliminado por {UserId}", roleName, actorUserId);
@@ -174,24 +204,16 @@ public class RolesModel : PageModel
             return RedirectToPage();
         }
 
-        // No permitir agregar Admin si no eres Admin
-        if (rolesToAdd.Contains("Admin") && !User.IsInRole("Admin"))
+        // Solo SuperAdmin (rol Admin) puede asignar/quitar el rol Admin
+        if ((rolesToAdd.Contains("Admin") || rolesToRemove.Contains("Admin")) && !User.IsInRole("Admin"))
         {
-            TempData["FlashError"] = "Solo Admin puede asignar el rol Admin.";
+            TempData["FlashError"] = "Solo SuperAdmin puede gestionar el rol Admin.";
             return RedirectToPage();
         }
 
-        var actorUserId = _userManager.GetUserId(User) ?? "";
-        var actorEmail = (await _userManager.GetUserAsync(User))?.Email;
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-
         foreach (var role in rolesToAdd)
         {
-            var result = await _userManager.AddToRoleAsync(user, role);
-            if (result.Succeeded)
-            {
-                await _auditService.LogUserActionAsync(actorUserId, actorEmail, userId, "AddRole", new { Role = role }, ipAddress);
-            }
+            await _userManager.AddToRoleAsync(user, role);
         }
 
         foreach (var role in rolesToRemove)
@@ -207,15 +229,62 @@ public class RolesModel : PageModel
                 }
             }
 
-            var result = await _userManager.RemoveFromRoleAsync(user, role);
-            if (result.Succeeded)
-            {
-                await _auditService.LogUserActionAsync(actorUserId, actorEmail, userId, "RemoveRole", new { Role = role }, ipAddress);
-            }
+            await _userManager.RemoveFromRoleAsync(user, role);
         }
 
         TempData["FlashSuccess"] = "Roles actualizados exitosamente.";
         return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostUpdateRolePermissionsAsync(string roleId, List<string> selectedPermissions)
+    {
+        var role = await _roleManager.FindByIdAsync(roleId);
+        if (role == null)
+        {
+            TempData["FlashError"] = "Rol no encontrado.";
+            return RedirectToPage();
+        }
+
+        // No permitir modificar permisos de roles del sistema (excepto Admin puede modificar Moderador)
+        var systemRoles = new[] { "Admin", "Beneficiario" };
+        if (systemRoles.Contains(role.Name) && !User.IsInRole("Admin"))
+        {
+            TempData["FlashError"] = "No se pueden modificar permisos de roles del sistema.";
+            return RedirectToPage();
+        }
+
+        // Obtener permisos actuales del rol
+        var currentClaims = await _roleManager.GetClaimsAsync(role);
+        var currentPermissions = currentClaims
+            .Where(c => c.Type == Permissions.ClaimType)
+            .Select(c => c.Value)
+            .ToList();
+
+        // Eliminar permisos que ya no están seleccionados
+        var permissionsToRemove = currentPermissions.Except(selectedPermissions ?? new List<string>()).ToList();
+        foreach (var permission in permissionsToRemove)
+        {
+            var claim = currentClaims.FirstOrDefault(c => c.Type == Permissions.ClaimType && c.Value == permission);
+            if (claim != null)
+            {
+                await _roleManager.RemoveClaimAsync(role, claim);
+            }
+        }
+
+        // Agregar nuevos permisos
+        var permissionsToAdd = (selectedPermissions ?? new List<string>()).Except(currentPermissions).ToList();
+        foreach (var permission in permissionsToAdd)
+        {
+            var claim = new System.Security.Claims.Claim(Permissions.ClaimType, permission);
+            await _roleManager.AddClaimAsync(role, claim);
+        }
+
+        var actorUserId = _userManager.GetUserId(User) ?? "";
+
+        TempData["FlashSuccess"] = $"Permisos del rol '{role.Name}' actualizados exitosamente.";
+        _logger.LogInformation("Permisos del rol {RoleName} actualizados por {UserId}", role.Name, actorUserId);
+
+        return RedirectToPage(new { roleId });
     }
 
     public class RoleViewModel

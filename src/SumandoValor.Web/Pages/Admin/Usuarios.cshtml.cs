@@ -153,14 +153,12 @@ public class UsuariosModel : PageModel
             user.LockoutEnabled = true;
             user.LockoutEnd = DateTimeOffset.MaxValue;
             await _userManager.UpdateAsync(user);
-            await LogAuditAsync("ToggleActive", user.Id, new { to = "inactive" });
             TempData["FlashSuccess"] = "Usuario desactivado.";
         }
         else
         {
             user.LockoutEnd = null;
             await _userManager.UpdateAsync(user);
-            await LogAuditAsync("ToggleActive", user.Id, new { to = "active" });
             TempData["FlashSuccess"] = "Usuario activado.";
         }
 
@@ -206,8 +204,11 @@ public class UsuariosModel : PageModel
             FechaNacimiento = CreateInput.FechaNacimiento!.Value,
             NivelEducativo = CreateInput.NivelEducativo,
             SituacionLaboral = CreateInput.SituacionLaboral,
+            Sector = CreateInput.Sector ?? "TercerSector", // Valor por defecto si no se especifica
             CanalConocio = CreateInput.CanalConocio,
+            Pais = CreateInput.Pais ?? "Venezuela", // Valor por defecto si no se especifica
             Estado = CreateInput.Estado,
+            Municipio = CreateInput.Municipio,
             Ciudad = CreateInput.Ciudad,
             Telefono = CreateInput.Telefono,
             TieneDiscapacidad = false,
@@ -227,7 +228,6 @@ public class UsuariosModel : PageModel
         var initialRole = CreateInput.InitialRole == "Moderador" ? "Moderador" : "Beneficiario";
         await _userManager.AddToRoleAsync(user, initialRole);
 
-        await LogAuditAsync("CreateUser", user.Id, new { role = initialRole, email = user.Email });
         TempData["FlashSuccess"] = $"Usuario creado ({initialRole}).";
         return RedirectToPage(new { Search = search, Status = status, Role = role, page });
     }
@@ -262,7 +262,6 @@ public class UsuariosModel : PageModel
         }
         else
         {
-            await LogAuditAsync("MakeModerador", user.Id, new { role = "Moderador" });
             TempData["FlashSuccess"] = "Rol Moderador asignado.";
         }
 
@@ -307,7 +306,6 @@ public class UsuariosModel : PageModel
         }
         else
         {
-            await LogAuditAsync("RemoveModerador", user.Id, new { role = "Moderador" });
             TempData["FlashSuccess"] = "Rol Moderador removido.";
         }
 
@@ -329,28 +327,6 @@ public class UsuariosModel : PageModel
         return "/Admin/Usuarios" + (parts.Any() ? "?" + string.Join("&", parts) : "");
     }
 
-    private async Task LogAuditAsync(string action, string targetUserId, object details)
-    {
-        try
-        {
-            var actorUserId = _userManager.GetUserId(User) ?? string.Empty;
-            var payload = JsonSerializer.Serialize(details);
-
-            _context.AdminAuditEvents.Add(new AdminAuditEvent
-            {
-                ActorUserId = actorUserId,
-                TargetUserId = targetUserId,
-                Action = action,
-                DetailsJson = payload,
-                CreatedAt = DateTime.UtcNow
-            });
-            await _context.SaveChangesAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "No se pudo registrar auditoría admin (Action={Action})", action);
-        }
-    }
 
     public sealed class Row
     {
@@ -399,11 +375,19 @@ public class UsuariosModel : PageModel
         [Required(ErrorMessage = "La situación laboral es requerida")]
         public string SituacionLaboral { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "El sector es requerido")]
+        public string Sector { get; set; } = string.Empty;
+
         [Required(ErrorMessage = "El canal por el cual conoció es requerido")]
         public string CanalConocio { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "El país es requerido")]
+        public string Pais { get; set; } = "Venezuela";
+
         [Required(ErrorMessage = "El estado es requerido")]
         public string Estado { get; set; } = string.Empty;
+
+        public string? Municipio { get; set; }
 
         [Required(ErrorMessage = "La ciudad es requerida")]
         public string Ciudad { get; set; } = string.Empty;

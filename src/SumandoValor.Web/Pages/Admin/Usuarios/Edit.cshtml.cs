@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -115,11 +114,6 @@ public class EditModel : PageModel
                 return Page();
             }
 
-            await LogAuditAsync("EditUser", user.Id, new
-            {
-                fields = new { Input.Nombres, Input.Apellidos, Input.Cedula, Input.Sexo, Input.Telefono, Input.IsActive }
-            });
-
             TempData["FlashSuccess"] = "Usuario actualizado.";
             return RedirectToPage("/Admin/Usuarios");
         }
@@ -130,29 +124,6 @@ public class EditModel : PageModel
             ModelState.AddModelError(string.Empty, "No se pudo guardar. Verifica que la cédula no esté repetida.");
             Email = user.Email ?? user.UserName ?? "";
             return Page();
-        }
-    }
-
-    private async Task LogAuditAsync(string action, string targetUserId, object details)
-    {
-        try
-        {
-            var actorUserId = _userManager.GetUserId(User) ?? string.Empty;
-            var payload = JsonSerializer.Serialize(details);
-
-            _context.AdminAuditEvents.Add(new AdminAuditEvent
-            {
-                ActorUserId = actorUserId,
-                TargetUserId = targetUserId,
-                Action = action,
-                DetailsJson = payload,
-                CreatedAt = DateTime.UtcNow
-            });
-            await _context.SaveChangesAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "No se pudo registrar auditoría admin (Action={Action})", action);
         }
     }
 

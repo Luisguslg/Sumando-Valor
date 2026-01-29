@@ -1,206 +1,136 @@
-@page "/Admin/Auditoria"
+@page
 @model SumandoValor.Web.Pages.Admin.AuditoriaModel
-@using System.Text.Json
-@using System.Text.Json.Serialization
 @{
-    ViewData["Title"] = "Auditoría del Sistema";
+    ViewData["Title"] = "Auditoría";
     Layout = "~/Pages/Shared/_AdminLayout.cshtml";
 }
 
-@await Html.PartialAsync("_PageHeader", new SumandoValor.Web.Pages.Shared.PageHeaderModel
-{
-    Title = "Auditoría del Sistema",
-    Subtitle = "Registro completo de cambios y acciones en el sistema.",
-    UseBrandBackground = false
-})
-
-<div class="container my-4">
-    <!-- Filtros -->
-    <div class="admin-card mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label small">Tipo de Entidad</label>
-                    <select class="form-select" name="EntityType">
-                        <option value="">Todos</option>
-                        <option value="Curso" selected="@(Model.EntityType == "Curso")">Curso</option>
-                        <option value="Taller" selected="@(Model.EntityType == "Taller")">Taller</option>
-                        <option value="Usuario" selected="@(Model.EntityType == "Usuario")">Usuario</option>
-                        <option value="Rol" selected="@(Model.EntityType == "Rol")">Rol</option>
-                        <option value="Inscripcion" selected="@(Model.EntityType == "Inscripcion")">Inscripción</option>
-                        <option value="Certificado" selected="@(Model.EntityType == "Certificado")">Certificado</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label small">Acción</label>
-                    <select class="form-select" name="Action">
-                        <option value="">Todas</option>
-                        <option value="Create" selected="@(Model.Action == "Create")">Crear</option>
-                        <option value="Update" selected="@(Model.Action == "Update")">Actualizar</option>
-                        <option value="Delete" selected="@(Model.Action == "Delete")">Eliminar</option>
-                        <option value="ToggleActive" selected="@(Model.Action == "ToggleActive")">Activar/Desactivar</option>
-                        <option value="MakeModerador" selected="@(Model.Action == "MakeModerador")">Asignar Moderador</option>
-                        <option value="RemoveModerador" selected="@(Model.Action == "RemoveModerador")">Quitar Moderador</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label small">Buscar</label>
-                    <input class="form-control" name="Search" value="@Model.Search" placeholder="Email, entidad, acción..." />
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small">&nbsp;</label>
-                    <button class="btn btn-primary w-100" type="submit">Filtrar</button>
-                </div>
-            </form>
+<div class="admin-card">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h1 class="h4 mb-1">Registro de Auditoría</h1>
+            <div class="text-muted">Logs de cambios por tabla y acción. Solo visible para Admin.</div>
         </div>
     </div>
 
-    <!-- Resultados -->
-    <div class="admin-card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Eventos de Auditoría</h5>
-            <span class="badge bg-secondary">Total: @Model.TotalCount</span>
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label small">Tabla</label>
+            <select name="TableName" class="form-select">
+                <option value="">Todas</option>
+                <option value="Cursos" selected="@(Model.TableName == "Cursos")">Cursos</option>
+                <option value="Talleres" selected="@(Model.TableName == "Talleres")">Talleres</option>
+                <option value="Inscripciones" selected="@(Model.TableName == "Inscripciones")">Inscripciones</option>
+                <option value="Certificados" selected="@(Model.TableName == "Certificados")">Certificados</option>
+                <option value="EncuestasSatisfaccion" selected="@(Model.TableName == "EncuestasSatisfaccion")">Encuestas</option>
+                <option value="MensajesContacto" selected="@(Model.TableName == "MensajesContacto")">Mensajes</option>
+                <option value="CarouselItems" selected="@(Model.TableName == "CarouselItems")">Carrusel</option>
+                <option value="SiteImages" selected="@(Model.TableName == "SiteImages")">Imágenes</option>
+            </select>
         </div>
-        <div class="card-body">
-            @if (Model.Events == null || !Model.Events.Any())
-            {
-                <p class="text-muted">No se encontraron eventos de auditoría.</p>
-            }
-            else
-            {
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Fecha/Hora</th>
-                                <th>Usuario</th>
-                                <th>Entidad</th>
-                                <th>Acción</th>
-                                <th>Detalles</th>
-                                <th>IP</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var evt in Model.Events)
-                            {
-                                <tr>
-                                    <td>
-                                        <div>@evt.CreatedAt.ToString("dd/MM/yyyy")</div>
-                                        <div class="text-muted small">@evt.CreatedAt.ToString("HH:mm:ss")</div>
-                                    </td>
-                                    <td>
-                                        <div class="fw-semibold">@evt.ActorName</div>
-                                        @if (!string.IsNullOrEmpty(evt.ActorEmail))
-                                        {
-                                            <div class="text-muted small">@evt.ActorEmail</div>
-                                        }
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-info">@evt.EntityType</span>
-                                        @if (!string.IsNullOrEmpty(evt.EntityId))
-                                        {
-                                            <div class="text-muted small mt-1">ID: @evt.EntityId</div>
-                                        }
-                                    </td>
-                                    <td>
-                                        <span class="badge @(evt.Action switch {
-                                            "Create" => "bg-success",
-                                            "Update" => "bg-warning",
-                                            "Delete" => "bg-danger",
-                                            _ => "bg-secondary"
-                                        })">@evt.Action</span>
-                                    </td>
-                                    <td>
-                                        @if (evt.OldValues != null || evt.NewValues != null)
-                                        {
-                                            <button type="button" class="btn btn-sm btn-outline-info" 
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#detailsModal_@evt.Id">
-                                                Ver Cambios
-                                            </button>
-                                            
-                                            <!-- Modal para detalles -->
-                                            <div class="modal fade" id="detailsModal_@evt.Id" tabindex="-1">
-                                                <div class="modal-dialog modal-lg">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title">Detalles del Cambio</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            @if (evt.OldValues != null)
-                                                            {
-                                                                <h6>Valores Anteriores:</h6>
-                                                                <pre class="bg-light p-3 rounded"><code>@System.Text.Json.JsonSerializer.Serialize(evt.OldValues, new JsonSerializerOptions { WriteIndented = true })</code></pre>
-                                                            }
-                                                            @if (evt.NewValues != null)
-                                                            {
-                                                                <h6>Valores Nuevos:</h6>
-                                                                <pre class="bg-light p-3 rounded"><code>@System.Text.Json.JsonSerializer.Serialize(evt.NewValues, new JsonSerializerOptions { WriteIndented = true })</code></pre>
-                                                            }
-                                                            @if (evt.Details != null)
-                                                            {
-                                                                <h6>Información Adicional:</h6>
-                                                                <pre class="bg-light p-3 rounded"><code>@System.Text.Json.JsonSerializer.Serialize(evt.Details, new JsonSerializerOptions { WriteIndented = true })</code></pre>
-                                                            }
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        }
-                                        else if (evt.Details != null)
-                                        {
-                                            <span class="text-muted small">Ver detalles</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (!string.IsNullOrEmpty(evt.IpAddress))
-                                        {
-                                            <code class="small">@evt.IpAddress</code>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">-</span>
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+        <div class="col-md-4">
+            <label class="form-label small">Acción</label>
+            <select name="Action" class="form-select">
+                <option value="">Todas</option>
+                <option value="INSERT" selected="@(Model.Action == "INSERT")">Crear</option>
+                <option value="UPDATE" selected="@(Model.Action == "UPDATE")">Actualizar</option>
+                <option value="DELETE" selected="@(Model.Action == "DELETE")">Eliminar</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+        </div>
+        <div class="col-md-2">
+            <a href="/Admin/Auditoria" class="btn btn-secondary w-100">Limpiar</a>
+        </div>
+    </form>
+</div>
 
-                <!-- Paginación -->
-                @if (Model.TotalPages > 1)
-                {
-                    <nav aria-label="Paginación">
-                        <ul class="pagination justify-content-center">
-                            @if (Model.PageNumber > 1)
-                            {
-                                <li class="page-item">
-                                    <a class="page-link" href="@Model.PageUrl(Model.PageNumber - 1)">Anterior</a>
-                                </li>
-                            }
-                            
-                            @for (int i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.TotalPages, Model.PageNumber + 2); i++)
-                            {
-                                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
-                                    <a class="page-link" href="@Model.PageUrl(i)">@i</a>
-                                </li>
-                            }
-                            
-                            @if (Model.PageNumber < Model.TotalPages)
-                            {
-                                <li class="page-item">
-                                    <a class="page-link" href="@Model.PageUrl(Model.PageNumber + 1)">Siguiente</a>
-                                </li>
-                            }
-                        </ul>
-                    </nav>
-                }
-            }
+<div class="admin-card">
+    @if (Model.Logs.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Tabla</th>
+                        <th>Acción</th>
+                        <th>Registro ID</th>
+                        <th>Usuario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var log in Model.Logs)
+                    {
+                        <tr>
+                            <td class="text-nowrap">@log.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                            <td>@log.TableName</td>
+                            <td>
+                                @if (log.Action == "INSERT")
+                                {
+                                    <span class="badge bg-success">Crear</span>
+                                }
+                                else if (log.Action == "UPDATE")
+                                {
+                                    <span class="badge bg-warning text-dark">Actualizar</span>
+                                }
+                                else if (log.Action == "DELETE")
+                                {
+                                    <span class="badge bg-danger">Eliminar</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@log.Action</span>
+                                }
+                            </td>
+                            <td>@log.RecordId</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(log.UserEmail))
+                                {
+                                    @log.UserEmail
+                                }
+                                else if (!string.IsNullOrEmpty(log.UserId))
+                                {
+                                    <span class="text-muted small">@log.UserId</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Sistema</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
-    </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="Paginación" class="mt-3">
+                <ul class="pagination justify-content-center mb-0">
+                    <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                        <a class="page-link" href="@(Model.PageNumber <= 1 ? "#" : Model.GetPageUrl(Model.PageNumber - 1))">Anterior</a>
+                    </li>
+                    @for (var i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.TotalPages, Model.PageNumber + 2); i++)
+                    {
+                        <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                            <a class="page-link" href="@Model.GetPageUrl(i)">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link" href="@(Model.PageNumber >= Model.TotalPages ? "#" : Model.GetPageUrl(Model.PageNumber + 1))">Siguiente</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+
+        <div class="mt-3 text-muted small">
+            Mostrando @((Model.PageNumber - 1) * Model.PageSize + 1) - @(Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount)) de @Model.TotalCount registros
+        </div>
+    }
+    else
+    {
+        <p class="text-muted mb-0">No se encontraron registros de auditoría con los filtros actuales.</p>
+    }
 </div>

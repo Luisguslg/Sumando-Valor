@@ -64,9 +64,6 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddHttpClient();
 
-// Servicio de auditoría
-builder.Services.AddScoped<SumandoValor.Infrastructure.Services.IAuditService, SumandoValor.Infrastructure.Services.AuditService>();
-
 // Almacenamiento de emails en desarrollo: persistir en disco para que sobrevivan reinicios
 var devEmailPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "DevEmails");
 builder.Services.AddSingleton<IDevEmailStore>(_ => new FileDevEmailStore(devEmailPath));
@@ -210,6 +207,9 @@ app.Use(async (context, next) =>
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+// Establecer contexto de usuario para triggers de auditoría
+app.UseMiddleware<SumandoValor.Web.Middleware.AuditContextMiddleware>();
 
 // Rate limiting para endpoints públicos (antes de routing para mejor performance)
 app.UseMiddleware<SumandoValor.Web.Middleware.RateLimitingMiddleware>();

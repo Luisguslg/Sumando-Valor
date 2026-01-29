@@ -164,7 +164,7 @@ public class DetailsModel : PageModel
         }
 
         // Verificar acceso a curso interno si el curso no es público
-        if (Taller.Curso != null && !Taller.Curso.EsPublico)
+        if (Taller?.Curso != null && !Taller.Curso.EsPublico)
         {
             var hasAccess = HttpContext.Session.GetString($"curso_access_{Taller.CursoId}") == "granted";
             

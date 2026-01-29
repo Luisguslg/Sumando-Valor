@@ -88,6 +88,26 @@
                 </div>
 
                 <div class="col-md-6">
+                    <label asp-for="CreateInput.Sector" class="form-label">Sector <span class="text-danger">*</span></label>
+                    <select asp-for="CreateInput.Sector" class="form-select">
+                        <option value="">Seleccione...</option>
+                        <option value="TercerSector">Tercer sector</option>
+                        <option value="SectorPrivado">Sector privado</option>
+                        <option value="SectorPublico">Sector público</option>
+                        <option value="Academia">Academia</option>
+                    </select>
+                    <span asp-validation-for="CreateInput.Sector" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="CreateInput.Pais" class="form-label">País <span class="text-danger">*</span></label>
+                    <select asp-for="CreateInput.Pais" class="form-select">
+                        <option value="Venezuela" selected>Venezuela</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                    <span asp-validation-for="CreateInput.Pais" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
                     <label asp-for="CreateInput.Estado" class="form-label">Estado <span class="text-danger">*</span></label>
                     <select asp-for="CreateInput.Estado" class="form-select">
                         <option value="">Seleccione...</option>

@@ -19,13 +19,13 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Certificado> Certificados { get; set; }
     public DbSet<EncuestaSatisfaccion> EncuestasSatisfaccion { get; set; }
     public DbSet<MensajeContacto> MensajesContacto { get; set; }
-    public DbSet<AdminAuditEvent> AdminAuditEvents { get; set; }
     public DbSet<CarouselItem> CarouselItems { get; set; }
     public DbSet<SiteImage> SiteImages { get; set; }
     public DbSet<SurveyTemplate> SurveyTemplates { get; set; }
     public DbSet<SurveyQuestion> SurveyQuestions { get; set; }
     public DbSet<SurveyResponse> SurveyResponses { get; set; }
     public DbSet<SurveyAnswer> SurveyAnswers { get; set; }
+    public DbSet<AuditLog> AuditLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -145,24 +145,6 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.Mensaje).IsRequired().HasMaxLength(2000);
         });
 
-        builder.Entity<AdminAuditEvent>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.HasIndex(e => e.CreatedAt);
-            entity.HasIndex(e => e.ActorUserId);
-            entity.HasIndex(e => e.TargetUserId);
-            entity.HasIndex(e => e.EntityType);
-            entity.HasIndex(e => e.EntityId);
-            entity.Property(e => e.Action).IsRequired().HasMaxLength(80);
-            entity.Property(e => e.EntityType).HasMaxLength(100);
-            entity.Property(e => e.EntityId).HasMaxLength(100);
-            entity.Property(e => e.ActorEmail).HasMaxLength(256);
-            entity.Property(e => e.DetailsJson).HasMaxLength(4000);
-            entity.Property(e => e.OldValuesJson).HasMaxLength(4000);
-            entity.Property(e => e.NewValuesJson).HasMaxLength(4000);
-            entity.Property(e => e.IpAddress).HasMaxLength(45);
-        });
-
         builder.Entity<CarouselItem>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -219,6 +201,19 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.QuestionId);
             entity.Property(e => e.Value).IsRequired().HasMaxLength(2000);
+        });
+
+        builder.Entity<AuditLog>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.TableName);
+            entity.HasIndex(e => e.CreatedAt);
+            entity.HasIndex(e => e.UserId);
+            entity.Property(e => e.TableName).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Action).IsRequired().HasMaxLength(20);
+            entity.Property(e => e.RecordId).HasMaxLength(100);
+            entity.Property(e => e.UserId).HasMaxLength(450);
+            entity.Property(e => e.UserEmail).HasMaxLength(256);
         });
     }
 }
