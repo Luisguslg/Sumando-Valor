@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.SqlServer;
 using SumandoValor.Domain.Entities;
 using SumandoValor.Domain.Entities.Surveys;
 
@@ -217,17 +218,17 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         });
 
         // Tablas con triggers de auditoría: desactivar OUTPUT para que SQL Server permita INSERT/UPDATE
-        builder.Entity<Curso>().ToTable("Cursos", tb => tb.UseSqlOutputClause(false));
-        builder.Entity<Taller>().ToTable("Talleres", tb => tb.UseSqlOutputClause(false));
-        builder.Entity<Inscripcion>().ToTable("Inscripciones", tb => tb.UseSqlOutputClause(false));
-        builder.Entity<Certificado>().ToTable("Certificados", tb => tb.UseSqlOutputClause(false));
-        builder.Entity<EncuestaSatisfaccion>().ToTable("EncuestasSatisfaccion", tb => tb.UseSqlOutputClause(false));
-        builder.Entity<MensajeContacto>().ToTable("MensajesContacto", tb => tb.UseSqlOutputClause(false));
-        builder.Entity<CarouselItem>().ToTable("CarouselItems", tb => tb.UseSqlOutputClause(false));
-        builder.Entity<SiteImage>().ToTable("SiteImages", tb => tb.UseSqlOutputClause(false));
-        builder.Entity<SurveyTemplate>().ToTable("SurveyTemplates", tb => tb.UseSqlOutputClause(false));
-        builder.Entity<SurveyQuestion>().ToTable("SurveyQuestions", tb => tb.UseSqlOutputClause(false));
-        builder.Entity<SurveyResponse>().ToTable("SurveyResponses", tb => tb.UseSqlOutputClause(false));
-        builder.Entity<SurveyAnswer>().ToTable("SurveyAnswers", tb => tb.UseSqlOutputClause(false));
+        builder.Entity<Curso>().UseSqlOutputClause(false);
+        builder.Entity<Taller>().UseSqlOutputClause(false);
+        builder.Entity<Inscripcion>().UseSqlOutputClause(false);
+        builder.Entity<Certificado>().UseSqlOutputClause(false);
+        builder.Entity<EncuestaSatisfaccion>().UseSqlOutputClause(false);
+        builder.Entity<MensajeContacto>().UseSqlOutputClause(false);
+        builder.Entity<CarouselItem>().UseSqlOutputClause(false);
+        builder.Entity<SiteImage>().UseSqlOutputClause(false);
+        builder.Entity<SurveyTemplate>().UseSqlOutputClause(false);
+        builder.Entity<SurveyQuestion>().UseSqlOutputClause(false);
+        builder.Entity<SurveyResponse>().UseSqlOutputClause(false);
+        builder.Entity<SurveyAnswer>().UseSqlOutputClause(false);
     }
 }
