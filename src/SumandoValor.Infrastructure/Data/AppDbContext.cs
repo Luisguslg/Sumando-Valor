@@ -218,17 +218,17 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         });
 
         // Tablas con triggers de auditoría: desactivar OUTPUT para que SQL Server permita INSERT/UPDATE
-        builder.Entity<Curso>().UseSqlOutputClause(false);
-        builder.Entity<Taller>().UseSqlOutputClause(false);
-        builder.Entity<Inscripcion>().UseSqlOutputClause(false);
-        builder.Entity<Certificado>().UseSqlOutputClause(false);
-        builder.Entity<EncuestaSatisfaccion>().UseSqlOutputClause(false);
-        builder.Entity<MensajeContacto>().UseSqlOutputClause(false);
-        builder.Entity<CarouselItem>().UseSqlOutputClause(false);
-        builder.Entity<SiteImage>().UseSqlOutputClause(false);
-        builder.Entity<SurveyTemplate>().UseSqlOutputClause(false);
-        builder.Entity<SurveyQuestion>().UseSqlOutputClause(false);
-        builder.Entity<SurveyResponse>().UseSqlOutputClause(false);
-        builder.Entity<SurveyAnswer>().UseSqlOutputClause(false);
+        builder.Entity<Curso>().Metadata.UseSqlOutputClause(false);
+        builder.Entity<Taller>().Metadata.UseSqlOutputClause(false);
+        builder.Entity<Inscripcion>().Metadata.UseSqlOutputClause(false);
+        builder.Entity<Certificado>().Metadata.UseSqlOutputClause(false);
+        builder.Entity<EncuestaSatisfaccion>().Metadata.UseSqlOutputClause(false);
+        builder.Entity<MensajeContacto>().Metadata.UseSqlOutputClause(false);
+        builder.Entity<CarouselItem>().Metadata.UseSqlOutputClause(false);
+        builder.Entity<SiteImage>().Metadata.UseSqlOutputClause(false);
+        builder.Entity<SurveyTemplate>().Metadata.UseSqlOutputClause(false);
+        builder.Entity<SurveyQuestion>().Metadata.UseSqlOutputClause(false);
+        builder.Entity<SurveyResponse>().Metadata.UseSqlOutputClause(false);
+        builder.Entity<SurveyAnswer>().Metadata.UseSqlOutputClause(false);
     }
 }
