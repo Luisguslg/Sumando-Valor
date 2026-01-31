@@ -216,6 +216,13 @@ Todos los perfiles usan `ASPNETCORE_ENVIRONMENT=Development`. Para pruebas local
 - [x] Actualizar documentación (AdminAuditEvent → AuditLog en 01, 03, 04, 05, 07, 08)
 - [ ] Revisar ítems pendientes del PDF de revisión (UI/UX)
 
+### Mejoras posteriores (pre pruebas 2)
+- [x] SendAccess: envío a múltiples correos (textarea, coma/línea/semicolon)
+- [x] Emails HTML con plantilla KPMG (EmailTemplates.cs)
+- [x] Generar enlace: formulario separado (no anidado)
+- [x] Clave de acceso: validación case-insensitive
+- [x] UI encuestas: Create, Index, Edit mejorados
+
 ---
 
 **Fecha de auditoría:** 31 de enero de 2026  

@@ -308,9 +308,10 @@ La auditoría es requerida por **NITSO** y permite:
 
 ### Enviar Enlace por Correo
 
-1. En la página de edición del programa interno, haz clic en **"Enviar enlace por correo"**
-2. Busca al usuario por nombre o email
-3. El sistema enviará automáticamente el enlace al usuario
+1. En la página de edición del programa interno, haz clic en **"Enviar enlace por correo a varias personas"**
+2. Ingresa uno o más correos (uno por línea, o separados por coma o punto y coma)
+3. Opcional: usa el desplegable para agregar usuarios registrados a la lista
+4. El sistema enviará el enlace HTML a cada destinatario
 
 ### Agregar Usuario Directamente
 

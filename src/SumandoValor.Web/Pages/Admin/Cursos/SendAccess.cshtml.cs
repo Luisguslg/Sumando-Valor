@@ -37,9 +37,8 @@ public class SendAccessModel : PageModel
     {
         public int CursoId { get; set; }
 
-        [Required(ErrorMessage = "El email es requerido")]
-        [EmailAddress(ErrorMessage = "El email no es válido")]
-        public string Email { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Ingresa al menos un correo electrónico")]
+        public string Emails { get; set; } = string.Empty;
 
         [Range(1, 365, ErrorMessage = "Los días de expiración deben estar entre 1 y 365")]
         public int DiasExpiracion { get; set; } = 30;
@@ -81,6 +80,24 @@ public class SendAccessModel : PageModel
             return NotFound();
         }
 
+        // Parsear emails (líneas, comas o punto y coma)
+        var emailList = (Input.Emails ?? "")
+            .Split(new[] { '\n', '\r', ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(e => e.Trim())
+            .Where(e => e.Length > 0 && e.Contains('@'))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (emailList.Count == 0)
+        {
+            ModelState.AddModelError(nameof(Input.Emails), "Ingresa al menos un correo electrónico válido.");
+            Usuarios = await _context.Users
+                .OrderBy(u => u.Nombres)
+                .ThenBy(u => u.Apellidos)
+                .ToListAsync();
+            return Page();
+        }
+
         if (!ModelState.IsValid)
         {
             Usuarios = await _context.Users
@@ -90,35 +107,38 @@ public class SendAccessModel : PageModel
             return Page();
         }
 
-        // Generar token único (cada vez que se envía, se genera uno nuevo, invalidando el anterior)
+        // Generar token único (compartido para todos los destinatarios)
         var token = GenerateUniqueToken();
         Curso.TokenAccesoUnico = token;
         Curso.TokenExpiracion = DateTime.UtcNow.AddDays(Input.DiasExpiracion);
 
         await _context.SaveChangesAsync();
 
-        // Generar enlace de acceso
         var accessLink = Url.Page(
             "/Cursos/Details",
             pageHandler: null,
             values: new { id = Curso.Id, token = token },
-            protocol: Request.Scheme);
+            protocol: Request.Scheme) ?? string.Empty;
+
+        var successCount = 0;
+        var errors = new List<string>();
 
         try
         {
-            await _emailService.SendCourseAccessLinkAsync(
-                Input.Email,
-                Curso.Titulo,
-                accessLink ?? string.Empty);
-
-            _logger.LogInformation("Enlace de acceso enviado para curso {CursoId} a {Email}", Curso.Id, Input.Email);
-            TempData["FlashSuccess"] = $"Enlace de acceso enviado exitosamente a {Input.Email}";
+            await _emailService.SendCourseAccessLinkToMultipleAsync(emailList, Curso.Titulo, accessLink);
+            successCount = emailList.Count;
+            _logger.LogInformation("Enlace de acceso enviado para curso {CursoId} a {Count} destinatarios", Curso.Id, successCount);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error enviando enlace de acceso para curso {CursoId} a {Email}", Curso.Id, Input.Email);
-            TempData["FlashError"] = $"Error al enviar el email: {ex.Message}";
+            _logger.LogError(ex, "Error enviando enlaces de acceso para curso {CursoId}", Curso.Id);
+            TempData["FlashError"] = $"Error al enviar los correos: {ex.Message}";
+            return RedirectToPage("/Admin/Cursos/SendAccess", new { id = Curso.Id });
         }
+
+        TempData["FlashSuccess"] = successCount == 1
+            ? $"Enlace enviado exitosamente a {emailList[0]}"
+            : $"Enlace enviado exitosamente a {successCount} destinatarios.";
 
         return RedirectToPage("/Admin/Cursos");
     }

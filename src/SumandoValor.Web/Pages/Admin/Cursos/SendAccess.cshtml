@@ -30,21 +30,27 @@ else
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                         
                         <div class="mb-3">
-                            <label asp-for="Input.Email" class="form-label">Email del destinatario *</label>
-                            <input asp-for="Input.Email" class="form-control" type="email" placeholder="usuario@ejemplo.com" />
-                            <span asp-validation-for="Input.Email" class="text-danger"></span>
-                            <small class="text-muted">Se enviará un enlace único para acceder al Programa Formativo.</small>
+                            <label asp-for="Input.Emails" class="form-label">Correos electrónicos *</label>
+                            <textarea asp-for="Input.Emails" class="form-control" rows="4" 
+                                placeholder="Un correo por línea, o separados por coma o punto y coma. Ej:&#10;usuario1@ejemplo.com&#10;usuario2@ejemplo.com"></textarea>
+                            <span asp-validation-for="Input.Emails" class="text-danger"></span>
+                            <small class="text-muted">Ingresa uno o más correos. Se enviará el enlace a cada destinatario.</small>
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">O seleccionar usuario registrado</label>
-                            <select id="userSelect" class="form-select">
-                                <option value="">Seleccionar usuario...</option>
-                                @foreach (var user in Model.Usuarios)
-                                {
-                                    <option value="@user.Email">@user.Nombres @user.Apellidos (@user.Email)</option>
-                                }
-                            </select>
+                            <label class="form-label">O agregar usuario registrado</label>
+                            <div class="input-group">
+                                <select id="userSelect" class="form-select">
+                                    <option value="">Seleccionar para agregar...</option>
+                                    @foreach (var user in Model.Usuarios)
+                                    {
+                                        <option value="@user.Email">@user.Nombres @user.Apellidos (@user.Email)</option>
+                                    }
+                                </select>
+                                <button type="button" class="btn btn-outline-secondary" id="btnAddUser" title="Agregar a la lista">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+                            </div>
                         </div>
                         
                         <div class="mb-3">
@@ -55,7 +61,7 @@ else
                         </div>
                         
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Generar y Enviar Enlace</button>
+                            <button type="submit" class="btn btn-primary">Generar y Enviar Enlace a Todos</button>
                             <a asp-page="/Admin/Cursos" class="btn btn-secondary">Cancelar</a>
                         </div>
                     </form>
@@ -67,11 +73,27 @@ else
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    <script>
-        document.getElementById('userSelect').addEventListener('change', function() {
-            if (this.value) {
-                document.getElementById('Input_Email').value = this.value;
-            }
-        });
-    </script>
+    @if (Model.Curso != null)
+    {
+        <script>
+            (function() {
+                var select = document.getElementById('userSelect');
+                var textarea = document.getElementById('Input_Emails');
+                var btnAdd = document.getElementById('btnAddUser');
+                if (!select || !textarea) return;
+                function addEmail(email) {
+                    if (!email) return;
+                    var current = (textarea.value || '').trim();
+                    var emails = current ? current.split(/[\n,;]+/).map(function(e){ return e.trim(); }).filter(Boolean) : [];
+                    if (emails.indexOf(email) === -1) {
+                        emails.push(email);
+                        textarea.value = emails.join('\n');
+                    }
+                    select.value = '';
+                }
+                select.addEventListener('change', function() { addEmail(this.value); });
+                if (btnAdd) btnAdd.addEventListener('click', function() { addEmail(select.value); });
+            })();
+        </script>
+    }
 }

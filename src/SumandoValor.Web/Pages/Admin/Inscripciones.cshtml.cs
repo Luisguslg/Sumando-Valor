@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SumandoValor.Domain.Entities;
 using SumandoValor.Infrastructure.Data;
+using SumandoValor.Infrastructure.Services;
 using System.Data;
 using System.Text;
 using Microsoft.Data.SqlClient;
@@ -15,11 +16,13 @@ public class InscripcionesModel : PageModel
 {
     private readonly AppDbContext _context;
     private readonly ILogger<InscripcionesModel> _logger;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public InscripcionesModel(AppDbContext context, ILogger<InscripcionesModel> logger)
+    public InscripcionesModel(AppDbContext context, ILogger<InscripcionesModel> logger, IHttpContextAccessor httpContextAccessor)
     {
         _context = context;
         _logger = logger;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public List<InscripcionViewModel> Inscripciones { get; set; } = new();
@@ -144,6 +147,54 @@ public class InscripcionesModel : PageModel
 
         await _context.SaveChangesAsync();
         TempData["FlashSuccess"] = $"Asistencia actualizada para {inscripciones.Count} inscripciones.";
+        return RedirectToPage(new { tallerId = TallerIdFiltro });
+    }
+
+    public async Task<IActionResult> OnPostSendEmailBatchAsync(string subject, string message)
+    {
+        if (SelectedInscripcionIds == null || !SelectedInscripcionIds.Any())
+        {
+            TempData["FlashInfo"] = "No se seleccionaron destinatarios.";
+            return RedirectToPage(new { tallerId = TallerIdFiltro });
+        }
+
+        if (string.IsNullOrWhiteSpace(subject) || string.IsNullOrWhiteSpace(message))
+        {
+            TempData["FlashError"] = "Asunto y mensaje son requeridos.";
+            return RedirectToPage(new { tallerId = TallerIdFiltro });
+        }
+
+        var users = await _context.Inscripciones
+            .Where(i => SelectedInscripcionIds.Contains(i.Id))
+            .Select(i => i.User)
+            .Distinct()
+            .ToListAsync();
+
+        int successCount = 0;
+        var emailService = _httpContextAccessor.HttpContext?.RequestServices.GetService<IEmailService>();
+        
+        if (emailService != null)
+        {
+            var htmlBody = EmailTemplates.GenericMessageHtml(subject, message);
+            
+            foreach (var user in users)
+            {
+                if (!string.IsNullOrWhiteSpace(user.Email))
+                {
+                    try
+                    {
+                        await emailService.SendEmailAsync(user.Email, subject, htmlBody, isHtml: true);
+                        successCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error enviando correo masivo a {Email}", user.Email);
+                    }
+                }
+            }
+        }
+
+        TempData["FlashSuccess"] = $"Correo enviado a {successCount} usuarios.";
         return RedirectToPage(new { tallerId = TallerIdFiltro });
     }
 

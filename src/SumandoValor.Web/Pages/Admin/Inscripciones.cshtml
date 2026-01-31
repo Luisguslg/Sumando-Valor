@@ -73,7 +73,45 @@
         <button type="submit" asp-page-handler="UpdateAttendanceBatch" asp-route-attended="false" form="batchForm" class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-x me-1"></i>Desmarcar Asistencia
         </button>
+        <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalSendEmail">
+            <i class="bi bi-envelope me-1"></i>Enviar Correo
+        </button>
     </div>
+
+    <!-- ... table ... -->
+    <!-- (Existing Table code remains, wrapped in form) --> 
+
+<!-- Modal Enviar Correo Massivo -->
+<div class="modal fade" id="modalSendEmail" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Enviar Correo a Seleccionados</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Asunto</label>
+                    <input type="text" name="subject" form="batchForm" class="form-control" required placeholder="Asunto del correo...">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Mensaje</label>
+                    <textarea name="message" form="batchForm" class="form-control" rows="5" required placeholder="Escribe tu mensaje aquí..."></textarea>
+                    <small class="text-muted">Se enviará con el diseño oficial de Sumando Valor.</small>
+                </div>
+                <div class="alert alert-info py-2">
+                    <small><i class="bi bi-info-circle me-1"></i>Asegúrate de haber seleccionado los destinatarios en la tabla.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" asp-page-handler="SendEmailBatch" form="batchForm" class="btn btn-primary">
+                    <i class="bi bi-send me-1"></i>Enviar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
     <form method="post" id="batchForm">
     <div class="table-responsive">

@@ -16,7 +16,7 @@ public sealed class SmtpEmailService : IEmailService
         _options = options.Value;
     }
 
-    public async Task SendEmailAsync(string to, string subject, string body)
+    public async Task SendEmailAsync(string to, string subject, string body, bool isHtml = false)
     {
         if (!_options.Enabled)
         {
@@ -38,7 +38,7 @@ public sealed class SmtpEmailService : IEmailService
             From = new MailAddress(_options.FromAddress, _options.FromName),
             Subject = subject,
             Body = body,
-            IsBodyHtml = false
+            IsBodyHtml = isHtml
         };
         message.To.Add(to);
 
@@ -123,12 +123,17 @@ public sealed class SmtpEmailService : IEmailService
 
     public Task SendCourseAccessLinkAsync(string to, string cursoTitulo, string accessLink)
     {
-        var body =
-            $"Has sido invitado a acceder al Programa Formativo: {cursoTitulo}\n\n" +
-            $"Haz clic en el siguiente enlace para acceder:\n\n{accessLink}\n\n" +
-            "Este enlace es único y personal. No lo compartas con otras personas.";
+        var body = EmailTemplates.CourseAccessLinkHtml(cursoTitulo, accessLink);
+        return SendEmailAsync(to, $"Invitación al Programa Formativo: {cursoTitulo} - Sumando Valor", body, isHtml: true);
+    }
 
-        return SendEmailAsync(to, $"Invitación al Programa Formativo: {cursoTitulo} - Sumando Valor", body);
+    public async Task SendCourseAccessLinkToMultipleAsync(IEnumerable<string> emails, string cursoTitulo, string accessLink)
+    {
+        var list = emails.Where(e => !string.IsNullOrWhiteSpace(e)).Select(e => e.Trim()).Distinct().ToList();
+        foreach (var email in list)
+        {
+            await SendCourseAccessLinkAsync(email, cursoTitulo, accessLink);
+        }
     }
 }
 

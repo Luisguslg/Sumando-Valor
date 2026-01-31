@@ -8,8 +8,8 @@
 <div class="admin-card">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
         <div>
-            <h1 class="h4 mb-1">Encuestas</h1>
-            <div class="text-muted">Gestiona encuestas globales (se usan igual para todos los talleres).</div>
+            <h1 class="h4 mb-1"><i class="bi bi-clipboard-data me-2"></i>Encuestas</h1>
+            <p class="text-muted mb-0">Gestiona encuestas de satisfacción que se aplican a todos los talleres.</p>
         </div>
         <a asp-page="/Admin/SurveyTemplates/Create" class="btn btn-primary">
             <i class="bi bi-plus-circle me-1"></i>Nueva encuesta
@@ -18,8 +18,18 @@
 </div>
 
 <div class="admin-card">
+    @if (!Model.Rows.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-clipboard-x display-4 text-muted"></i>
+            <p class="text-muted mt-3">No hay encuestas creadas. Crea la primera para recoger feedback de los participantes.</p>
+            <a asp-page="/Admin/SurveyTemplates/Create" class="btn btn-primary">Crear encuesta</a>
+        </div>
+    }
+    else
+    {
     <div class="table-responsive">
-        <table class="table table-striped align-middle">
+        <table class="table table-hover align-middle">
             <thead>
             <tr>
                 <th>Nombre</th>
@@ -41,7 +51,7 @@
                     <td class="text-end">@t.QuestionCount</td>
                     <td class="text-center">
                         <a asp-page="/Admin/SurveyTemplates/Edit" asp-route-id="@t.Id" class="btn btn-sm btn-outline-primary">
-                            Editar
+                            <i class="bi bi-pencil me-1"></i>Editar
                         </a>
                     </td>
                 </tr>
@@ -49,5 +59,6 @@
             </tbody>
         </table>
     </div>
+    }
 </div>
 

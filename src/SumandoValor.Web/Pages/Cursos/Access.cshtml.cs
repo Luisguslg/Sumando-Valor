@@ -83,9 +83,13 @@ public class AccessModel : PageModel
             return Page();
         }
 
-        // Verificar clave de acceso (comparación case-sensitive para mayor seguridad)
+        // Verificar clave de acceso (case-insensitive para mejor UX)
+        var claveIngresada = Input.ClaveAcceso?.Trim() ?? "";
+        
+        // Null safe check: si la clave del curso es nula, nadie entra (o todos entra, dependiendo logica, aquí asumimos seguridad: nadie).
+        // Si el curso no tiene clave definida, logicamente no deberia pedirla, pero por seguridad fallamos.
         if (string.IsNullOrEmpty(Curso.ClaveAcceso) || 
-            !Curso.ClaveAcceso.Equals(Input.ClaveAcceso.Trim(), StringComparison.Ordinal))
+            !Curso.ClaveAcceso.Equals(claveIngresada, StringComparison.OrdinalIgnoreCase))
         {
             // Log de intento fallido (sin exponer la clave)
             _logger.LogWarning("Intento de acceso fallido al curso {CursoId} con clave incorrecta", id);

@@ -136,13 +136,13 @@ else
             const input = document.getElementById('plataformaInput');
 
             function syncPlataforma() {
-                const modalidad = parseInt(modalidadSelect.value, 10);
-                const requiere = modalidad === @((int)ModalidadTaller.Virtual) || modalidad === @((int)ModalidadTaller.Hibrido);
-
-                wrapper.style.display = requiere ? 'block' : 'none';
-                input.required = requiere;
-
-                if (!requiere) {
+                if (requiere) {
+                    wrapper.style.display = 'block';
+                    input.required = true;
+                    if (!input.value) input.value = ''; // Ensure not null
+                } else {
+                    wrapper.style.display = 'none';
+                    input.required = false;
                     input.value = '';
                 }
             }
