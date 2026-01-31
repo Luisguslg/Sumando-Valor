@@ -118,7 +118,8 @@ public class UsuariosModel : PageModel
         }
         if (!string.IsNullOrWhiteSpace(SearchEmail))
         {
-            q = q.Where(u => u.Email.Contains(SearchEmail.Trim()));
+            var emailFilter = SearchEmail.Trim();
+            q = q.Where(u => u.Email != null && u.Email.Contains(emailFilter));
         }
         if (!string.IsNullOrWhiteSpace(SearchCedula))
         {

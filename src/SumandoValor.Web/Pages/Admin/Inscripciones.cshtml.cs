@@ -164,10 +164,13 @@ public class InscripcionesModel : PageModel
             return RedirectToPage(new { tallerId = TallerIdFiltro });
         }
 
-        var users = await _context.Inscripciones
+        var userIds = await _context.Inscripciones
             .Where(i => SelectedInscripcionIds.Contains(i.Id))
-            .Select(i => i.User)
+            .Select(i => i.UserId)
             .Distinct()
+            .ToListAsync();
+        var users = await _context.Users
+            .Where(u => userIds.Contains(u.Id))
             .ToListAsync();
 
         int successCount = 0;

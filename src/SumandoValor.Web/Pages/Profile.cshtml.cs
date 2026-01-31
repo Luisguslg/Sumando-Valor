@@ -30,15 +30,15 @@ public class ProfileModel : PageModel
         CurrentUser = await _userManager.GetUserAsync(User);
         if (CurrentUser != null)
         {
-            Input.Telefono = CurrentUser.Telefono;
-            Input.NivelEducativo = CurrentUser.NivelEducativo;
-            Input.SituacionLaboral = CurrentUser.SituacionLaboral;
-            Input.Sector = CurrentUser.Sector;
-            Input.Pais = CurrentUser.Pais;
-            Input.Estado = CurrentUser.Estado;
-            Input.Municipio = CurrentUser.Municipio;
+            Input.Telefono = CurrentUser.Telefono ?? "";
+            Input.NivelEducativo = CurrentUser.NivelEducativo ?? "";
+            Input.SituacionLaboral = CurrentUser.SituacionLaboral ?? "";
+            Input.Sector = CurrentUser.Sector ?? "";
+            Input.Pais = CurrentUser.Pais ?? "";
+            Input.Estado = CurrentUser.Estado ?? "";
+            Input.Municipio = CurrentUser.Municipio ?? "";
             Input.TieneDiscapacidad = CurrentUser.TieneDiscapacidad;
-            Input.DiscapacidadDescripcion = CurrentUser.DiscapacidadDescripcion;
+            Input.DiscapacidadDescripcion = CurrentUser.DiscapacidadDescripcion ?? "";
         }
     }
 
