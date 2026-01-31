@@ -18,9 +18,41 @@ public static class DbInitializer
     {
         await context.Database.MigrateAsync();
 
+        // Fallback: asegurar columna Ubicacion si la migración no se aplicó (p. ej. BD externa)
+        await EnsureUbicacionColumnAsync(context);
+
         await SeedRolesAsync(roleManager);
         await SeedAdminUserAsync(userManager, configuration, isDevelopment);
         await SeedSuperAdminUserAsync(userManager, configuration, isDevelopment);
+    }
+
+    private static async Task EnsureUbicacionColumnAsync(AppDbContext context)
+    {
+        try
+        {
+            var conn = context.Database.GetDbConnection();
+            await conn.OpenAsync();
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"
+                IF NOT EXISTS (SELECT 1 FROM sys.columns 
+                    WHERE object_id = OBJECT_ID('Talleres') AND name = 'Ubicacion')
+                BEGIN
+                    ALTER TABLE [Talleres] ADD [Ubicacion] nvarchar(300) NULL;
+                    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+                    VALUES ('20260131000000_AddUbicacionToTaller', '8.0.0');
+                END";
+            await cmd.ExecuteNonQueryAsync();
+        }
+        catch (Exception)
+        {
+            // Si falla (p. ej. sin permisos ALTER), la migración debería haberlo aplicado
+        }
+        finally
+        {
+            var conn = context.Database.GetDbConnection();
+            if (conn.State == System.Data.ConnectionState.Open)
+                await conn.CloseAsync();
+        }
     }
 
     private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
