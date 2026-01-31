@@ -201,10 +201,10 @@ public class RolesModel : PageModel
             return RedirectToPage();
         }
 
-        // Solo SuperAdmin (rol Admin) puede asignar/quitar el rol Admin
+        // Solo Admin puede asignar/quitar el rol Admin
         if ((rolesToAdd.Contains("Admin") || rolesToRemove.Contains("Admin")) && !User.IsInRole("Admin"))
         {
-            TempData["FlashError"] = "Solo SuperAdmin puede gestionar el rol Admin.";
+            TempData["FlashError"] = "Solo un administrador puede gestionar el rol Admin.";
             return RedirectToPage();
         }
 

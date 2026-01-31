@@ -22,10 +22,14 @@
                 <option value="Talleres" selected="@(Model.TableName == "Talleres")">Talleres</option>
                 <option value="Inscripciones" selected="@(Model.TableName == "Inscripciones")">Inscripciones</option>
                 <option value="Certificados" selected="@(Model.TableName == "Certificados")">Certificados</option>
-                <option value="EncuestasSatisfaccion" selected="@(Model.TableName == "EncuestasSatisfaccion")">Encuestas</option>
+                <option value="EncuestasSatisfaccion" selected="@(Model.TableName == "EncuestasSatisfaccion")">Encuestas satisfacción</option>
                 <option value="MensajesContacto" selected="@(Model.TableName == "MensajesContacto")">Mensajes</option>
                 <option value="CarouselItems" selected="@(Model.TableName == "CarouselItems")">Carrusel</option>
                 <option value="SiteImages" selected="@(Model.TableName == "SiteImages")">Imágenes</option>
+                <option value="SurveyTemplates" selected="@(Model.TableName == "SurveyTemplates")">Plantillas encuestas</option>
+                <option value="SurveyQuestions" selected="@(Model.TableName == "SurveyQuestions")">Preguntas encuestas</option>
+                <option value="SurveyResponses" selected="@(Model.TableName == "SurveyResponses")">Respuestas encuestas</option>
+                <option value="SurveyAnswers" selected="@(Model.TableName == "SurveyAnswers")">Opciones encuestas</option>
             </select>
         </div>
         <div class="col-md-4">
@@ -58,6 +62,7 @@
                         <th>Acción</th>
                         <th>Registro ID</th>
                         <th>Usuario</th>
+                        <th>Detalle</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -97,6 +102,28 @@
                                 else
                                 {
                                     <span class="text-muted">Sistema</span>
+                                }
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(log.OldValues) || !string.IsNullOrEmpty(log.NewValues))
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#audit-detail-@log.Id" aria-expanded="false">
+                                        Ver detalle
+                                    </button>
+                                    <div class="collapse mt-1" id="audit-detail-@log.Id">
+                                        @if (!string.IsNullOrEmpty(log.OldValues))
+                                        {
+                                            <div class="small"><strong>Antes:</strong> <pre class="mb-0 mt-1 p-2 bg-light rounded small" style="max-height:120px;overflow:auto;">@log.OldValues</pre></div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(log.NewValues))
+                                        {
+                                            <div class="small"><strong>Después:</strong> <pre class="mb-0 mt-1 p-2 bg-light rounded small" style="max-height:120px;overflow:auto;">@log.NewValues</pre></div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
                                 }
                             </td>
                         </tr>

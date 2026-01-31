@@ -161,10 +161,12 @@ using (var scope = app.Services.CreateScope())
     catch { }
 }
 
-if (!app.Environment.IsDevelopment())
+var useProductionErrorHandling = bool.TryParse(app.Configuration["UseProductionErrorHandling"], out var v) && v;
+if (!app.Environment.IsDevelopment() || useProductionErrorHandling)
 {
     app.UseExceptionHandler("/Error");
-    app.UseHsts();
+    if (!app.Environment.IsDevelopment())
+        app.UseHsts();
 }
 else
 {

@@ -207,7 +207,7 @@ if (ext.Equals(".png", StringComparison.OrdinalIgnoreCase))
 
 ### Implementación
 - **Framework**: ILogger de .NET
-- **Auditoría administrativa**: Tabla `AdminAuditEvents`
+- **Auditoría administrativa**: Tabla `AuditLogs` (triggers SQL)
 
 ### Eventos Auditados
 - Edición de usuarios
@@ -216,14 +216,7 @@ if (ext.Equals(".png", StringComparison.OrdinalIgnoreCase))
 - Aprobación de certificados
 
 ```csharp
-_context.AdminAuditEvents.Add(new AdminAuditEvent
-{
-    ActorUserId = actorUserId,
-    TargetUserId = targetUserId,
-    Action = action,
-    DetailsJson = payload,
-    CreatedAt = DateTime.UtcNow
-});
+Triggers SQL en tablas (Cursos, Talleres, Inscripciones, etc.) insertan en AuditLogs con TableName, Action, RecordId, UserId, UserEmail, OldValues, NewValues.
 ```
 
 **Estado**: ✅ **CUMPLE** - Auditoría implementada

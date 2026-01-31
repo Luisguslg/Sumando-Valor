@@ -159,10 +159,9 @@ Estas relaciones eliminan automáticamente los registros hijos al eliminar el pa
 - `FileName` (Required, MaxLength: 260)
 - `AltText` (Required, MaxLength: 200)
 
-#### AdminAuditEvents
-- `ActorUserId` (Required)
-- `TargetUserId` (Required)
-- `Action` (Required, MaxLength: 80)
+#### AuditLogs
+- `TableName` (Required, MaxLength: 100)
+- `Action` (Required, MaxLength: 20)
 
 #### SurveyTemplates
 - `Name` (Required, MaxLength: 200)
@@ -212,8 +211,8 @@ Estas relaciones eliminan automáticamente los registros hijos al eliminar el pa
 | SiteImages | Key | 80 | Clave lógica |
 | SiteImages | FileName | 260 | Ruta completa de archivo |
 | SiteImages | AltText | 200 | Texto alternativo |
-| AdminAuditEvents | Action | 80 | Tipo de acción |
-| AdminAuditEvents | DetailsJson | 4000 | JSON con detalles |
+| AuditLogs | TableName | 100 | Tabla afectada |
+| AuditLogs | Action | 20 | INSERT, UPDATE, DELETE |
 | SurveyTemplates | Name | 200 | Nombre del template |
 | SurveyTemplates | Description | 4000 | Descripción del template |
 | SurveyQuestions | Text | 500 | Texto de la pregunta |
@@ -274,10 +273,10 @@ Todas las enumeraciones se almacenan como `int` en la BD:
 #### SiteImages
 - `IX_SiteImages_UpdatedAt`: Ordenamiento por fecha de actualización
 
-#### AdminAuditEvents
-- `IX_AdminAuditEvents_CreatedAt`: Ordenamiento por fecha
-- `IX_AdminAuditEvents_ActorUserId`: Búsqueda por actor
-- `IX_AdminAuditEvents_TargetUserId`: Búsqueda por objetivo
+#### AuditLogs
+- `IX_AuditLogs_TableName`: Filtrado por tabla
+- `IX_AuditLogs_CreatedAt`: Ordenamiento por fecha
+- `IX_AuditLogs_UserId`: Búsqueda por usuario
 
 #### SurveyTemplates
 - `IX_SurveyTemplates_IsActive`: Filtrado de activos

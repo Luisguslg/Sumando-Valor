@@ -66,11 +66,24 @@
 </div>
 
 <div class="table-responsive">
-    <table class="table table-striped">
+    <div class="mb-3 d-flex gap-2">
+        <button type="submit" asp-page-handler="UpdateAttendanceBatch" asp-route-attended="true" form="batchForm" class="btn btn-primary btn-sm">
+            <i class="bi bi-check2-all me-1"></i>Marcar Asistencia
+        </button>
+        <button type="submit" asp-page-handler="UpdateAttendanceBatch" asp-route-attended="false" form="batchForm" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-x me-1"></i>Desmarcar Asistencia
+        </button>
+    </div>
+
+    <form method="post" id="batchForm">
+    <div class="table-responsive">
+    <table class="table table-striped align-middle">
         <thead>
             <tr>
+                <th style="width: 30px;">
+                    <input type="checkbox" class="form-check-input" id="selectAll" />
+                </th>
                 <th>Taller</th>
-                <th>Curso</th>
                 <th>Usuario</th>
                 <th>Email</th>
                 <th>Fecha Inscripción</th>
@@ -80,57 +93,70 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model.Inscripciones)
+            @foreach (var group in Model.Inscripciones.GroupBy(i => i.Inscripcion.Taller).OrderByDescending(g => g.Key.FechaInicio))
             {
-                var inscripcion = item.Inscripcion;
-                var user = item.User;
-                <tr>
-                    <td>@inscripcion.Taller.Titulo</td>
-                    <td>@inscripcion.Taller.Curso.Titulo</td>
-                    <td>@user.Nombres @user.Apellidos</td>
-                    <td>@user.Email</td>
-                    <td>@inscripcion.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                    <td>
-                        @if (inscripcion.Estado == EstadoInscripcion.Activa)
-                        {
-                            <span class="badge bg-success">Activa</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-secondary">Cancelada</span>
-                        }
-                    </td>
-                    <td>
-                        @if (inscripcion.Asistencia)
-                        {
-                            <span class="badge bg-info">Sí</span>
-                        }
-                        else
-                        {
-                            <span class="text-muted">No</span>
-                        }
-                    </td>
-                    <td class="text-center">
-                        <div class="admin-actions">
-                            <form method="post" asp-page-handler="ToggleAsistencia" asp-route-id="@inscripcion.Id" class="m-0">
-                                <button type="submit" class="btn btn-sm btn-outline-primary">
-                                    @(inscripcion.Asistencia ? "Quitar asistencia" : "Marcar asistencia")
-                                </button>
-                            </form>
-                            @if (inscripcion.Estado == EstadoInscripcion.Activa)
-                            {
-                                <form method="post" asp-page-handler="Cancelar" asp-route-id="@inscripcion.Id" class="m-0">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Está seguro de cancelar esta inscripción?');">
-                                        Cancelar
-                                    </button>
-                                </form>
-                            }
-                        </div>
+                <tr class="table-secondary">
+                    <td colspan="8" class="fw-bold">
+                        <i class="bi bi-calendar-event me-2"></i>@group.Key.Titulo 
+                        <span class="fw-normal text-muted small ms-2">(@group.Key.Curso.Titulo)</span>
                     </td>
                 </tr>
+                @foreach (var item in group)
+                {
+                    var inscripcion = item.Inscripcion;
+                    var user = item.User;
+                    <tr>
+                        <td>
+                            <input type="checkbox" name="SelectedInscripcionIds" value="@inscripcion.Id" class="form-check-input form-check-inputRow" />
+                        </td>
+                        <td>@inscripcion.Taller.Curso.Titulo</td>
+                        <td>@user.Nombres @user.Apellidos</td>
+                        <td>@user.Email</td>
+                        <td>@inscripcion.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            @if (inscripcion.Estado == EstadoInscripcion.Activa)
+                            {
+                                <span class="badge bg-success">Activa</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Cancelada</span>
+                            }
+                        </td>
+                        <td>
+                            @if (inscripcion.Asistencia)
+                            {
+                                <span class="badge bg-info">Sí</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">No</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <div class="admin-actions">
+                                <form method="post" asp-page-handler="ToggleAsistencia" asp-route-id="@inscripcion.Id" class="m-0">
+                                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                                        @(inscripcion.Asistencia ? "Quitar" : "Asistir")
+                                    </button>
+                                </form>
+                                @if (inscripcion.Estado == EstadoInscripcion.Activa)
+                                {
+                                    <form method="post" asp-page-handler="Cancelar" asp-route-id="@inscripcion.Id" class="m-0">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Está seguro de cancelar esta inscripción?');">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
             }
         </tbody>
     </table>
+    </div>
+    </form>
 </div>
 
 @section Scripts {

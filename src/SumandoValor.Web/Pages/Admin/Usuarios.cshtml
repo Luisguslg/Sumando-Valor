@@ -166,29 +166,38 @@
     </details>
 
     <form method="get" class="row g-2 align-items-end">
-        <div class="col-md-5">
-            <label class="form-label small">Buscar</label>
-            <input class="form-control" name="Search" value="@Model.Search" placeholder="Nombre, apellido, email o cédula" />
+        <div class="col-md-2">
+            <label class="form-label small">Nombre</label>
+            <input class="form-control form-control-sm" name="SearchName" value="@Model.SearchName" placeholder="Nombre" />
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
+            <label class="form-label small">Email</label>
+            <input class="form-control form-control-sm" name="SearchEmail" value="@Model.SearchEmail" placeholder="Email" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small">Cédula</label>
+            <input class="form-control form-control-sm" name="SearchCedula" value="@Model.SearchCedula" placeholder="Buscar cédula..." />
+        </div>
+        <div class="col-md-2">
             <label class="form-label small">Estado</label>
-            <select class="form-select" name="Status">
+            <select class="form-select form-select-sm" name="Status">
                 <option value="">Todos</option>
                 <option value="active" selected="@(Model.Status == "active")">Activos</option>
                 <option value="inactive" selected="@(Model.Status == "inactive")">Inactivos</option>
             </select>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <label class="form-label small">Rol</label>
-            <select class="form-select" name="Role">
+            <select class="form-select form-select-sm" name="Role">
                 <option value="">Todos</option>
                 <option value="Moderador" selected="@(Model.Role == "Moderador")">Moderador</option>
-                <option value="Moderador" selected="@(Model.Role == "Admin")">Admin</option>
+                <option value="Admin" selected="@(Model.Role == "Admin")">Admin</option>
                 <option value="Beneficiario" selected="@(Model.Role == "Beneficiario")">Beneficiario</option>
             </select>
         </div>
-        <div class="col-md-1">
-            <button class="btn btn-primary w-100" type="submit">Filtrar</button>
+        <div class="col-md-2 d-grid gap-1">
+            <button class="btn btn-primary btn-sm" type="submit">Filtrar</button>
+            <button class="btn btn-outline-secondary btn-sm" type="submit" asp-page-handler="ExportCsv" formmethod="post">Exportar CSV</button>
         </div>
     </form>
 </div>
@@ -217,7 +226,6 @@
                 <tr>
                     <td>
                         <div class="fw-semibold">@u.FullName</div>
-                        <div class="text-muted small">@u.UserId</div>
                     </td>
                     <td class="text-muted">@u.Email</td>
                     <td>@u.Cedula</td>

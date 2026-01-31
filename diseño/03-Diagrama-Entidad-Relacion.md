@@ -146,13 +146,16 @@ erDiagram
         datetime UpdatedAt
     }
 
-    AdminAuditEvents {
+    AuditLogs {
         int Id PK
-        string ActorUserId
-        string TargetUserId
+        string TableName
         string Action
-        string DetailsJson
+        string RecordId
+        string UserId
+        string UserEmail
         datetime CreatedAt
+        string OldValues
+        string NewValues
     }
 
     SurveyTemplates {
@@ -362,21 +365,24 @@ erDiagram
 - `IX_SiteImages_Key` (Unique)
 - `IX_SiteImages_UpdatedAt`
 
-### AdminAuditEvents
+### AuditLogs
 **Llave Primaria:** `Id` (int, Identity)
 
 **Campos:**
 - `Id` (int, PK, Identity)
-- `ActorUserId` (string, Required) - Usuario que ejecutó la acción
-- `TargetUserId` (string, Required) - Usuario afectado
-- `Action` (string, Required, MaxLength: 80) - Tipo de acción
-- `DetailsJson` (string, MaxLength: 4000) - Detalles en JSON
+- `TableName` (string, Required, MaxLength: 100) - Tabla afectada
+- `Action` (string, Required, MaxLength: 20) - INSERT, UPDATE, DELETE
+- `RecordId` (string, MaxLength: 100) - ID del registro
+- `UserId` (string, MaxLength: 450) - Usuario que ejecutó la acción
+- `UserEmail` (string, MaxLength: 256) - Email del usuario
 - `CreatedAt` (datetime)
+- `OldValues` (string, nvarchar(max)) - Valores anteriores (JSON)
+- `NewValues` (string, nvarchar(max)) - Valores nuevos (JSON)
 
 **Índices:**
-- `IX_AdminAuditEvents_CreatedAt`
-- `IX_AdminAuditEvents_ActorUserId`
-- `IX_AdminAuditEvents_TargetUserId`
+- `IX_AuditLogs_TableName`
+- `IX_AuditLogs_CreatedAt`
+- `IX_AuditLogs_UserId`
 
 ### SurveyTemplates
 **Llave Primaria:** `Id` (int, Identity)

@@ -278,11 +278,14 @@ Definir variables de entorno en IIS (recomendado) o en `web.config`.
 - **Validaciones**: Verifica cupos disponibles, estado del taller, y previene inscripciones duplicadas
 - **Transacciones**: Usa transacciones SERIALIZABLE para evitar race conditions
 
-### Actualizaciones de UI
+### Actualizaciones de UI y Funcionalidad (Enero 2026)
 
-- **Capitalización**: "Programa formativo" → "Programa Formativo" en toda la aplicación
-- **Tarjetas**: "Programa Formativo" aparece una sola vez, centrado
-- **Opciones de registro**: Actualizadas según especificación (Redes sociales, Amigos o familiares, etc.)
+- **Panel de Administración**:
+  - **Usuarios**: Exportación a CSV, filtros granulares por columna y eliminación de columnas redundantes (ID).
+  - **Inscripciones**: Agrupación visual por taller y funcionalidad de **marcado masivo de asistencia**.
+  - **Visualización**: Tablas rediseñadas para mejor legibilidad.
+- **Capitalización**: "Programa Formativo" corregido en toda la aplicación.
+- **Formularios**: Nuevos campos de perfil (Sector) y validaciones mejoradas (Máscara cédula, teléfono).
 
 ## 13. Por confirmar / Pendiente de definición
 

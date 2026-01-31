@@ -327,7 +327,7 @@ La aplicación utiliza **Razor Pages** (no Web API tradicional), por lo que los 
   - `Input.Telefono` (string, max 25, opcional)
   - `Input.IsActive` (bool)
 - **Restricciones**: Solo SuperAdmin puede editar SuperAdmin
-- **Efectos secundarios**: Registra evento en `AdminAuditEvents`
+- **Efectos secundarios**: Registra evento en `AuditLogs`
 
 #### Toggle Activo/Inactivo
 - **Ruta**: `/Admin/Usuarios`
@@ -336,7 +336,7 @@ La aplicación utiliza **Razor Pages** (no Web API tradicional), por lo que los 
 - **Parámetros POST**:
   - `userId` (string, required)
 - **Restricciones**: No se puede desactivar el último Admin/SuperAdmin
-- **Efectos secundarios**: Registra evento en `AdminAuditEvents`
+- **Efectos secundarios**: Registra evento en `AuditLogs`
 
 #### Asignar/Remover Rol Admin
 - **Ruta**: `/Admin/Usuarios`
@@ -347,7 +347,7 @@ La aplicación utiliza **Razor Pages** (no Web API tradicional), por lo que los 
 - **Parámetros POST**:
   - `userId` (string, required)
 - **Restricciones**: Solo SuperAdmin puede modificar roles Admin
-- **Efectos secundarios**: Registra evento en `AdminAuditEvents`
+- **Efectos secundarios**: Registra evento en `AuditLogs`
 
 ### Carrusel
 - **Ruta**: `/Admin/Carrusel`

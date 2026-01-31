@@ -40,10 +40,6 @@ artifacts/
 *.nuget.props
 *.nuget.targets
 
-# Entity Framework
-# IMPORTANT: Do NOT ignore EF Core migration Designer files.
-# They are required for migrations to apply correctly on other machines/CI.
-
 # Runtime data (do not commit)
 src/SumandoValor.Web/App_Data/
 **/App_Data/
@@ -57,7 +53,6 @@ artifacts/
 **/artifacts/
 
 # Production/local configuration (do not commit secrets)
-# Copy from appsettings.Production.example.json and set secrets via IIS env vars.
 src/SumandoValor.Web/appsettings.Production.json
 src/SumandoValor.Web/appsettings.Local.json
 
@@ -78,54 +73,3 @@ Maqueta-SumandoValor/
 
 # Carpeta de ejemplo/artefacto (no subir)
 Ejemplo/
-
-# User-specific files
-*.rsuser
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-
-# Build results
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-x64/
-x86/
-[Ww][Ii][Nn]32/
-[Aa][Rr][Mm]/
-[Aa][Rr][Mm]64/
-bld/
-[Bb]in/
-[Oo]bj/
-[Ll]og/
-[Ll]ogs/
-
-# Visual Studio cache/options directory
-.vs/
-
-# .NET Core
-project.lock.json
-project.fragment.lock.json
-artifacts/
-
-# NuGet Packages
-*.nupkg
-*.snupkg
-**/packages/*
-!**/packages/build/
-*.nuget.props
-*.nuget.targets
-
-# Entity Framework
-# IMPORTANT: Do NOT ignore EF Core migration Designer files.
-# They are required for migrations to apply correctly on other machines/CI.
-
-# Rider
-.idea/
-*.sln.iml
-
-# Maqueta frontend (no subir al repositorio)
-Maqueta-SumandoValor/
-**/maqueta-*/

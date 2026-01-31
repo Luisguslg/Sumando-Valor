@@ -16,7 +16,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SumandoValor.Infrastructure\SumandoValor.Infrastructure.csproj" />
-    <ProjectReference Include="..\SumandoValor.Application\SumandoValor.Application.csproj" />
   </ItemGroup>
 
 </Project>

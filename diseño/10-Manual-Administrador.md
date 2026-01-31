@@ -425,17 +425,47 @@ Puedes exportar:
 2. **Usa códigos para acceso controlado**: Si quieres controlar quién tiene acceso, usa códigos únicos
 3. **Agrega usuarios directamente cuando sea necesario**: Para usuarios específicos, agrégalos directamente desde inscripciones
 
-### Gestión de Talleres
+### 3.1 Gestión de Usuarios
 
-1. **Crea talleres con suficiente anticipación**: Permite que los usuarios se inscriban con tiempo
-2. **Actualiza cupos según necesidad**: Ajusta los cupos según la demanda
-3. **Marca asistencia después de cada taller**: Es necesario para generar certificados
+**Ruta**: `/Admin/Usuarios`
 
-### Gestión de Inscripciones
+Esta pantalla permite ver el listado de todos los usuarios registrados en el sistema (beneficiarios, moderadores y administradores).
 
-1. **Revisa regularmente las inscripciones**: Mantén un control de quién está inscrito
-2. **Cancela inscripciones cuando sea necesario**: Libera cupos para otros usuarios
-3. **Marca asistencia puntualmente**: Facilita la generación de certificados
+**Funcionalidades**:
+
+- **Filtrado Avanzado**: Puede filtrar por nombre, email, cédula, estado (Activo/Inactivo) o rol.
+- **Exportación CSV**: Botón para descargar el listado actual (respetando los filtros aplicados) en formato CSV compatible con Excel.
+- **Activar/Desactivar**: Bloquea el acceso al sistema (Lockout).
+  - *Nota*: No se permite desactivar a usuarios que sean Administradores o Moderadores activos (medida de seguridad).
+- **Asignar Roles**: Convertir a un usuario en Moderador.
+
+---
+
+### 3.2 Gestión de Inscripciones
+
+**Ruta**: `/Admin/Inscripciones`
+
+Permite controlar quién asiste a los talleres.
+
+**Visualización**:
+- Las inscripciones se muestran **agrupadas por Taller** (ordenado del más reciente al más antiguo).
+- Cada grupo muestra el título del taller y el curso asociado.
+
+**Acciones Disponibles**:
+
+1. **Inscribir Usuario (Manual)**:
+   - Botón para abrir modal.
+   - Selección de taller (solo talleres ABIERTOS).
+   - Búsqueda de usuario por nombre/cédula.
+   - Valida cupos y duplicados.
+
+2. **Control de Asistencia (Masivo)**:
+   - Casillas de verificación (checkbox) para seleccionar múltiples usuarios.
+   - Botones en la parte superior para **"Marcar Asistencia"** o **"Desmarcar Asistencia"** a todos los seleccionados en lote.
+
+3. **Acciones Individuales**:
+   - **Asistencia**: Marcar/Desmarcar asistencia individualmente.
+   - **Cancelar**: Cancela la inscripción y libera el cupo (solo si el taller está abierto).
 
 ---
 

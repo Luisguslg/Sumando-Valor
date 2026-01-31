@@ -15,7 +15,7 @@ Sumando Valor APP/
 │   │   │   ├── MensajeContacto.cs
 │   │   │   ├── CarouselItem.cs
 │   │   │   ├── SiteImage.cs
-│   │   │   ├── AdminAuditEvent.cs
+│   │   │   ├── AuditLog.cs
 │   │   │   └── Surveys/              # Sistema de encuestas
 │   │   │       ├── SurveyTemplate.cs
 │   │   │       ├── SurveyQuestion.cs
@@ -23,9 +23,6 @@ Sumando Valor APP/
 │   │   │       └── SurveyAnswer.cs
 │   │   └── Helpers/
 │   │       └── Catalogos.cs
-│   │
-│   ├── SumandoValor.Application/      # Capa de Aplicación (actualmente vacía)
-│   │   └── SumandoValor.Application.csproj
 │   │
 │   ├── SumandoValor.Infrastructure/   # Capa de Infraestructura
 │   │   ├── Data/
@@ -189,17 +186,13 @@ Sumando Valor APP/
 - **Propósito**: Entidades puras del dominio, sin dependencias externas
 - **Dependencias**: Ninguna (proyecto de biblioteca estándar)
 
-### SumandoValor.Application
-- **Propósito**: Casos de uso y lógica de aplicación (actualmente vacío, preparado para futuro)
-- **Dependencias**: Domain
-
 ### SumandoValor.Infrastructure
-- **Propósito**: Implementaciones técnicas (EF Core, servicios externos)
+- **Propósito**: Implementaciones técnicas (EF Core, Identity, servicios externos)
 - **Dependencias**: Domain
 
 ### SumandoValor.Web
 - **Propósito**: Capa de presentación (Razor Pages, configuración)
-- **Dependencias**: Domain, Infrastructure, Application
+- **Dependencias**: Domain, Infrastructure
 
 ### SumandoValor.Tests
 - **Propósito**: Tests unitarios e integración

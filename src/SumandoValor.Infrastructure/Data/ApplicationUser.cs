@@ -35,9 +35,9 @@ public class ApplicationUser : IdentityUser
     [Required(ErrorMessage = "La situación laboral es requerida")]
     public string SituacionLaboral { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "El sector es requerido")]
+    // Modificado para permitir nulos en usuarios antiguos
     [StringLength(50, ErrorMessage = "El sector no puede exceder 50 caracteres")]
-    public string Sector { get; set; } = string.Empty;
+    public string? Sector { get; set; }
 
     [Required(ErrorMessage = "El canal por el cual conoció es requerido")]
     public string CanalConocio { get; set; } = string.Empty;

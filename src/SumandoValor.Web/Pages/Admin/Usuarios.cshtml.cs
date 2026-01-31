@@ -26,6 +26,13 @@ public class UsuariosModel : PageModel
     }
 
     [BindProperty(SupportsGet = true)]
+    public string? SearchName { get; set; }
+    [BindProperty(SupportsGet = true)]
+    public string? SearchEmail { get; set; }
+    [BindProperty(SupportsGet = true)]
+    public string? SearchCedula { get; set; }
+
+    [BindProperty(SupportsGet = true)]
     public string? Search { get; set; }
 
     [BindProperty(SupportsGet = true)]
@@ -46,44 +53,7 @@ public class UsuariosModel : PageModel
 
     public async Task OnGetAsync()
     {
-        var q = _context.Users.AsQueryable();
-
-        if (!string.IsNullOrWhiteSpace(Search))
-        {
-            var s = Search.Trim();
-            q = q.Where(u =>
-                (u.Nombres != null && u.Nombres.Contains(s)) ||
-                (u.Apellidos != null && u.Apellidos.Contains(s)) ||
-                (u.Email != null && u.Email.Contains(s)) ||
-                (u.Cedula != null && u.Cedula.Contains(s)));
-        }
-
-        if (Status == "active")
-        {
-            q = q.Where(u => u.LockoutEnd == null || u.LockoutEnd <= DateTimeOffset.UtcNow);
-        }
-        else if (Status == "inactive")
-        {
-            q = q.Where(u => u.LockoutEnd != null && u.LockoutEnd > DateTimeOffset.UtcNow);
-        }
-
-        // Role filter (server-side): join to AspNetUserRoles
-        if (!string.IsNullOrWhiteSpace(Role))
-        {
-            var roleId = await _context.Roles.Where(r => r.Name == Role).Select(r => r.Id).FirstOrDefaultAsync();
-            if (!string.IsNullOrWhiteSpace(roleId))
-            {
-                q = from u in q
-                    join ur in _context.UserRoles on u.Id equals ur.UserId
-                    where ur.RoleId == roleId
-                    select u;
-            }
-            else
-            {
-                q = q.Where(_ => false);
-            }
-        }
-
+        var q = BuildQuery();
         TotalCount = await q.CountAsync();
 
         var page = Math.Max(1, PageNumber);
@@ -113,6 +83,87 @@ public class UsuariosModel : PageModel
         }
     }
 
+    public async Task<IActionResult> OnPostExportCsvAsync()
+    {
+        var q = BuildQuery();
+        var users = await q
+            .OrderBy(u => u.Nombres)
+            .ThenBy(u => u.Apellidos)
+            .ToListAsync();
+
+        var csv = new System.Text.StringBuilder();
+        csv.AppendLine("Nombres,Apellidos,Email,Cedula,Sexo,Telefono,Estado,Rol");
+
+        foreach (var u in users)
+        {
+            var roles = await _userManager.GetRolesAsync(u);
+            var roleStr = string.Join(";", roles);
+            var status = (u.LockoutEnd == null || u.LockoutEnd <= DateTimeOffset.UtcNow) ? "Activo" : "Inactivo";
+            
+            csv.AppendLine($"\"{u.Nombres}\",\"{u.Apellidos}\",\"{u.Email}\",\"{u.Cedula}\",\"{u.Sexo}\",\"{u.Telefono}\",\"{status}\",\"{roleStr}\"");
+        }
+
+        var fileName = $"usuarios_{DateTime.Now:yyyyMMdd_HHmm}.csv";
+        return File(System.Text.Encoding.UTF8.GetBytes(csv.ToString()), "text/csv", fileName);
+    }
+
+    private IQueryable<ApplicationUser> BuildQuery()
+    {
+        var q = _context.Users.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(SearchName))
+        {
+            var s = SearchName.Trim();
+            q = q.Where(u => (u.Nombres + " " + u.Apellidos).Contains(s));
+        }
+        if (!string.IsNullOrWhiteSpace(SearchEmail))
+        {
+            q = q.Where(u => u.Email.Contains(SearchEmail.Trim()));
+        }
+        if (!string.IsNullOrWhiteSpace(SearchCedula))
+        {
+            q = q.Where(u => u.Cedula.Contains(SearchCedula.Trim()));
+        }
+
+        // Legacy generic search support if param is present (optional)
+        if (!string.IsNullOrWhiteSpace(Search))
+        {
+             var s = Search.Trim();
+             q = q.Where(u =>
+                 (u.Nombres != null && u.Nombres.Contains(s)) ||
+                 (u.Apellidos != null && u.Apellidos.Contains(s)) ||
+                 (u.Email != null && u.Email.Contains(s)) ||
+                 (u.Cedula != null && u.Cedula.Contains(s)));
+        }
+
+        if (Status == "active")
+        {
+            q = q.Where(u => u.LockoutEnd == null || u.LockoutEnd <= DateTimeOffset.UtcNow);
+        }
+        else if (Status == "inactive")
+        {
+            q = q.Where(u => u.LockoutEnd != null && u.LockoutEnd > DateTimeOffset.UtcNow);
+        }
+
+        // Role filter (server-side)
+        if (!string.IsNullOrWhiteSpace(Role))
+        {
+            // Note: This needs synchronous execution inside logic or a join.
+            // Simplified approach since we need to keep this sync for BuildQuery usually, 
+            // but Role filtering involves async usually or joins.
+            // Let's use the join approach from original code essentially.
+            var roleId = _context.Roles.Where(r => r.Name == Role).Select(r => r.Id).FirstOrDefault();
+            if (roleId != null)
+            {
+                 q = from u in q
+                    join ur in _context.UserRoles on u.Id equals ur.UserId
+                    where ur.RoleId == roleId
+                    select u;
+            }
+        }
+        return q;
+    }
+
     public async Task<IActionResult> OnPostToggleActiveAsync(string id)
     {
         var actorIsAdmin = User.IsInRole("Admin");
@@ -124,8 +175,10 @@ public class UsuariosModel : PageModel
         }
 
         var isActive = user.LockoutEnd == null || user.LockoutEnd <= DateTimeOffset.UtcNow;
+
         if (isActive)
         {
+            // Desactivar: validaciones solo aplican al desactivar
             var roles = await _userManager.GetRolesAsync(user);
             if (roles.Contains("Moderador") || roles.Contains("Admin"))
             {
@@ -149,17 +202,36 @@ public class UsuariosModel : PageModel
                     return RedirectToPage(new { Search, Status, Role, page = PageNumber });
                 }
             }
-
-            user.LockoutEnabled = true;
-            user.LockoutEnd = DateTimeOffset.MaxValue;
-            await _userManager.UpdateAsync(user);
-            TempData["FlashSuccess"] = "Usuario desactivado.";
         }
-        else
+
+        try
         {
-            user.LockoutEnd = null;
-            await _userManager.UpdateAsync(user);
-            TempData["FlashSuccess"] = "Usuario activado.";
+            if (isActive)
+            {
+                user.LockoutEnabled = true;
+                user.LockoutEnd = DateTimeOffset.MaxValue;
+                TempData["FlashSuccess"] = "Usuario desactivado.";
+            }
+            else
+            {
+                user.LockoutEnd = null;
+                TempData["FlashSuccess"] = "Usuario activado.";
+            }
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                _logger.LogWarning("Error actualizando usuario {UserId}: {Errors}", user.Id, errors);
+                TempData["FlashSuccess"] = null;
+                TempData["FlashError"] = $"No se pudo actualizar el usuario: {errors}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Excepción al activar/desactivar usuario {UserId}", user.Id);
+            TempData["FlashSuccess"] = null;
+            TempData["FlashError"] = "Ocurrió un error inesperado al procesar la solicitud.";
         }
 
         return RedirectToPage(new { Search, Status, Role, page = PageNumber });
@@ -168,8 +240,10 @@ public class UsuariosModel : PageModel
     public async Task<IActionResult> OnPostCreateAsync()
     {
         // Re-apply GET-bound query context so redirects keep filters/paging.
-        // (These are SupportsGet; they won't bind automatically on POST.)
         var search = Request.Query["Search"].ToString();
+        var searchName = Request.Query["SearchName"].ToString();
+        var searchEmail = Request.Query["SearchEmail"].ToString();
+        var searchCedula = Request.Query["SearchCedula"].ToString();
         var status = Request.Query["Status"].ToString();
         var role = Request.Query["Role"].ToString();
         var page = int.TryParse(Request.Query["page"].ToString(), out var p) ? p : 1;
@@ -177,6 +251,9 @@ public class UsuariosModel : PageModel
         if (!ModelState.IsValid)
         {
             Search = string.IsNullOrWhiteSpace(search) ? null : search;
+            SearchName = string.IsNullOrWhiteSpace(searchName) ? null : searchName;
+            SearchEmail = string.IsNullOrWhiteSpace(searchEmail) ? null : searchEmail;
+            SearchCedula = string.IsNullOrWhiteSpace(searchCedula) ? null : searchCedula;
             Status = string.IsNullOrWhiteSpace(status) ? null : status;
             Role = string.IsNullOrWhiteSpace(role) ? null : role;
             PageNumber = page;
@@ -188,7 +265,7 @@ public class UsuariosModel : PageModel
         if (existing != null)
         {
             TempData["FlashError"] = "Ese email ya existe.";
-            return RedirectToPage(new { Search = search, Status = status, Role = role, page });
+            return RedirectToPage(new { Search = search, SearchName = searchName, SearchEmail = searchEmail, SearchCedula = searchCedula, Status = status, Role = role, page });
         }
 
         var user = new ApplicationUser
@@ -221,7 +298,7 @@ public class UsuariosModel : PageModel
         {
             TempData["FlashError"] = "No se pudo crear el usuario.";
             _logger.LogWarning("Create user failed: {Errors}", string.Join("; ", result.Errors.Select(e => e.Description)));
-            return RedirectToPage(new { Search = search, Status = status, Role = role, page });
+            return RedirectToPage(new { Search = search, SearchName = searchName, SearchEmail = searchEmail, SearchCedula = searchCedula, Status = status, Role = role, page });
         }
 
         // Default role
@@ -229,7 +306,7 @@ public class UsuariosModel : PageModel
         await _userManager.AddToRoleAsync(user, initialRole);
 
         TempData["FlashSuccess"] = $"Usuario creado ({initialRole}).";
-        return RedirectToPage(new { Search = search, Status = status, Role = role, page });
+        return RedirectToPage(new { Search = search, SearchName = searchName, SearchEmail = searchEmail, SearchCedula = searchCedula, Status = status, Role = role, page });
     }
 
     public async Task<IActionResult> OnPostMakeModeradorAsync(string id)
@@ -318,6 +395,9 @@ public class UsuariosModel : PageModel
         {
             ["page"] = page.ToString(),
             ["Search"] = Search,
+            ["SearchName"] = SearchName,
+            ["SearchEmail"] = SearchEmail,
+            ["SearchCedula"] = SearchCedula,
             ["Status"] = Status,
             ["Role"] = Role
         };

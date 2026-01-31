@@ -27,6 +27,9 @@ public class InscripcionesModel : PageModel
     public List<ApplicationUser> UsuariosDisponibles { get; set; } = new();
     public int? TallerIdFiltro { get; set; }
 
+    [BindProperty]
+    public List<int> SelectedInscripcionIds { get; set; } = new();
+
     public class InscripcionViewModel
     {
         public Inscripcion Inscripcion { get; set; } = null!;
@@ -119,6 +122,28 @@ public class InscripcionesModel : PageModel
 
         _logger.LogInformation("Inscripción {InscripcionId} cancelada por admin", id);
         TempData["FlashSuccess"] = "Inscripción cancelada exitosamente. Cupo liberado.";
+        return RedirectToPage(new { tallerId = TallerIdFiltro });
+    }
+
+    public async Task<IActionResult> OnPostUpdateAttendanceBatchAsync(bool attended)
+    {
+        if (SelectedInscripcionIds == null || !SelectedInscripcionIds.Any())
+        {
+            TempData["FlashInfo"] = "No se seleccionaron inscripciones.";
+            return RedirectToPage(new { tallerId = TallerIdFiltro });
+        }
+
+        var inscripciones = await _context.Inscripciones
+            .Where(i => SelectedInscripcionIds.Contains(i.Id))
+            .ToListAsync();
+
+        foreach (var ins in inscripciones)
+        {
+            ins.Asistencia = attended;
+        }
+
+        await _context.SaveChangesAsync();
+        TempData["FlashSuccess"] = $"Asistencia actualizada para {inscripciones.Count} inscripciones.";
         return RedirectToPage(new { tallerId = TallerIdFiltro });
     }
 

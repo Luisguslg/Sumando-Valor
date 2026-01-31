@@ -77,58 +77,68 @@
                 </tr>
                 </thead>
                 <tbody>
-                @foreach (var row in Model.Rows)
+                @{
+                    var groups = Model.Rows.GroupBy(r => r.TallerTitulo).OrderByDescending(g => g.Count()); // Or sort by Date if available in Row
+                }
+                @foreach (var group in groups)
                 {
-                    <tr>
-                        <td>
-                            @if (row.CanSelect)
-                            {
-                                <input class="form-check-input" type="checkbox" name="SelectedInscripcionIds" value="@row.InscripcionId" />
-                            }
+                    <tr class="table-secondary">
+                        <td colspan="8" class="fw-bold">
+                            <i class="bi bi-award me-2"></i>@group.Key
                         </td>
-                        <td>@row.UserFullName</td>
-                        <td class="text-muted">@row.UserEmail</td>
-                        <td>
-                            <div class="fw-semibold">@row.TallerTitulo</div>
-                            <div class="text-muted small">@row.CursoTitulo</div>
-                        </td>
-                        <td class="text-end">
-                            <span class="badge @(row.AsistenciaOk ? "bg-success" : "bg-light text-dark")">
-                                @(row.AsistenciaOk ? "Sí" : "No")
-                            </span>
-                        </td>
-                        <td class="text-end">
-                            <span class="badge @(row.EncuestaOk ? "bg-success" : row.EncuestaRequired ? "bg-light text-dark" : "bg-secondary")">
-                                @if (!row.EncuestaRequired)
+                    </tr>
+                    @foreach (var row in group)
+                    {
+                        <tr>
+                            <td>
+                                @if (row.CanSelect)
                                 {
-                                    <text>No aplica</text>
+                                    <input class="form-check-input" type="checkbox" name="SelectedInscripcionIds" value="@row.InscripcionId" />
                                 }
-                                else if (row.EncuestaOk)
+                            </td>
+                            <td>@row.UserFullName</td>
+                            <td class="text-muted">@row.UserEmail</td>
+                            <td class="text-muted small">
+                                @row.CursoTitulo
+                            </td>
+                            <td class="text-end">
+                                <span class="badge @(row.AsistenciaOk ? "bg-success" : "bg-light text-dark")">
+                                    @(row.AsistenciaOk ? "Sí" : "No")
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <span class="badge @(row.EncuestaOk ? "bg-success" : row.EncuestaRequired ? "bg-light text-dark" : "bg-secondary")">
+                                    @if (!row.EncuestaRequired)
+                                    {
+                                        <text>N/A</text>
+                                    }
+                                    else if (row.EncuestaOk)
+                                    {
+                                        <text>Sí</text>
+                                    }
+                                    else
+                                    {
+                                        <text>No</text>
+                                    }
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge @row.EstadoBadgeClass">@row.EstadoText</span>
+                            </td>
+                            <td>
+                                @if (row.CertificadoId.HasValue && row.Estado == EstadoCertificado.Aprobado && row.HasPdf)
                                 {
-                                    <text>Sí</text>
+                                    <a asp-page="/Certificates/Download" asp-route-id="@row.CertificadoId.Value" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-download"></i>
+                                    </a>
                                 }
                                 else
                                 {
-                                    <text>No</text>
+                                    <span class="text-muted small">—</span>
                                 }
-                            </span>
-                        </td>
-                        <td>
-                            <span class="badge @row.EstadoBadgeClass">@row.EstadoText</span>
-                        </td>
-                        <td>
-                            @if (row.CertificadoId.HasValue && row.Estado == EstadoCertificado.Aprobado && row.HasPdf)
-                            {
-                                <a asp-page="/Certificates/Download" asp-route-id="@row.CertificadoId.Value" class="btn btn-sm btn-outline-primary">
-                                    Descargar
-                                </a>
-                            }
-                            else
-                            {
-                                <span class="text-muted small">—</span>
-                            }
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
+                    }
                 }
                 </tbody>
             </table>

@@ -106,10 +106,16 @@ classDiagram
         +string FileName
     }
 
-    class AdminAuditEvent {
+    class AuditLog {
         +int Id
+        +string TableName
         +string Action
+        +string RecordId
+        +string UserId
+        +string UserEmail
         +DateTime CreatedAt
+        +string OldValues
+        +string NewValues
     }
 
     %% Relaciones principales - Core del negocio
