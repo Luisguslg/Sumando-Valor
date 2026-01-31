@@ -166,11 +166,7 @@ public class EditModel : PageModel
 
     private static string GenerateUniqueToken()
     {
-        // Genera un token único de 32 caracteres usando Guid y Base64
-        return Convert.ToBase64String(Guid.NewGuid().ToByteArray())
-            .Replace("+", "-")
-            .Replace("/", "_")
-            .Replace("=", "")
-            .Substring(0, 32);
+        // Genera un token único de 32 caracteres hexadecimales (Guid sin guiones)
+        return Guid.NewGuid().ToString("N");
     }
 }

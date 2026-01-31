@@ -78,12 +78,14 @@ public class CursosModel : PageModel
             return RedirectToPage();
         }
 
-        // Buscar curso por ClaveAcceso
-        var curso = await _context.Cursos
-            .FirstOrDefaultAsync(c => c.Estado == EstatusCurso.Activo && 
-                                     !c.EsPublico && 
-                                     !string.IsNullOrEmpty(c.ClaveAcceso) &&
-                                     c.ClaveAcceso.Equals(codigoAcceso.Trim(), StringComparison.OrdinalIgnoreCase));
+        // Buscar curso por ClaveAcceso (EF no traduce StringComparison, filtramos en memoria)
+        var codigoTrimmed = codigoAcceso.Trim();
+        var cursosCandidatos = await _context.Cursos
+            .Where(c => c.Estado == EstatusCurso.Activo && !c.EsPublico && c.ClaveAcceso != null && c.ClaveAcceso != "")
+            .ToListAsync();
+
+        var curso = cursosCandidatos
+            .FirstOrDefault(c => c.ClaveAcceso!.Equals(codigoTrimmed, StringComparison.OrdinalIgnoreCase));
 
         if (curso == null)
         {
