@@ -7,8 +7,7 @@
 }
 
 <div class="mb-4">
-    <h1>Crear Nuevo Taller</h1>
-    <a asp-page="/Admin/Talleres" class="btn btn-link">← Volver a Talleres</a>
+    <a asp-page="/Admin/Talleres" class="btn btn-link">← Volver</a>
 </div>
 
 <div class="row">
@@ -65,6 +64,13 @@
                         asp-items="Html.GetEnumSelectList<ModalidadTaller>()">
                 </select>
                 <span asp-validation-for="Input.Modalidad" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3" id="ubicacionWrapper" style="display:none;">
+                <label asp-for="Input.Ubicacion" class="form-label">Ubicación *</label>
+                <input asp-for="Input.Ubicacion" class="form-control" id="ubicacionInput" placeholder="Dirección o lugar del taller" />
+                <span asp-validation-for="Input.Ubicacion" class="text-danger"></span>
+                <small class="text-muted">Requerida si la modalidad es Presencial</small>
             </div>
 
             <div class="mb-3" id="plataformaWrapper" style="display:none;">
@@ -126,23 +132,27 @@
     <script>
         (function () {
             const modalidadSelect = document.getElementById('modalidadSelect');
-            const wrapper = document.getElementById('plataformaWrapper');
-            const input = document.getElementById('plataformaInput');
+            const plataformaWrapper = document.getElementById('plataformaWrapper');
+            const plataformaInput = document.getElementById('plataformaInput');
+            const ubicacionWrapper = document.getElementById('ubicacionWrapper');
+            const ubicacionInput = document.getElementById('ubicacionInput');
 
-            function syncPlataforma() {
+            function syncModalidad() {
                 const modalidad = parseInt(modalidadSelect.value, 10);
-                const requiere = modalidad === @((int)ModalidadTaller.Virtual) || modalidad === @((int)ModalidadTaller.Hibrido);
+                const esPresencial = modalidad === @((int)ModalidadTaller.Presencial);
+                const esVirtualOHibrido = modalidad === @((int)ModalidadTaller.Virtual) || modalidad === @((int)ModalidadTaller.Hibrido);
 
-                wrapper.style.display = requiere ? 'block' : 'none';
-                input.required = requiere;
+                ubicacionWrapper.style.display = esPresencial ? 'block' : 'none';
+                ubicacionInput.required = esPresencial;
+                if (!esPresencial) ubicacionInput.value = '';
 
-                if (!requiere) {
-                    input.value = '';
-                }
+                plataformaWrapper.style.display = esVirtualOHibrido ? 'block' : 'none';
+                plataformaInput.required = esVirtualOHibrido;
+                if (!esVirtualOHibrido) plataformaInput.value = '';
             }
 
-            modalidadSelect.addEventListener('change', syncPlataforma);
-            syncPlataforma(); // inicial
+            modalidadSelect.addEventListener('change', syncModalidad);
+            syncModalidad();
         })();
     </script>
 }

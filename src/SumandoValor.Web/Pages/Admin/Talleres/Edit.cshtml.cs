@@ -48,6 +48,9 @@ public class EditModel : PageModel
         [Required(ErrorMessage = "La modalidad es requerida")]
         public ModalidadTaller Modalidad { get; set; }
 
+        [StringLength(300, ErrorMessage = "La ubicación no puede exceder 300 caracteres")]
+        public string? Ubicacion { get; set; }
+
         [StringLength(200, ErrorMessage = "La plataforma digital no puede exceder 200 caracteres")]
         public string? PlataformaDigital { get; set; }
 
@@ -90,6 +93,7 @@ public class EditModel : PageModel
             CuposMaximos = Taller.CuposMaximos,
             Estatus = Taller.Estatus,
             FacilitadorTexto = Taller.FacilitadorTexto,
+            Ubicacion = Taller.Ubicacion,
             PermiteCertificado = Taller.PermiteCertificado,
             RequiereEncuesta = Taller.RequiereEncuesta
         };
@@ -99,6 +103,10 @@ public class EditModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
+        if (Input.Modalidad == ModalidadTaller.Presencial && string.IsNullOrWhiteSpace(Input.Ubicacion))
+        {
+            ModelState.AddModelError("Input.Ubicacion", "La ubicación es requerida para modalidad Presencial.");
+        }
         if (Input.Modalidad != ModalidadTaller.Presencial && string.IsNullOrWhiteSpace(Input.PlataformaDigital))
         {
             ModelState.AddModelError("Input.PlataformaDigital", "La plataforma digital es requerida para modalidad Virtual o Híbrida.");
@@ -155,6 +163,7 @@ public class EditModel : PageModel
         taller.CuposDisponibles = Input.CuposMaximos - inscripcionesActivas;
         taller.Estatus = Input.Estatus;
         taller.FacilitadorTexto = Input.FacilitadorTexto;
+        taller.Ubicacion = Input.Ubicacion;
         taller.PermiteCertificado = Input.PermiteCertificado;
         taller.RequiereEncuesta = Input.RequiereEncuesta;
         taller.UpdatedAt = DateTime.UtcNow;

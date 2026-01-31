@@ -49,13 +49,23 @@
                     <div class="row g-3 mt-0">
                         <div class="col-md-6">
                             <label asp-for="Input.Password" class="form-label">Contraseña <span class="text-danger">*</span></label>
-                            <input asp-for="Input.Password" class="form-control" autocomplete="new-password" />
+                            <div class="input-group">
+                                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" id="passwordInput" />
+                                <button type="button" class="btn btn-outline-secondary" id="togglePassword" tabindex="-1" aria-label="Mostrar/ocultar contraseña">
+                                    <i class="bi bi-eye" id="passwordIcon"></i>
+                                </button>
+                            </div>
                             <span asp-validation-for="Input.Password" class="text-danger"></span>
-                            <small class="text-muted">Mínimo 14 caracteres: mayúsculas, minúsculas, números y caracteres especiales (@@<text>$</text>!%*?&amp;)</small>
+                            <small class="text-muted">Mínimo 14 caracteres: mayúsculas, minúsculas, números y al menos un carácter especial (ej. @@$!%*?&amp;#/-_)</small>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="Input.ConfirmPassword" class="form-label">Confirmar Contraseña <span class="text-danger">*</span></label>
-                            <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" />
+                            <div class="input-group">
+                                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" id="confirmPasswordInput" />
+                                <button type="button" class="btn btn-outline-secondary" id="toggleConfirmPassword" tabindex="-1" aria-label="Mostrar/ocultar contraseña">
+                                    <i class="bi bi-eye" id="confirmPasswordIcon"></i>
+                                </button>
+                            </div>
                             <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
                         </div>
                     </div>
@@ -238,6 +248,23 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
+        // Toggle visibilidad contraseña (siempre visible)
+        function setupPasswordToggle(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (!input || !icon) return;
+            const btn = icon.closest('button');
+            if (!btn) return;
+            btn.addEventListener('click', function() {
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                icon.classList.toggle('bi-eye', !isPassword);
+                icon.classList.toggle('bi-eye-slash', isPassword);
+            });
+        }
+        setupPasswordToggle('passwordInput', 'passwordIcon');
+        setupPasswordToggle('confirmPasswordInput', 'confirmPasswordIcon');
+
         document.getElementById('tieneDiscapacidad').addEventListener('change', function() {
             const descGroup = document.getElementById('discapacidadDescripcionGroup');
             if (this.checked) {

@@ -50,6 +50,9 @@ public class CreateModel : PageModel
         [Required(ErrorMessage = "La modalidad es requerida")]
         public ModalidadTaller Modalidad { get; set; }
 
+        [StringLength(300, ErrorMessage = "La ubicación no puede exceder 300 caracteres")]
+        public string? Ubicacion { get; set; }
+
         [StringLength(200, ErrorMessage = "La plataforma digital no puede exceder 200 caracteres")]
         public string? PlataformaDigital { get; set; }
 
@@ -92,6 +95,10 @@ public class CreateModel : PageModel
 
         CursosSelectList = new SelectList(cursos, "Id", "Titulo");
 
+        if (Input.Modalidad == ModalidadTaller.Presencial && string.IsNullOrWhiteSpace(Input.Ubicacion))
+        {
+            ModelState.AddModelError("Input.Ubicacion", "La ubicación es requerida para modalidad Presencial.");
+        }
         if (Input.Modalidad != ModalidadTaller.Presencial && string.IsNullOrWhiteSpace(Input.PlataformaDigital))
         {
             ModelState.AddModelError("Input.PlataformaDigital", "La plataforma digital es requerida para modalidad Virtual o Híbrida.");
@@ -131,6 +138,7 @@ public class CreateModel : PageModel
             FechaFin = Input.FechaFin,
             HoraInicio = Input.HoraInicio!.Value,
             Modalidad = Input.Modalidad,
+            Ubicacion = Input.Ubicacion,
             PlataformaDigital = Input.PlataformaDigital,
             CuposMaximos = Input.CuposMaximos,
             CuposDisponibles = Input.CuposMaximos,

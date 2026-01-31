@@ -2,17 +2,21 @@
 @model SumandoValor.Web.Pages.Admin.InscripcionesModel
 @using SumandoValor.Domain.Entities
 @{
-    ViewData["Title"] = "Gestión de Inscripciones";
+    ViewData["Title"] = "Inscripciones";
     Layout = "~/Pages/Shared/_AdminLayout.cshtml";
 }
 
-<div class="mb-4">
-    <h1>Gestión de Inscripciones</h1>
+<div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <a asp-page="/Admin" class="btn btn-link text-muted p-0">← Volver</a>
     <div class="d-flex gap-2 flex-wrap align-items-center">
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#inscribirModal">
             <i class="bi bi-person-plus me-1"></i>Inscribir Usuario
         </button>
         <form method="post" asp-page-handler="ExportCsv" class="d-inline">
+            @if (Model.TallerIdFiltro.HasValue)
+            {
+                <input type="hidden" name="tallerId" value="@Model.TallerIdFiltro" />
+            }
             <button type="submit" class="btn btn-outline-primary">Exportar CSV</button>
         </form>
         <select id="tallerFilter" class="form-select d-inline" style="width: auto;">
@@ -134,16 +138,26 @@
             @foreach (var group in Model.Inscripciones.GroupBy(i => i.Inscripcion.Taller).OrderByDescending(g => g.Key.FechaInicio))
             {
                 <tr class="table-secondary">
-                    <td colspan="8" class="fw-bold">
-                        <i class="bi bi-calendar-event me-2"></i>@group.Key.Titulo 
-                        <span class="fw-normal text-muted small ms-2">(@group.Key.Curso.Titulo)</span>
+                    <td colspan="8" class="fw-bold d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <span>
+                            <i class="bi bi-calendar-event me-2"></i>@group.Key.Titulo 
+                            <span class="fw-normal text-muted small ms-2">(@group.Key.Curso.Titulo)</span>
+                        </span>
+                        <span class="d-flex gap-2">
+                            <a asp-page="/Admin/Inscripciones" asp-route-tallerId="@group.Key.Id" class="btn btn-sm btn-outline-primary" target="_blank">
+                                <i class="bi bi-list-ul me-1"></i>Lista de asistencia
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-secondary marcarTodoTaller" data-taller-id="@group.Key.Id" title="Marcar todos para asistencia">
+                                <i class="bi bi-check2-all me-1"></i>Marcar todo
+                            </button>
+                        </span>
                     </td>
                 </tr>
                 @foreach (var item in group)
                 {
                     var inscripcion = item.Inscripcion;
                     var user = item.User;
-                    <tr>
+                    <tr data-taller-id="@inscripcion.TallerId">
                         <td>
                             <input type="checkbox" name="SelectedInscripcionIds" value="@inscripcion.Id" class="form-check-input form-check-inputRow" />
                         </td>
@@ -199,6 +213,12 @@
 
 @section Scripts {
     <script>
+        document.getElementById('selectAll').addEventListener('change', function() {
+            document.querySelectorAll('input.form-check-inputRow').forEach(function(cb) {
+                cb.checked = this.checked;
+            }, this);
+        });
+
         document.getElementById('tallerFilter').addEventListener('change', function() {
             const tallerId = this.value;
             const url = new URL(window.location);
@@ -254,6 +274,18 @@
                 }
                 usuarioResults.style.display = 'block';
             }, 300);
+        });
+
+        // Marcar todo por taller
+        document.querySelectorAll('.marcarTodoTaller').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const tallerId = this.getAttribute('data-taller-id');
+                const rows = document.querySelectorAll('tr[data-taller-id="' + tallerId + '"]');
+                rows.forEach(function(row) {
+                    const cb = row.querySelector('input.form-check-inputRow');
+                    if (cb) cb.checked = true;
+                });
+            });
         });
 
         // Ocultar resultados al hacer clic fuera

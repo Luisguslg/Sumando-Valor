@@ -19,12 +19,12 @@
 
 <div class="admin-card">
     <h2 class="h6 mb-1">Imagen por defecto “Mis Talleres”</h2>
-    <div class="text-muted mb-3">Se usa en las tarjetas de “Mis Talleres” (no es una imagen por taller).</div>
+    <div class="text-muted mb-3">Se usa en las tarjetas de “Mis Talleres” (no es una imagen por taller). Recomendado: 400×250 px.</div>
 
     @if (!string.IsNullOrWhiteSpace(Model.WorkshopCardUrl))
     {
         <div class="mb-3">
-            <img src="@Model.WorkshopCardUrl" alt="@Model.WorkshopCardAlt" style="max-width: 260px; height: auto; border-radius: 8px;" />
+            <img src="@Model.WorkshopCardUrl" alt="@Model.WorkshopCardAlt" style="max-width: 260px; max-height: 160px; object-fit: contain; border-radius: 8px; border: 1px solid #e5e7eb;" />
         </div>
     }
     else
@@ -34,7 +34,7 @@
 
     <form method="post" enctype="multipart/form-data" asp-page-handler="UploadWorkshopCard" class="row g-3">
         <div class="col-md-6">
-            <label class="form-label">Archivo (jpg/png/webp, máx 4MB)</label>
+            <label class="form-label">Archivo (JPG/PNG/WebP, máx. 4 MB, recomendado 400×250 px)</label>
             <input class="form-control" type="file" name="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required />
         </div>
         <div class="col-md-6">
@@ -55,11 +55,12 @@
 <div class="admin-card">
     <h2 class="h6 mb-1">Imagen Home “Formación con propósito”</h2>
     <div class="text-muted mb-3">Es la imagen del bloque que aparece al final del Home (tarjeta “Formación con propósito”).</div>
+    <div class="text-muted mb-2 small">Recomendado: 600×400 px.</div>
 
     @if (!string.IsNullOrWhiteSpace(Model.HomePillarsUrl))
     {
         <div class="mb-3">
-            <img src="@Model.HomePillarsUrl" alt="@Model.HomePillarsAlt" style="max-width: 100%; height: auto; border-radius: 8px;" />
+            <img src="@Model.HomePillarsUrl" alt="@Model.HomePillarsAlt" style="max-width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; border: 1px solid #e5e7eb;" />
         </div>
     }
     else
@@ -69,7 +70,7 @@
 
     <form method="post" enctype="multipart/form-data" asp-page-handler="UploadHomePillars" class="row g-3">
         <div class="col-md-6">
-            <label class="form-label">Archivo (jpg/png/webp, máx 4MB)</label>
+            <label class="form-label">Archivo (JPG/PNG/WebP, máx. 4 MB, recomendado 600×400 px)</label>
             <input class="form-control" type="file" name="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required />
         </div>
         <div class="col-md-6">
@@ -93,7 +94,7 @@
     @if (!string.IsNullOrWhiteSpace(Model.AboutMainUrl))
     {
         <div class="mb-3">
-            <img src="@Model.AboutMainUrl" alt="@Model.AboutMainAlt" style="max-width: 100%; height: auto; border-radius: 8px;" />
+            <img src="@Model.AboutMainUrl" alt="@Model.AboutMainAlt" style="max-width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; border: 1px solid #e5e7eb;" />
         </div>
     }
     else
@@ -103,7 +104,7 @@
 
     <form method="post" enctype="multipart/form-data" asp-page-handler="UploadAboutMain" class="row g-3">
         <div class="col-md-6">
-            <label class="form-label">Archivo (jpg/png/webp, máx 4MB)</label>
+            <label class="form-label">Archivo (JPG/PNG/WebP, máx. 4 MB, recomendado 800×500 px)</label>
             <input class="form-control" type="file" name="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required />
         </div>
         <div class="col-md-6">

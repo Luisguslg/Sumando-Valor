@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using SumandoValor.Domain.Entities;
+using SumandoValor.Domain.Helpers;
 using SumandoValor.Infrastructure.Data;
 
 namespace SumandoValor.Web.Pages.Admin;
@@ -76,6 +77,8 @@ public class UsuariosModel : PageModel
                 FullName = $"{u.Nombres} {u.Apellidos}".Trim(),
                 Email = u.Email ?? "",
                 Cedula = u.Cedula ?? "",
+                NivelEducativo = u.NivelEducativo ?? "",
+                Ubicacion = FormatUbicacion(u),
                 IsActive = u.LockoutEnd == null || u.LockoutEnd <= DateTimeOffset.UtcNow,
                 Roles = roles.ToList(),
                 IsModerador = roles.Contains("Moderador") || roles.Contains("Admin")
@@ -92,19 +95,26 @@ public class UsuariosModel : PageModel
             .ToListAsync();
 
         var csv = new System.Text.StringBuilder();
-        csv.AppendLine("Nombres,Apellidos,Email,Cedula,Sexo,Telefono,Estado,Rol");
+        csv.AppendLine("Nombres,Apellidos,Email,Cedula,Sexo,Telefono,NivelEducativo,Ubicacion,Estado,Rol");
 
         foreach (var u in users)
         {
             var roles = await _userManager.GetRolesAsync(u);
             var roleStr = string.Join(";", roles);
             var status = (u.LockoutEnd == null || u.LockoutEnd <= DateTimeOffset.UtcNow) ? "Activo" : "Inactivo";
-            
-            csv.AppendLine($"\"{u.Nombres}\",\"{u.Apellidos}\",\"{u.Email}\",\"{u.Cedula}\",\"{u.Sexo}\",\"{u.Telefono}\",\"{status}\",\"{roleStr}\"");
+            var ubicacion = FormatUbicacion(u);
+            var nivel = Catalogos.NivelesEducativos.TryGetValue(u.NivelEducativo ?? "", out var n) ? n : (u.NivelEducativo ?? "");
+            csv.AppendLine($"\"{EscapeCsv(u.Nombres)}\",\"{EscapeCsv(u.Apellidos)}\",\"{EscapeCsv(u.Email ?? "")}\",\"{EscapeCsv(u.Cedula ?? "")}\",\"{EscapeCsv(u.Sexo ?? "")}\",\"{EscapeCsv(u.Telefono ?? "")}\",\"{EscapeCsv(nivel)}\",\"{EscapeCsv(ubicacion)}\",\"{status}\",\"{roleStr}\"");
         }
 
+        var csvContent = csv.ToString();
+        var preamble = System.Text.Encoding.UTF8.GetPreamble();
+        var contentBytes = System.Text.Encoding.UTF8.GetBytes(csvContent);
+        var bytes = new byte[preamble.Length + contentBytes.Length];
+        Buffer.BlockCopy(preamble, 0, bytes, 0, preamble.Length);
+        Buffer.BlockCopy(contentBytes, 0, bytes, preamble.Length, contentBytes.Length);
         var fileName = $"usuarios_{DateTime.Now:yyyyMMdd_HHmm}.csv";
-        return File(System.Text.Encoding.UTF8.GetBytes(csv.ToString()), "text/csv", fileName);
+        return File(bytes, "text/csv; charset=utf-8", fileName);
     }
 
     private IQueryable<ApplicationUser> BuildQuery()
@@ -415,9 +425,28 @@ public class UsuariosModel : PageModel
         public string FullName { get; set; } = "";
         public string Email { get; set; } = "";
         public string Cedula { get; set; } = "";
+        public string NivelEducativo { get; set; } = "";
+        public string Ubicacion { get; set; } = "";
         public bool IsActive { get; set; }
         public List<string> Roles { get; set; } = new();
         public bool IsModerador { get; set; }
+    }
+
+    private static string EscapeCsv(string s)
+    {
+        if (string.IsNullOrEmpty(s)) return "";
+        if (s.Contains(",") || s.Contains("\"") || s.Contains("\n"))
+            return "\"" + s.Replace("\"", "\"\"") + "\"";
+        return s;
+    }
+
+    private static string FormatUbicacion(ApplicationUser u)
+    {
+        var parts = new List<string>();
+        if (!string.IsNullOrWhiteSpace(u.Pais)) parts.Add(u.Pais);
+        if (!string.IsNullOrWhiteSpace(u.Estado)) parts.Add(u.Estado);
+        if (!string.IsNullOrWhiteSpace(u.Municipio)) parts.Add(u.Municipio);
+        return parts.Count > 0 ? string.Join(", ", parts) : "-";
     }
 
     public sealed class CreateUserInputModel

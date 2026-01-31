@@ -10,6 +10,7 @@ public class Taller
     public DateTime? FechaFin { get; set; }
     public TimeSpan HoraInicio { get; set; }
     public ModalidadTaller Modalidad { get; set; }
+    public string? Ubicacion { get; set; }
     public string? PlataformaDigital { get; set; }
     public int CuposMaximos { get; set; }
     public int CuposDisponibles { get; set; }

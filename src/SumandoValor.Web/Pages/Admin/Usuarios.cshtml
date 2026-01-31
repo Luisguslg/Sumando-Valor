@@ -210,6 +210,8 @@
                 <th>Usuario</th>
                 <th>Email</th>
                 <th>Cédula</th>
+                <th>Nivel Educativo</th>
+                <th>Ubicación</th>
                 <th>Estado</th>
                 <th>Roles</th>
                 <th class="text-center">Acciones</th>
@@ -229,6 +231,8 @@
                     </td>
                     <td class="text-muted">@u.Email</td>
                     <td>@u.Cedula</td>
+                    <td class="small">@(Catalogos.NivelesEducativos.TryGetValue(u.NivelEducativo, out var ne) ? ne : u.NivelEducativo)</td>
+                    <td class="small text-muted">@u.Ubicacion</td>
                     <td>
                         <span class="badge @(u.IsActive ? "bg-success" : "bg-secondary")">
                             @(u.IsActive ? "Activo" : "Inactivo")

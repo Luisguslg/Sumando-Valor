@@ -36,12 +36,12 @@ public class IndexModel : PageModel
             .Take(10)
             .ToListAsync();
 
-        // Solo mostrar cursos públicos en el home
+        // Solo mostrar cursos públicos en el home (máximo 4)
         CursosDestacados = await _context.Cursos
             .Where(c => c.Estado == EstatusCurso.Activo && c.EsPublico)
             .OrderBy(c => c.Orden)
             .ThenBy(c => c.Titulo)
-            .Take(3)
+            .Take(4)
             .ToListAsync();
 
         var today = DateTime.Today;
@@ -53,7 +53,7 @@ public class IndexModel : PageModel
                        t.Curso.EsPublico)
             .OrderBy(t => t.FechaInicio)
             .ThenBy(t => t.HoraInicio)
-            .Take(3)
+            .Take(4)
             .ToListAsync();
 
         // Cupos disponibles derivado por taller (visual)

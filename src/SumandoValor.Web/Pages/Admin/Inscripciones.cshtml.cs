@@ -28,6 +28,7 @@ public class InscripcionesModel : PageModel
     public List<InscripcionViewModel> Inscripciones { get; set; } = new();
     public List<Taller> TalleresDisponibles { get; set; } = new();
     public List<ApplicationUser> UsuariosDisponibles { get; set; } = new();
+    [BindProperty(SupportsGet = true, Name = "tallerId")]
     public int? TallerIdFiltro { get; set; }
 
     [BindProperty]
@@ -203,9 +204,13 @@ public class InscripcionesModel : PageModel
 
     public async Task<IActionResult> OnPostExportCsvAsync()
     {
-        var inscripciones = await _context.Inscripciones
+        var query = _context.Inscripciones
             .Include(i => i.Taller)
                 .ThenInclude(t => t.Curso)
+            .AsQueryable();
+        if (TallerIdFiltro.HasValue)
+            query = query.Where(i => i.TallerId == TallerIdFiltro.Value);
+        var inscripciones = await query
             .OrderByDescending(i => i.CreatedAt)
             .ToListAsync();
 
@@ -223,8 +228,13 @@ public class InscripcionesModel : PageModel
             csv.AppendLine($"{EscapeCsv(ins.Taller.Titulo)},{EscapeCsv(ins.Taller.Curso.Titulo)},{EscapeCsv($"{user.Nombres} {user.Apellidos}")},{EscapeCsv(user.Email ?? "")},{ins.CreatedAt:yyyy-MM-dd HH:mm},{ins.Estado},{(ins.Asistencia ? "Sí" : "No")}");
         }
 
-        var bytes = Encoding.UTF8.GetBytes(csv.ToString());
-        return File(bytes, "text/csv", $"inscripciones_{DateTime.Now:yyyyMMdd_HHmmss}.csv");
+        var csvContent = csv.ToString();
+        var preamble = Encoding.UTF8.GetPreamble();
+        var contentBytes = Encoding.UTF8.GetBytes(csvContent);
+        var bytes = new byte[preamble.Length + contentBytes.Length];
+        Buffer.BlockCopy(preamble, 0, bytes, 0, preamble.Length);
+        Buffer.BlockCopy(contentBytes, 0, bytes, preamble.Length, contentBytes.Length);
+        return File(bytes, "text/csv; charset=utf-8", $"inscripciones_{DateTime.Now:yyyyMMdd_HHmmss}.csv");
     }
 
     private static string EscapeCsv(string value)

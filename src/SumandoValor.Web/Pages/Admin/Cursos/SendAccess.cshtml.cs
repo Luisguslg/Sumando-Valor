@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -145,14 +144,6 @@ public class SendAccessModel : PageModel
 
     private static string GenerateUniqueToken()
     {
-        // Genera un token seguro de 32 caracteres
-        using var rng = RandomNumberGenerator.Create();
-        var bytes = new byte[24];
-        rng.GetBytes(bytes);
-        return Convert.ToBase64String(bytes)
-            .Replace("+", "-")
-            .Replace("/", "_")
-            .Replace("=", "")
-            .Substring(0, 32);
+        return Guid.NewGuid().ToString("N");
     }
 }
