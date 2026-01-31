@@ -155,17 +155,13 @@ Permisos mínimos durante migraciones: capacidad de ejecutar DDL (en muchos ento
 
 - Ruta Admin: `/Admin/EmailDiagnostics`
 
-### Variables de entorno (IIS) – Producción (sin secretos)
+### Variables de entorno (IIS) – Producción
 
-```text
-Email__Smtp__Enabled=true
-Email__Smtp__Host=goemairs.go.kworld.kpmg.com
-Email__Smtp__Port=25
-Email__Smtp__EnableSsl=false
-Email__Smtp__UseDefaultCredentials=true
-Email__Smtp__FromAddress=sumandovalor@kpmg.com
-Email__Smtp__FromName=Sumando Valor
-```
+Configurar en `web.config` (sección `environmentVariables`) o en las variables de entorno de IIS. Nunca versionar credenciales.
+
+- `ConnectionStrings__DefaultConnection`: cadena de conexión a SQL Server
+- `Email:Smtp:Enabled`, `Email:Smtp:Host`, `Email:Smtp:Port`, `Email:Smtp:EnableSsl`, `Email:Smtp:FromAddress`, `Email:Smtp:FromName`
+- `Captcha:Provider`: `Math` (por defecto, sin configuración adicional) o `Turnstile` si se usa Cloudflare
 
 ### Troubleshooting típico
 
@@ -223,6 +219,8 @@ Desde la raíz del repo:
 dotnet publish src\SumandoValor.Web\SumandoValor.Web.csproj -c Release -o .\publish
 ```
 
+En modo Release no se incluye `appsettings.Development.json` en el output.
+
 ### 10.2 Copiar al servidor
 
 Ejemplo:
@@ -244,10 +242,15 @@ Ejemplo:
 - Physical Path: carpeta publicada
 - Binding: según infraestructura (host/puerto/certificado)
 
-### 10.4 Variables de entorno / web.config
+### 10.4 Configuración obligatoria
 
-Definir variables de entorno en IIS (recomendado) o en `web.config`.  
-**Nunca** versionar contraseñas en Git.
+El `web.config` incluido en el publish solo tiene valores base. Antes del primer arranque en producción, añadir en la sección `environmentVariables` del `aspNetCore`:
+
+- `ConnectionStrings__DefaultConnection` (cadena de conexión a SQL Server)
+- Las variables de Email y SMTP según el entorno
+- `Captcha:Provider` queda en `Math` por defecto (no requiere Cloudflare)
+
+Consultar `appsettings.Production.example.json` como referencia de estructura. Nunca versionar contraseñas ni cadenas de conexión reales.
 
 ### 10.5 Logs
 
@@ -287,16 +290,9 @@ Definir variables de entorno en IIS (recomendado) o en `web.config`.
 - **Capitalización**: "Programa Formativo" corregido en toda la aplicación.
 - **Formularios**: Nuevos campos de perfil (Sector) y validaciones mejoradas (Máscara cédula, teléfono).
 
-## 13. Por confirmar / Pendiente de definición
+## 13. Funcionalidades del CRUD
 
-- ¿El CRUD completo de Encuestas ya está habilitado en Admin o solo parcialmente?
-- ¿El flujo exacto de aprobación de certificados requiere:
-  - aprobación manual obligatoria siempre?
-  - o automática tras encuesta aprobada?
-- ¿El CRUD de Usuarios (Admin) incluye:
-  - paginación?
-  - activación/desactivación?
-  - asignación de rol Admin desde UI?
-- ¿Existe política de retención/eliminación de certificados antiguos?
-- ¿El SMTP corporativo permite envío externo o solo interno?
+- **Usuarios**: paginación, activación/desactivación, asignación de rol Moderador desde UI (Admin puede promover). Admin se asigna vía seed o manualmente en BD.
+- **Encuestas**: resultados y exportación en Admin; plantillas de encuesta configurables.
+- **Certificados**: aprobación manual por Admin; agrupación por taller.
 

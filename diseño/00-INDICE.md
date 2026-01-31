@@ -16,7 +16,13 @@ Esta carpeta contiene la documentación técnica completa de la aplicación **Su
 8. **[08-Evaluacion-Seguridad.md](08-Evaluacion-Seguridad.md)** - Análisis de seguridad y recomendaciones
 9. **[09-Manual-Usuario.md](09-Manual-Usuario.md)** - Manual completo de usuario con todos los flujos
 10. **[10-Manual-Administrador.md](10-Manual-Administrador.md)** - Manual completo de administrador con todos los flujos
-11. **[11-CAPTCHA-Turnstile.md](11-CAPTCHA-Turnstile.md)** - Qué es Turnstile y cómo activar el CAPTCHA
+11. **[11-CAPTCHA-Turnstile.md](11-CAPTCHA-Turnstile.md)** - CAPTCHA matemático (por defecto) y opción Cloudflare Turnstile
+
+### Operaciones
+
+- **ops/DEPLOY_IIS.md** - Pasos para deploy en IIS
+- **ops/COMANDOS_BD_LOCAL.txt** - Comandos de migraciones
+- **ops/APLICAR_UBICACION_TALLER.sql** - Script por si la columna Ubicacion no se crea
 
 ### Notas
 
@@ -28,6 +34,6 @@ Esta carpeta contiene la documentación técnica completa de la aplicación **Su
 
 ### Versión
 
-- **Fecha de generación**: 2026-01-25
+- **Última actualización**: Enero 2026
 - **Versión de la aplicación**: .NET 8.0
 - **Base de datos**: SQL Server

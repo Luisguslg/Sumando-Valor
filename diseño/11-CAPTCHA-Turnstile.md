@@ -2,11 +2,11 @@
 
 ## Opción por defecto: CAPTCHA matemático (Math)
 
-**No hace falta configurar nada.** La aplicación usa por defecto un CAPTCHA matemático: una pregunta tipo *"¿Cuánto es 5 + 3?"* que el usuario responde en un cuadro de texto. Se valida en el servidor con la sesión; no hay cuentas externas ni claves.
+La aplicación usa por defecto un CAPTCHA matemático: una pregunta tipo *"¿Cuánto es 5 + 3?"* que el usuario responde. No requiere cuentas externas ni claves; funciona sin configurar nada.
 
-- **Dónde se usa**: Login, Registro y formulario de Contacto.
-- **Configuración**: En `appsettings.json` → `Captcha:Provider` = **"Math"** (es el valor por defecto).
-- **Para desactivar**: Pon `"Provider": "None"` si no quieres ninguna verificación.
+- **Dónde se usa**: Login, Registro y formulario de Contacto
+- **Configuración**: `Captcha:Provider` = **"Math"** (valor por defecto en producción)
+- **Para desactivar**: `"Provider": "None"` (no recomendado en producción)
 
 ---
 
