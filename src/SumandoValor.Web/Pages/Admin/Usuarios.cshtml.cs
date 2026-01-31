@@ -182,7 +182,7 @@ public class UsuariosModel : PageModel
         if (user == null)
         {
             TempData["FlashError"] = "Usuario no encontrado.";
-            return RedirectToPage();
+            return RedirectToUsuarios();
         }
 
         var isActive = user.LockoutEnd == null || user.LockoutEnd <= DateTimeOffset.UtcNow;
@@ -196,21 +196,21 @@ public class UsuariosModel : PageModel
                 if (!actorIsAdmin)
                 {
                     TempData["FlashError"] = "Solo Admin puede desactivar moderadores.";
-                    return RedirectToPage(new { Search, Status, Role, page = PageNumber });
+                    return RedirectToUsuarios();
                 }
 
                 var moderadores = await _userManager.GetUsersInRoleAsync("Moderador");
                 if (moderadores.Count <= 1)
                 {
                     TempData["FlashError"] = "No puedes desactivar al último moderador.";
-                    return RedirectToPage(new { Search, Status, Role, page = PageNumber });
+                    return RedirectToUsuarios();
                 }
 
                 var admins = await _userManager.GetUsersInRoleAsync("Admin");
                 if (roles.Contains("Admin") && admins.Count <= 1)
                 {
                     TempData["FlashError"] = "No puedes desactivar al último Admin.";
-                    return RedirectToPage(new { Search, Status, Role, page = PageNumber });
+                    return RedirectToUsuarios();
                 }
             }
         }
@@ -245,7 +245,7 @@ public class UsuariosModel : PageModel
             TempData["FlashError"] = "Ocurrió un error inesperado al procesar la solicitud.";
         }
 
-        return RedirectToPage(new { Search, Status, Role, page = PageNumber });
+        return RedirectToUsuarios();
     }
 
     public async Task<IActionResult> OnPostCreateAsync()
@@ -276,7 +276,7 @@ public class UsuariosModel : PageModel
         if (existing != null)
         {
             TempData["FlashError"] = "Ese email ya existe.";
-            return RedirectToPage(new { Search = search, SearchName = searchName, SearchEmail = searchEmail, SearchCedula = searchCedula, Status = status, Role = role, page });
+            return RedirectToUsuarios(pageOverride: page, search: search, searchName: searchName, searchEmail: searchEmail, searchCedula: searchCedula, status: status, role: role);
         }
 
         var user = new ApplicationUser
@@ -309,7 +309,7 @@ public class UsuariosModel : PageModel
         {
             TempData["FlashError"] = "No se pudo crear el usuario.";
             _logger.LogWarning("Create user failed: {Errors}", string.Join("; ", result.Errors.Select(e => e.Description)));
-            return RedirectToPage(new { Search = search, SearchName = searchName, SearchEmail = searchEmail, SearchCedula = searchCedula, Status = status, Role = role, page });
+            return RedirectToUsuarios(pageOverride: page, search: search, searchName: searchName, searchEmail: searchEmail, searchCedula: searchCedula, status: status, role: role);
         }
 
         // Default role
@@ -317,7 +317,7 @@ public class UsuariosModel : PageModel
         await _userManager.AddToRoleAsync(user, initialRole);
 
         TempData["FlashSuccess"] = $"Usuario creado ({initialRole}).";
-        return RedirectToPage(new { Search = search, SearchName = searchName, SearchEmail = searchEmail, SearchCedula = searchCedula, Status = status, Role = role, page });
+        return RedirectToUsuarios(pageOverride: page, search: search, searchName: searchName, searchEmail: searchEmail, searchCedula: searchCedula, status: status, role: role);
     }
 
     public async Task<IActionResult> OnPostMakeModeradorAsync(string id)
@@ -325,21 +325,21 @@ public class UsuariosModel : PageModel
         if (!User.IsInRole("Admin"))
         {
             TempData["FlashError"] = "Solo Admin puede asignar el rol Moderador.";
-            return RedirectToPage(new { Search, Status, Role, page = PageNumber });
+            return RedirectToUsuarios();
         }
 
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
         {
             TempData["FlashError"] = "Usuario no encontrado.";
-            return RedirectToPage();
+            return RedirectToUsuarios();
         }
 
         // Admins siempre tienen Moderador; no acción necesaria
         if ((await _userManager.GetRolesAsync(user)).Contains("Admin"))
         {
             TempData["FlashInfo"] = "Los Admins ya son Moderador por defecto.";
-            return RedirectToPage(new { Search, Status, Role, page = PageNumber });
+            return RedirectToUsuarios();
         }
 
         var res = await _userManager.AddToRoleAsync(user, "Moderador");
@@ -353,7 +353,7 @@ public class UsuariosModel : PageModel
             TempData["FlashSuccess"] = "Rol Moderador asignado.";
         }
 
-        return RedirectToPage(new { Search, Status, Role, page = PageNumber });
+        return RedirectToUsuarios();
     }
 
     public async Task<IActionResult> OnPostRemoveModeradorAsync(string id)
@@ -361,14 +361,14 @@ public class UsuariosModel : PageModel
         if (!User.IsInRole("Admin"))
         {
             TempData["FlashError"] = "Solo Admin puede quitar el rol Moderador.";
-            return RedirectToPage(new { Search, Status, Role, page = PageNumber });
+            return RedirectToUsuarios();
         }
 
         var user = await _userManager.FindByIdAsync(id);
         if (user == null)
         {
             TempData["FlashError"] = "Usuario no encontrado.";
-            return RedirectToPage();
+            return RedirectToUsuarios();
         }
 
         var targetRoles = await _userManager.GetRolesAsync(user);
@@ -376,14 +376,14 @@ public class UsuariosModel : PageModel
         {
             // Rule: Admins always keep Moderador
             TempData["FlashError"] = "No puedes quitar el rol Moderador a un Admin.";
-            return RedirectToPage(new { Search, Status, Role, page = PageNumber });
+            return RedirectToUsuarios();
         }
 
         var moderadores = await _userManager.GetUsersInRoleAsync("Moderador");
         if (moderadores.Count <= 1)
         {
             TempData["FlashError"] = "No puedes quitar el rol al último moderador.";
-            return RedirectToPage(new { Search, Status, Role, page = PageNumber });
+            return RedirectToUsuarios();
         }
 
         var res = await _userManager.RemoveFromRoleAsync(user, "Moderador");
@@ -397,7 +397,7 @@ public class UsuariosModel : PageModel
             TempData["FlashSuccess"] = "Rol Moderador removido.";
         }
 
-        return RedirectToPage(new { Search, Status, Role, page = PageNumber });
+        return RedirectToUsuarios();
     }
 
     public string PageUrl(int page)
@@ -416,6 +416,25 @@ public class UsuariosModel : PageModel
         var parts = qs.Where(kv => !string.IsNullOrWhiteSpace(kv.Value))
             .Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value!)}");
         return "/Admin/Usuarios" + (parts.Any() ? "?" + string.Join("&", parts) : "");
+    }
+
+    private IActionResult RedirectToUsuarios(int? pageOverride = null, string? search = null, string? searchName = null, string? searchEmail = null, string? searchCedula = null, string? status = null, string? role = null)
+    {
+        var page = pageOverride ?? PageNumber;
+        var qs = new Dictionary<string, string?>
+        {
+            ["page"] = page.ToString(),
+            ["Search"] = search ?? Search,
+            ["SearchName"] = searchName ?? SearchName,
+            ["SearchEmail"] = searchEmail ?? SearchEmail,
+            ["SearchCedula"] = searchCedula ?? SearchCedula,
+            ["Status"] = status ?? Status,
+            ["Role"] = role ?? Role
+        };
+        var parts = qs.Where(kv => !string.IsNullOrWhiteSpace(kv.Value))
+            .Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value!)}");
+        var url = "/Admin/Usuarios" + (parts.Any() ? "?" + string.Join("&", parts) : "");
+        return Redirect(url);
     }
 
 
