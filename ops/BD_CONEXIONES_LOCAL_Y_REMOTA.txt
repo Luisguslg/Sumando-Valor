@@ -8,7 +8,6 @@ IMPORTANTE
 CONEXIÓN LOCAL (esta PC)
 Server=localhost;Database=SumandoValorDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True;
 
-CONEXIÓN REMOTA
-Configurar en el servidor según el entorno. No versionar la cadena real.
-Ver README sección "Deploy en IIS" para variables de entorno.
+CONEXIÓN REMOTA (IIS en VECCSAPP10)
+Server=VECCSAPP10,61057;Database=SumandoValorDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=True;
 
